@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Solbin-X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="supabase-config.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen font-sans">
+
+    <!-- Navegación -->
+    <nav class="bg-white shadow-md z-10 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-tools text-2xl text-sky-600 mr-3"></i>
+                    <span class="font-bold text-xl text-gray-800">Solbin-X Admin</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userEmail" class="text-sm text-gray-600 hidden md:block"></span>
+                    <a href="index.html" target="_blank" rel="noopener noreferrer"
+                        class="text-gray-500 hover:text-sky-600 transition" title="Ver Tienda">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    <button id="logoutBtn"
+                        class="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <!-- Contenido Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Tabs Navigation -->
+        <div class="flex space-x-1 bg-gray-200 p-1 rounded-xl mb-8 w-fit">
+            <button onclick="switchAdminTab('products')" id="tabBtnProducts"
+                class="px-6 py-2 rounded-lg text-sm font-bold transition shadow bg-white text-sky-600">
+                <i class="fas fa-box-open mr-2"></i> Productos
+            </button>
+            <button onclick="switchAdminTab('orders')" id="tabBtnOrders"
+                class="px-6 py-2 rounded-lg text-sm font-bold transition text-gray-600 hover:bg-white hover:text-sky-600">
+                <i class="fas fa-shopping-cart mr-2"></i> Ventas
+            </button>
+        </div>
+
+        <!-- PRODUCTS SECTION -->
+        <div id="productsSection">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Inventario</h1>
+                <button onclick="openModal()"
+                    class="bg-sky-600 text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-sky-700 transition transform hover:-translate-y-1 flex items-center text-sm font-bold">
+                    <i class="fas fa-plus mr-2"></i> Nuevo Producto
+                </button>
+            </div>
+
+            <!-- Tabla de Productos -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-sky-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    Producto</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    Categoría</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">
+                                    Stock</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    Precio</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">
+                                    Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                    <i class="fas fa-circle-notch fa-spin mr-2"></i> Cargando productos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div id="productsPagination" class="flex justify-center items-center mt-6 space-x-2">
+                <!-- Pagination buttons will be generated by JS -->
+            </div>
+        </div>
+
+        <!-- ORDERS SECTION -->
+        <div id="ordersSection" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Historial de Ventas</h1>
+                <div class="flex space-x-2">
+                    <button onclick="exportOrdersToExcel()"
+                        class="bg-green-600 text-white border border-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-bold">
+                        <i class="fas fa-file-excel mr-2"></i> Exportar Excel
+                    </button>
+                    <button onclick="loadOrders()"
+                        class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition text-sm font-bold">
+                        <i class="fas fa-sync-alt mr-2"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-sky-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    ID Pedido</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    Fecha</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    Cliente / Info</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">
+                                    Total</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">
+                                    Estado</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider">
+                                    Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                    Haga clic en 'Actualizar' para ver las ventas.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Formulario -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 transform transition-all">
+                <div class="absolute top-4 right-4">
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <h3 class="text-2xl font-bold text-gray-900 mb-6" id="modalTitle">Nuevo Producto</h3>
+
+                <form id="productForm" class="space-y-4">
+                    <input type="hidden" id="prodId">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                        <input type="text" id="prodName" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-600 focus:border-transparent outline-none transition">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio (S/.)</label>
+                            <input type="number" id="prodPrice" required step="0.01" min="0"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-600 focus:border-transparent outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                            <input type="number" id="prodStock" required min="0" step="1"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-600 focus:border-transparent outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                            <select id="prodCategory" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-600 focus:border-transparent outline-none transition">
+                                <option value="laptops">Laptops</option>
+                                <option value="smartphones">Smartphones</option>
+                                <option value="tablets">Tablets</option>
+                                <option value="accesorios">Accesorios</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="prodNewArrival"
+                            class="h-4 w-4 text-sky-600 focus:ring-sky-500 border-gray-300 rounded transition cursor-pointer">
+                        <label for="prodNewArrival" class="ml-2 block text-sm font-medium text-gray-700 cursor-pointer">
+                            Marcar como Nuevo Ingreso <span class="text-xs text-gray-500 font-normal">(Mostrará la
+                                etiqueta "NUEVO")</span>
+                        </label>
+                    </div>
+
+                    <!-- Tabs for Info -->
+                    <div>
+                        <div class="flex border-b border-gray-200 mb-2">
+                            <button type="button" onclick="switchInfoTab('desc')" id="tabDesc"
+                                class="flex-1 py-2 text-sm font-medium text-sky-600 border-b-2 border-sky-600 focus:outline-none">
+                                Descripción
+                            </button>
+                            <button type="button" onclick="switchInfoTab('specs')" id="tabSpecs"
+                                class="flex-1 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
+                                Especificaciones
+                            </button>
+                        </div>
+
+                        <!-- Description Tab Content -->
+                        <div id="infoDescContainer">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción General</label>
+                            <textarea id="prodDesc" rows="5"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-600 focus:border-transparent outline-none transition"></textarea>
+                        </div>
+
+                        <!-- Specs Tab Content -->
+                        <div id="infoSpecsContainer" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Características Técnicas</label>
+                            <div id="specsList" class="space-y-2 mb-2 max-h-40 overflow-y-auto custom-scrollbar p-1">
+                                <!-- Dynamic specs items will be added here -->
+                            </div>
+                            <button type="button" onclick="addSpecRow()"
+                                class="text-sm text-sky-600 hover:text-sky-800 font-medium flex items-center">
+                                <i class="fas fa-plus-circle mr-1"></i> Agregar Característica
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Imagen del Producto</label>
+
+                        <!-- Tabs -->
+                        <div class="flex border-b border-gray-200 mb-2">
+                            <button type="button" onclick="switchImageTab('upload')" id="tabUpload"
+                                class="flex-1 py-1 text-sm font-medium text-sky-600 border-b-2 border-sky-600 focus:outline-none">
+                                Subir Archivo
+                            </button>
+                            <button type="button" onclick="switchImageTab('url')" id="tabUrl"
+                                class="flex-1 py-1 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
+                                URL Externa
+                            </button>
+                        </div>
+
+                        <!-- Upload Input -->
+                        <div id="uploadInputContainer">
+                            <input type="file" id="prodImageFile" accept="image/*"
+                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 transition">
+                        </div>
+
+                        <!-- URL Input -->
+                        <div id="urlInputContainer" class="hidden">
+                            <div class="flex gap-2">
+                                <input type="url" id="prodImage"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-600 focus:border-transparent outline-none transition"
+                                    placeholder="https://...">
+                                <button type="button" onclick="previewImage()"
+                                    class="bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200"
+                                    title="Ver Previsualización">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Preview common for both -->
+                        <div id="imagePreview"
+                            class="mt-2 hidden w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
+                            <img src="" alt="Preview" class="h-full object-contain">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal()"
+                            class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Cancelar</button>
+                        <button type="submit"
+                            class="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition font-semibold shadow">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"
+            onclick="closeOrderModal()"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div
+                class="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-0 overflow-hidden transform transition-all">
+
+                <!-- Header -->
+                <div class="bg-gray-50 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800">Detalles del Pedido <span id="orderModalId"
+                            class="text-sky-600"></span></h3>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="printOrder()"
+                            class="text-gray-400 hover:text-sky-600 transition focus:outline-none p-1" title="Imprimir">
+                            <i class="fas fa-print text-xl"></i>
+                        </button>
+                        <button onclick="closeOrderModal()"
+                            class="text-gray-400 hover:text-red-500 transition focus:outline-none p-1" title="Cerrar">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6 overflow-y-auto max-h-[70vh]">
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <!-- Info -->
+                        <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                            <h4 class="font-bold text-gray-700 mb-2 flex items-center"><i
+                                    class="fas fa-info-circle mr-2 text-blue-500"></i> Información</h4>
+                            <p class="text-sm text-gray-600 mb-1"><strong>Fecha:</strong> <span id="orderDate"></span>
+                            </p>
+                            <p class="text-sm text-gray-600 mb-1"><strong>Estado:</strong> <span
+                                    id="orderStatusDisplay"></span></p>
+                            <p class="text-sm text-gray-600 text-xs mt-2" id="orderCustomerInfo"></p>
+                        </div>
+
+                        <!-- Status Control -->
+                        <div class="bg-sky-50 rounded-xl p-4 border border-sky-100 relative">
+                            <h4 class="font-bold text-gray-700 mb-2 flex items-center"><i
+                                    class="fas fa-tasks mr-2 text-sky-500"></i> Gestionar Estado</h4>
+                            <select id="orderStatusSelect"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-sky-500 outline-none mb-2">
+                                <option value="iniciado">Iniciado</option>
+                                <option value="en_proceso">En Proceso</option>
+                                <option value="terminado">Finalizado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                            <button onclick="updateOrderStatus()"
+                                class="w-full bg-sky-600 text-white text-sm font-bold py-2 rounded-lg hover:bg-sky-700 transition">
+                                Actualizar Estado
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <h4 class="font-bold text-gray-800 mb-3 ml-1">Productos</h4>
+                    <div class="border rounded-xl overflow-hidden shadow-sm mb-4">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-gray-600">Producto</th>
+                                    <th class="px-4 py-2 text-center text-gray-600">Cant.</th>
+                                    <th class="px-4 py-2 text-right text-gray-600">P. Unit</th>
+                                    <th class="px-4 py-2 text-right text-gray-600">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderItemsTable" class="divide-y text-gray-700">
+                                <!-- Dynamic items -->
+                            </tbody>
+                            <tfoot class="bg-gray-50 font-bold text-gray-800">
+                                <tr>
+                                    <td colspan="3" class="px-4 py-3 text-right">Total</td>
+                                    <td class="px-4 py-3 text-right text-sky-600" id="orderTotal"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script src="admin-export.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Administración - Solbin-X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass w-full max-w-md p-8 rounded-2xl shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="inline-block p-4 rounded-full bg-sky-100 text-sky-600 mb-4">
+                <i class="fas fa-user-shield text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Panel de Administración</h1>
+            <p class="text-gray-500">Ingresa tus credenciales para continuar</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" required
+                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:border-transparent transition"
+                        placeholder="admin@demo.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" id="password" required
+                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:border-transparent transition"
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <div id="errorMessage"
+                class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm"></div>
+
+            <button type="submit"
+                class="w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-700 transition transform hover:-translate-y-1 shadow-lg">
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+            <a href="index.html" class="text-sm text-gray-500 hover:text-sky-600 transition">
+                <i class="fas fa-arrow-left mr-1"></i> Volver a la tienda
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Rate limiter for login attempts
+        let loginAttempts = 0;
+        let lastAttemptTime = 0;
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 60000; // 1 minute
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const now = Date.now();
+
+            // Check rate limiting
+            if (loginAttempts >= MAX_ATTEMPTS && (now - lastAttemptTime) < LOCKOUT_TIME) {
+                const remaining = Math.ceil((LOCKOUT_TIME - (now - lastAttemptTime)) / 1000);
+                Swal.fire('Demasiados intentos', `Por favor espera ${remaining} segundos antes de intentar de nuevo.`, 'warning');
+                return;
+            }
+
+            // Reset attempts after lockout period
+            if ((now - lastAttemptTime) >= LOCKOUT_TIME) {
+                loginAttempts = 0;
+            }
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMessage');
+            const btn = e.target.querySelector('button');
+            const originalBtnText = btn.innerHTML;
+
+            // Basic validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMsg.textContent = 'Por favor ingresa un correo válido.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMsg.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Cargando...';
+                errorMsg.classList.add('hidden');
+
+                const client = window.supabaseClient || window.supabase;
+                const { data, error } = await client.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                // Reset attempts on success
+                loginAttempts = 0;
+
+                // Redirigir al admin
+                window.location.href = 'admin.html';
+
+            } catch (err) {
+                console.error(err);
+                loginAttempts++;
+                lastAttemptTime = now;
+
+                // Generic error message to prevent user enumeration
+                errorMsg.textContent = 'Credenciales incorrectas. Intenta de nuevo.';
+                errorMsg.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnText;
+            }
+        });
+
+        // Verificar si ya hay sesión
+        async function checkSession() {
+            const client = window.supabaseClient || window.supabase;
+            const { data } = await client.auth.getSession();
+            if (data.session) {
+                window.location.href = 'admin.html';
+            }
+        }
+        checkSession();
+    </script>
+</body>
+
+</html>
