@@ -64,6 +64,31 @@ const productsPerPage = 10;
 let inventoryDataTable = null;
 let ordersDataTable = null;
 
+const spanishLanguage = {
+    "decimal": "",
+    "emptyTable": "No hay datos disponibles en la tabla",
+    "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+    "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+    "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+    "infoPostFix": "",
+    "thousands": ",",
+    "lengthMenu": "Mostrar _MENU_ entradas",
+    "loadingRecords": "Cargando...",
+    "processing": "Procesando...",
+    "search": "Buscar:",
+    "zeroRecords": "No se encontraron registros coincidentes",
+    "paginate": {
+        "first": "Primero",
+        "last": "Último",
+        "next": "Siguiente",
+        "previous": "Anterior"
+    },
+    "aria": {
+        "sortAscending": ": activar para ordenar la columna ascendente",
+        "sortDescending": ": activar para ordenar la columna descendente"
+    }
+};
+
 // Initialize DataTables
 function initInventoryTable() {
     if ($.fn.DataTable.isDataTable('#inventoryTable')) {
@@ -71,17 +96,25 @@ function initInventoryTable() {
     }
 
     return $('#inventoryTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-        },
+        language: spanishLanguage,
         pageLength: 10,
         responsive: true,
         autoWidth: false,
         width: '100%',
-        order: [[0, 'asc']], // Order by No.
+        order: [[0, 'desc']], // Order by No. (Most recent first)
         columnDefs: [
+            {
+                targets: 0,
+                type: 'num',
+                render: function (data, type, row) {
+                    if (type === 'display') {
+                        return `<span class="text-[11px] font-bold solid-slate-400 block text-center">#${data}</span>`;
+                    }
+                    return data;
+                }
+            },
             { orderable: false, targets: [5] }, // Non-orderable columns (Actions)
-            { className: "dt-center", targets: [3, 4, 5] }
+            { className: "dt-center", targets: [0, 3, 4, 5] }
         ],
         dom: '<"flex justify-between items-center mb-6"lf>rt<"flex justify-between items-center mt-6"ip>',
         drawCallback: function () {
@@ -97,9 +130,7 @@ function initOrdersTable() {
     }
 
     return $('#ordersTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-        },
+        language: spanishLanguage,
         pageLength: 10,
         responsive: true,
         autoWidth: false,
@@ -190,7 +221,7 @@ function renderProductsToTable(products) {
         `;
 
         inventoryDataTable.row.add([
-            `<span class="text-[11px] font-bold solid-slate-400 block text-center">#${p.id}</span>`,
+            p.id,
             `<div class="flex items-center space-x-3 py-1">
                 <div class="product-img-futuristic w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shadow-sm group-hover:border-brand-400 transition-all">
                     <img src="${p.image_url}" class="w-full h-full object-contain">
@@ -215,7 +246,7 @@ function renderProductsToTable(products) {
         ]);
     });
 
-    inventoryDataTable.order([1, 'asc']).draw();
+    inventoryDataTable.order([0, 'desc']).draw();
     updateProductStats(products);
 }
 
