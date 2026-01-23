@@ -16,6 +16,47 @@ async function checkAuth() {
     // Cargar datos iniciales
     loadProducts();
     loadOrders();
+    trackVisits();
+}
+
+// Track and Load Site Visits
+async function trackVisits() {
+    try {
+        const client = window.supabaseClient || window.supabase;
+        // Increment visit count via RPC
+        await client.rpc('increment_visit_count');
+
+        // Fetch current count
+        const { data, error } = await client
+            .from('site_visits')
+            .select('count')
+            .eq('id', 1)
+            .single();
+
+        if (error) throw error;
+
+        const counterEl = document.getElementById('visitCounter');
+        if (counterEl && data) {
+            // Animate number change for striking effect
+            animateNumber(counterEl, 0, data.count, 1500);
+        }
+    } catch (err) {
+        console.error('Error tracking visits:', err);
+    }
+}
+
+// Helper to animate numbers strikingly
+function animateNumber(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        element.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
 }
 
 // Tabs Logic

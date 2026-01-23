@@ -477,3 +477,18 @@ if (document.readyState === 'loading') {
     loadAndRenderProducts();
 }
 
+// Increment Site Visits on Load
+(async function () {
+    try {
+        // Wait a small delay to ensure Supabase is ready
+        setTimeout(async () => {
+            const client = window.supabaseClient || window.supabase;
+            if (client && typeof client.rpc === 'function') {
+                await client.rpc('increment_visit_count');
+            }
+        }, 1000);
+    } catch (e) {
+        // Silently fail if DB is busy or restricted
+    }
+})();
+
