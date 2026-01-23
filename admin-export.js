@@ -204,3 +204,105 @@ window.exportOrdersToExcel = function () {
     });
 }
 
+// Export Products to Excel
+window.exportProductsToExcel = function () {
+    const products = window.allAdminProducts;
+
+    if (!products || products.length === 0) {
+        Swal.fire('Atención', 'No hay datos para exportar. Cargando inventario...', 'info');
+        loadProducts();
+        return;
+    }
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#1E40AF" ss:Pattern="Solid"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="Normal">
+   <Alignment ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="Money">
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Font ss:Bold="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+   </Borders>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Inventario SolbinX">
+  <Table>
+   <Column ss:Width="150"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="80"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="250"/>
+   <Row>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">PRODUCTO</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">CATEGORÍA</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">STOCK</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">PRECIO (S/.)</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">DESCRIPCIÓN</Data></Cell>
+   </Row>`;
+
+    products.forEach(p => {
+        const name = p.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const desc = (p.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        xml += `
+   <Row>
+    <Cell ss:StyleID="Normal"><Data ss:Type="String">${name}</Data></Cell>
+    <Cell ss:StyleID="Normal"><Data ss:Type="String">${p.category}</Data></Cell>
+    <Cell ss:StyleID="Normal"><Data ss:Type="Number">${p.stock}</Data></Cell>
+    <Cell ss:StyleID="Money"><Data ss:Type="String">S/. ${parseFloat(p.price).toFixed(2)}</Data></Cell>
+    <Cell ss:StyleID="Normal"><Data ss:Type="String">${desc}</Data></Cell>
+   </Row>`;
+    });
+
+    xml += `
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+    const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const today = new Date().toISOString().slice(0, 10);
+    const filename = `Inventario_SolbinX_${today}.xls`;
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.click();
+    URL.revokeObjectURL(url);
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Inventario Exportado',
+        text: `Archivo listo: ${filename}`,
+        timer: 1500,
+        showConfirmButton: false
+    });
+}
+

@@ -13,181 +13,452 @@ async function checkAuth() {
     const userEmailEl = document.getElementById('userEmail');
     if (userEmailEl) userEmailEl.textContent = session.user.email;
 
-    // Cargar productos
+    // Cargar datos iniciales
     loadProducts();
+    loadOrders();
 }
 
 // Tabs Logic
 window.switchAdminTab = function (tab) {
+    const dashboardSection = document.getElementById('dashboardSection');
     const productsSection = document.getElementById('productsSection');
     const ordersSection = document.getElementById('ordersSection');
-    const btnProducts = document.getElementById('tabBtnProducts');
-    const btnOrders = document.getElementById('tabBtnOrders');
 
-    if (tab === 'products') {
-        productsSection.classList.remove('hidden');
-        ordersSection.classList.add('hidden');
+    // Sidebar buttons
+    const navButtons = {
+        dashboard: document.getElementById('sideBtnDashboard'),
+        products: document.getElementById('sideBtnProducts'),
+        orders: document.getElementById('sideBtnOrders')
+    };
 
-        btnProducts.className = "px-6 py-2 rounded-lg text-sm font-bold transition shadow bg-white text-sky-600";
-        btnOrders.className = "px-6 py-2 rounded-lg text-sm font-bold transition text-gray-600 hover:bg-white hover:text-sky-600";
-    } else {
-        productsSection.classList.add('hidden');
-        ordersSection.classList.remove('hidden');
+    // Hide all
+    dashboardSection?.classList.add('hidden');
+    productsSection?.classList.add('hidden');
+    ordersSection?.classList.add('hidden');
 
-        btnProducts.className = "px-6 py-2 rounded-lg text-sm font-bold transition text-gray-600 hover:bg-white hover:text-sky-600";
-        btnOrders.className = "px-6 py-2 rounded-lg text-sm font-bold transition shadow bg-white text-sky-600";
+    // Reset buttons
+    Object.values(navButtons).forEach(btn => {
+        if (btn) btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+    });
 
-        // Load orders if empty? or always refresh?
+    // Show selected
+    if (tab === 'dashboard') {
+        dashboardSection?.classList.remove('hidden');
+        navButtons.dashboard?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+    } else if (tab === 'products') {
+        productsSection?.classList.remove('hidden');
+        navButtons.products?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+        loadProducts();
+    } else if (tab === 'orders') {
+        ordersSection?.classList.remove('hidden');
+        navButtons.orders?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
         loadOrders();
     }
 }
 
 
 
-// Pagination state
+// Pagination state (No longer needed with DataTables, but kept for compatibility if referenced elsewhere)
 let currentProductPage = 1;
 const productsPerPage = 10;
+let inventoryDataTable = null;
+let ordersDataTable = null;
+
+// Initialize DataTables
+function initInventoryTable() {
+    if ($.fn.DataTable.isDataTable('#inventoryTable')) {
+        return $('#inventoryTable').DataTable();
+    }
+
+    return $('#inventoryTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        pageLength: 10,
+        responsive: true,
+        autoWidth: false,
+        width: '100%',
+        order: [[0, 'asc']], // Order by No.
+        columnDefs: [
+            { orderable: false, targets: [5] }, // Non-orderable columns (Actions)
+            { className: "dt-center", targets: [3, 4, 5] }
+        ],
+        dom: '<"flex justify-between items-center mb-6"lf>rt<"flex justify-between items-center mt-6"ip>',
+        drawCallback: function () {
+            $('.futuristic-row').addClass('fadeInUp');
+        }
+    });
+}
+
+// Initialize Orders DataTables
+function initOrdersTable() {
+    if ($.fn.DataTable.isDataTable('#ordersTable')) {
+        return $('#ordersTable').DataTable();
+    }
+
+    return $('#ordersTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        pageLength: 10,
+        responsive: true,
+        autoWidth: false,
+        width: '100%',
+        order: [[1, 'desc']], // Order by Date
+        columnDefs: [
+            { orderable: false, targets: [5] }, // Non-orderable columns (Actions)
+            { className: "dt-center", targets: [3, 4, 5] }
+        ],
+        dom: '<"flex justify-between items-center mb-8"lf>rt<"flex justify-between items-center mt-8"ip>',
+        createdRow: function (row, data, dataIndex) {
+            $(row).addClass('futuristic-row group');
+        },
+        drawCallback: function () {
+            $('.futuristic-row').addClass('fadeInUp');
+        }
+    });
+}
 
 // Cargar productos
-async function loadProducts() {
-    const tbody = document.getElementById('productsTableBody');
-    // Spinner
-    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-circle-notch fa-spin mr-2"></i> Cargando...</td></tr>`;
-
+window.loadProducts = async function () {
     try {
         const client = window.supabaseClient || window.supabase;
         const { data: products, error } = await client
             .from('products')
             .select('*')
-            .order('id', { ascending: false }); // Más recientes primero
+            .order('id', { ascending: false });
 
         if (error) throw error;
 
-        // Save for later lookup
         window.allAdminProducts = products;
 
-        if (products.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">No hay productos registrados.</td></tr>`;
-            document.getElementById('productsPagination').innerHTML = '';
-            return;
+        // Dashboard count update
+        const dashCount = document.getElementById('dashProductsCount');
+        if (dashCount) dashCount.textContent = products.length;
+
+        // Initialize table if not done
+        if (!inventoryDataTable) {
+            inventoryDataTable = initInventoryTable();
         }
 
-        // Render with pagination
-        renderProductsPage(products, currentProductPage);
+        // Render with DataTables
+        renderProductsToTable(products);
 
     } catch (err) {
         console.error('Error cargando productos:', err);
-        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error al cargar datos. <button onclick="loadProducts()" class="underline ml-2">Reintentar</button></td></tr>`;
+        Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
     }
 }
 
-// Render products for a specific page
-function renderProductsPage(products, page) {
-    const tbody = document.getElementById('productsTableBody');
-    const totalPages = Math.ceil(products.length / productsPerPage);
+// Render products using DataTables
+function renderProductsToTable(products) {
+    if (!inventoryDataTable) return;
+    inventoryDataTable.clear();
 
-    // Ensure valid page
-    if (page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    currentProductPage = page;
+    products.forEach((p, index) => {
+        // Category Badge Tech
+        let catClasses = 'bg-slate-100 text-slate-600 border-slate-200';
+        if (p.category === 'laptops') catClasses = 'bg-indigo-50/50 text-indigo-600 border-indigo-200/50';
+        if (p.category === 'smartphones') catClasses = 'bg-sky-50/50 text-sky-600 border-sky-200/50';
+        if (p.category === 'tablets') catClasses = 'bg-purple-50/50 text-purple-600 border-purple-200/50';
+        if (p.category === 'accesorios') catClasses = 'bg-amber-50/50 text-amber-600 border-amber-200/50';
 
-    // Calculate slice
-    const startIndex = (page - 1) * productsPerPage;
-    const endIndex = startIndex + productsPerPage;
-    const pageProducts = products.slice(startIndex, endIndex);
+        // Stock Logic with Premium Badges
+        let stockBadge = '';
+        if (p.stock <= 5) {
+            stockBadge = `<span class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-black uppercase tracking-tighter">Crítico: ${p.stock}</span>`;
+        } else if (p.stock <= 15) {
+            stockBadge = `<span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 text-[9px] font-black uppercase tracking-tighter">Bajo: ${p.stock}</span>`;
+        } else {
+            stockBadge = `<span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-black uppercase tracking-tighter">Óptimo: ${p.stock}</span>`;
+        }
 
-    tbody.innerHTML = '';
-    pageProducts.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50 transition';
-        tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                    <div class="h-10 w-10 flex-shrink-0">
-                        <img class="h-10 w-10 rounded-full object-cover" src="${p.image_url}" alt="${p.name}">
-                    </div>
-                    <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">${p.name}</div>
-                        <div class="text-xs text-gray-500 truncate max-w-xs">${p.description || ''}</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-100 text-sky-800 uppercase">
-                    ${p.category}
-                </span>
-            </td>
-             <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700 font-bold">
-                ${p.stock !== undefined ? p.stock : '-'}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                S/. ${parseFloat(p.price).toFixed(2)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
-                <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="text-indigo-600 hover:text-indigo-900 px-2 py-1 rounded hover:bg-indigo-50 transition" title="Editar">
-                    <i class="fas fa-edit"></i>
+        const cleanP = JSON.stringify(p).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+
+        const actionsHtml = `
+            <div class="flex items-center justify-center space-x-2">
+                <button onclick='viewProductDetail(${cleanP})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-brand-500 hover:text-white transition-all shadow-sm">
+                    <i class="fas fa-eye text-sm"></i>
                 </button>
-                <button onclick="deleteProduct(${p.id})" class="text-red-600 hover:text-red-900 px-2 py-1 rounded hover:bg-red-50 transition" title="Eliminar">
-                    <i class="fas fa-trash-alt"></i>
+                <button onclick='editProduct(${cleanP})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                    <i class="fas fa-pen-to-square text-sm"></i>
                 </button>
-            </td>
+                <button onclick="deleteProduct(${p.id})" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                    <i class="fas fa-trash-can text-sm"></i>
+                </button>
+            </div>
         `;
-        tbody.appendChild(tr);
+
+        inventoryDataTable.row.add([
+            `<span class="text-[11px] font-bold solid-slate-400 block text-center">#${p.id}</span>`,
+            `<div class="flex items-center space-x-3 py-1">
+                <div class="product-img-futuristic w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shadow-sm group-hover:border-brand-400 transition-all">
+                    <img src="${p.image_url}" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <span class="block text-[13px] font-extrabold solid-slate-700 tracking-tight leading-snug">${p.name} <i class="fas fa-arrow-up-right-from-square text-[9px] solid-slate-400 ml-1"></i></span>
+                    <span class="text-[9px] font-bold solid-slate-400 uppercase tracking-widest">SKU-${p.id.toString().padStart(5, '0')}</span>
+                </div>
+            </div>`,
+            `<div class="flex items-center justify-start py-1">
+                <span class="px-3 py-1.5 text-[9px] font-bold rounded-xl ${catClasses} uppercase tracking-widest border shadow-sm">${p.category}</span>
+            </div>`,
+            `<div class="flex justify-center py-1">${stockBadge}</div>`,
+            `<div class="flex flex-col items-center py-1">
+                <div class="bg-slate-50 border border-slate-100 px-4 py-1.5 rounded-xl group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all">
+                    <span class="text-[14px] font-extrabold solid-slate-700">
+                        <span class="solid-brand-500 mr-0.5 font-bold">S/.</span>${parseFloat(p.price).toFixed(2)}
+                    </span>
+                </div>
+            </div>`,
+            actionsHtml
+        ]);
     });
 
-    // Render pagination
-    renderProductsPagination(products.length, totalPages, page);
+    inventoryDataTable.order([1, 'asc']).draw();
+    updateProductStats(products);
 }
 
-// Render pagination buttons
-function renderProductsPagination(totalProducts, totalPages, currentPage) {
-    const container = document.getElementById('productsPagination');
-
-    if (totalPages <= 1) {
-        container.innerHTML = '';
-        return;
-    }
-
-    let html = '';
-
-    // Previous button
-    html += `<button onclick="goToProductPage(${currentPage - 1})" 
-        class="px-3 py-1 rounded-lg ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-600 hover:bg-sky-50 hover:text-sky-600 border border-gray-300'} transition text-sm font-medium"
-        ${currentPage === 1 ? 'disabled' : ''}>
-        <i class="fas fa-chevron-left"></i>
-    </button>`;
-
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === currentPage) {
-            html += `<button class="px-3 py-1 rounded-lg bg-sky-600 text-white font-bold text-sm">${i}</button>`;
-        } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            html += `<button onclick="goToProductPage(${i})" 
-                class="px-3 py-1 rounded-lg bg-white text-gray-600 hover:bg-sky-50 hover:text-sky-600 border border-gray-300 transition text-sm font-medium">${i}</button>`;
-        } else if (i === currentPage - 2 || i === currentPage + 2) {
-            html += `<span class="px-2 text-gray-400">...</span>`;
-        }
-    }
-
-    // Next button
-    html += `<button onclick="goToProductPage(${currentPage + 1})" 
-        class="px-3 py-1 rounded-lg ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-600 hover:bg-sky-50 hover:text-sky-600 border border-gray-300'} transition text-sm font-medium"
-        ${currentPage === totalPages ? 'disabled' : ''}>
-        <i class="fas fa-chevron-right"></i>
-    </button>`;
-
-    // Info text
-    html += `<span class="ml-4 text-sm text-gray-500">Mostrando ${((currentPage - 1) * productsPerPage) + 1}-${Math.min(currentPage * productsPerPage, totalProducts)} de ${totalProducts}</span>`;
-
-    container.innerHTML = html;
-}
-
-// Navigate to page
+// Helper for pagination (now handled by DataTables)
 window.goToProductPage = function (page) {
-    if (window.allAdminProducts) {
-        renderProductsPage(window.allAdminProducts, page);
+    if (inventoryDataTable) {
+        inventoryDataTable.page(page - 1).draw('page');
     }
 }
+
+// Update inventory stats
+function updateProductStats(products) {
+    const totalEl = document.getElementById('statsProductCount');
+    const inStockEl = document.getElementById('statsInStock');
+    const lowStockEl = document.getElementById('statsLowStock');
+    const newArrivalsEl = document.getElementById('statsNewArrivals');
+
+    if (totalEl) totalEl.textContent = products.length;
+    if (inStockEl) inStockEl.textContent = products.filter(p => p.stock > 15).length;
+    if (lowStockEl) lowStockEl.textContent = products.filter(p => p.stock <= 5).length;
+    if (newArrivalsEl) newArrivalsEl.textContent = products.filter(p => p.is_new_arrival).length;
+}
+
+// --- PRODUCT DETAIL MODAL ---
+window.viewProductDetail = function (product) {
+    window.currentViewingProduct = product;
+    document.getElementById('detailProductName').textContent = product.name;
+    document.getElementById('detailProductImage').src = product.image_url;
+    document.getElementById('detailProductStock').textContent = product.stock;
+    document.getElementById('detailProductPrice').textContent = 'S/. ' + parseFloat(product.price).toFixed(2);
+    document.getElementById('detailProductDesc').textContent = product.description || 'Sin descripción disponible para este artículo.';
+    document.getElementById('detailProductCategory').textContent = product.category;
+
+    // Status Pill Logic
+    const statusPill = document.getElementById('detailStatusPill');
+    if (product.stock <= 5) {
+        statusPill.textContent = 'Stock Crítico';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-rose-100 text-rose-600 border border-rose-200';
+    } else if (product.stock <= 15) {
+        statusPill.textContent = 'Stock Bajo';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-600 border border-amber-200';
+    } else {
+        statusPill.textContent = 'Stock Disponible';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-600 border border-emerald-200';
+    }
+
+    const specsContainer = document.getElementById('detailProductSpecs');
+    specsContainer.innerHTML = '';
+
+    let specs = product.specifications;
+    if (typeof specs === 'string') {
+        try { specs = JSON.parse(specs); } catch (e) { specs = null; }
+    }
+
+    if (specs && Array.isArray(specs) && specs.length > 0) {
+        document.getElementById('detailSpecsContainer').classList.remove('hidden');
+        specs.forEach(s => {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between py-2 border-b border-slate-100/50 hover:bg-white/50 transition-colors px-2 rounded-lg';
+            row.innerHTML = `
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">${s.key}</span>
+                <span class="text-[11px] font-extrabold text-slate-700">${s.value}</span>
+            `;
+            specsContainer.appendChild(row);
+        });
+    } else {
+        document.getElementById('detailSpecsContainer').classList.add('hidden');
+    }
+
+    document.getElementById('productDetailModal').classList.remove('hidden');
+}
+
+window.closeProductDetailModal = function () {
+    document.getElementById('productDetailModal').classList.add('hidden');
+}
+
+window.printProductDetail = function () {
+    const p = window.currentViewingProduct;
+    if (!p) return;
+
+    let specsHtml = '';
+    let specs = p.specifications;
+    if (typeof specs === 'string') {
+        try { specs = JSON.parse(specs); } catch (e) { specs = null; }
+    }
+    if (specs && Array.isArray(specs)) {
+        specs.forEach(s => {
+            specsHtml += `
+                <div class="print-spec-item">
+                    <span class="spec-key">${s.key}</span>
+                    <span class="spec-value">${s.value}</span>
+                </div>`;
+        });
+    }
+
+    const printWin = window.open('', '', 'width=900,height=900');
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Ficha de Producto - ${p.name}</title>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; background: white; line-height: 1.4; }
+                    
+                    /* Header Elite */
+                    .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px; }
+                    .company-logo { height: 50px; }
+                    .header-info { text-align: right; }
+                    .header-info h2 { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; }
+                    .header-info p { font-size: 10px; color: #cbd5e1; }
+
+                    /* Top Section Grid */
+                    .top-grid { display: grid; grid-template-columns: 380px 1fr; gap: 40px; margin-bottom: 30px; align-items: start; }
+                    
+                    /* Image Container */
+                    .product-image-container { 
+                        background: #f8fafc; 
+                        border-radius: 30px; 
+                        padding: 30px; 
+                        border: 1px solid #f1f5f9; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        height: 380px;
+                        overflow: hidden;
+                    }
+                    .product-image { max-width: 100%; max-height: 100%; object-fit: contain; }
+                    
+                    /* Right Info Area */
+                    .product-title-area h1 { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; line-height: 1.1; letter-spacing: -0.02em; }
+                    
+                    .stats-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                    
+                    .stat-card { 
+                        background: #f8fafc; 
+                        padding: 25px; 
+                        border-radius: 20px; 
+                        position: relative; 
+                        border: 1px solid #f1f5f9;
+                    }
+                    /* Card Ribbons like image */
+                    .stat-card.price-card { border-left: 5px solid #3b82f6; }
+                    .stat-card.stock-card { border-left: 5px solid #f59e0b; }
+                    
+                    .stat-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; display: block; }
+                    .stat-value { font-size: 24px; font-weight: 900; color: #1e293b; display: block; }
+                    .stat-value.price-color { color: #0d9488; } /* Premium Teal instead of pure green */
+
+                    /* Full Width Sections (Description & Specs) */
+                    .full-width-section { width: 100%; margin-top: 20px; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; }
+                    .section-header { background: #f8fafc; padding: 12px 20px; border-bottom: 1px solid #f1f5f9; }
+                    .section-header h3 { font-size: 11px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: 1px; }
+                    
+                    .section-body { padding: 25px; }
+                    .section-body p { font-size: 13px; color: #475569; line-height: 1.6; text-align: justify; }
+
+                    /* Specs Grid in Full Width */
+                    .specs-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px 40px; }
+                    .spec-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
+                    .spec-key { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; }
+                    .spec-value { font-size: 11px; font-weight: 800; color: #1e293b; }
+
+                    .print-footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #f1f5f9; text-align: center; }
+                    .print-footer p { font-size: 9px; color: #cbd5e1; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+                    @media print {
+                        body { padding: 20px; }
+                        .stat-card, .section-header, .product-image-container { -webkit-print-color-adjust: exact; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-header">
+                    <img src="Imagenes/Logotipo.png" class="company-logo">
+                    <div class="header-info">
+                        <h2>Ficha Técnica de Inventario</h2>
+                        <p>${new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+
+                <div class="top-grid">
+                    <div class="product-image-container">
+                        <img src="${p.image_url}" class="product-image">
+                    </div>
+                    <div class="product-title-area">
+                        <h1>${p.name}</h1>
+                        <div class="stats-cards">
+                            <div class="stat-card price-card">
+                                <span class="stat-label">Precio Unitario</span>
+                                <span class="stat-value price-color">S/. ${parseFloat(p.price).toFixed(2)}</span>
+                            </div>
+                            <div class="stat-card stock-card">
+                                <span class="stat-label">Stock Neto</span>
+                                <span class="stat-value">${p.stock} Unidades</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description Full Width (As shown in RED box) -->
+                <div class="full-width-section">
+                    <div class="section-header">
+                        <h3>Descripción Técnica</h3>
+                    </div>
+                    <div class="section-body">
+                        <p>${p.description || 'No hay descripción técnica disponible para este artículo.'}</p>
+                    </div>
+                </div>
+
+                <!-- Specifications Full Width -->
+                <div class="full-width-section" id="printSpecsSection">
+                    <div class="section-header">
+                        <h3>Especificaciones Detalladas</h3>
+                    </div>
+                    <div class="section-body">
+                        <div class="specs-grid">
+                            ${specsHtml || '<p style="font-size: 12px; color: #94a3b8;">No se registraron especificaciones.</p>'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="print-footer">
+                    <p>Sistema Solbin-X &copy; ${new Date().getFullYear()} - Documento de Control de Inventario</p>
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        setTimeout(() => {
+                            window.print();
+                            window.close();
+                        }, 500);
+                    };
+                </script>
+            </body>
+        </html>
+    `);
+    printWin.document.close();
+}
+
+
+// --- PEDIDOS (ORDERS) LOGIC ---
 
 
 
@@ -195,9 +466,6 @@ window.goToProductPage = function (page) {
 // --- PEDIDOS (ORDERS) LOGIC ---
 
 window.loadOrders = async function () {
-    const tbody = document.getElementById('ordersTableBody');
-    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-circle-notch fa-spin mr-2"></i> Cargando ventas...</td></tr>`;
-
     try {
         const client = window.supabaseClient || window.supabase;
         const { data: orders, error } = await client
@@ -210,59 +478,110 @@ window.loadOrders = async function () {
         // Save for export
         window.allAdminOrders = orders;
 
-        if (!orders || orders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No hay ventas registradas.</td></tr>`;
-            return;
+        // Dashboard count update
+        const dashCount = document.getElementById('dashOrdersCount');
+        if (dashCount) dashCount.textContent = orders.length;
+
+        // Initialize table if not done
+        if (!ordersDataTable) {
+            ordersDataTable = initOrdersTable();
         }
 
-        tbody.innerHTML = '';
-        orders.forEach(order => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-gray-50 transition';
-
-            // Status Badge
-            let statusColor = 'gray';
-            if (order.status === 'iniciado') statusColor = 'blue';
-            if (order.status === 'en_proceso') statusColor = 'yellow';
-            if (order.status === 'terminado') statusColor = 'green';
-            if (order.status === 'cancelado') statusColor = 'red';
-
-            const badgeClass = `bg-${statusColor}-100 text-${statusColor}-800`;
-
-            const date = new Date(order.created_at).toLocaleString();
-
-            // Clean JSON string pass
-            const orderJson = JSON.stringify(order).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
-
-            tr.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">#${order.id}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${date}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-gray-400">WhatsApp / Web</span>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-gray-800">
-                    S/. ${parseFloat(order.total).toFixed(2)}
-                </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeClass} uppercase">
-                        ${order.status === 'terminado' ? 'Finalizado' : order.status.replace('_', ' ')}
-                    </span>
-                </td>
-                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <button onclick='viewOrder(${orderJson})' class="bg-sky-50 text-sky-600 hover:bg-sky-100 px-3 py-1 rounded-lg transition font-bold text-xs border border-sky-200">
-                        <i class="fas fa-eye mr-1"></i> Ver
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+        renderOrdersToTable(orders);
 
     } catch (err) {
         console.error('Error cargando ventas:', err);
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error al cargar ventas.</td></tr>`;
+        Swal.fire('Error', 'No se pudieron cargar las ventas.', 'error');
     }
+}
+
+// Render orders using DataTables
+// Render orders using DataTables
+function renderOrdersToTable(orders) {
+    if (!ordersDataTable) return;
+    ordersDataTable.clear();
+
+    orders.forEach((order, index) => {
+        // Status Badge Pro (Premium Tech Colors)
+        let statusClasses = '';
+        let statusLabel = '';
+        let dotColor = '';
+
+        if (order.status === 'iniciado') {
+            statusClasses = 'bg-indigo-50/50 text-indigo-600 border-indigo-200/50';
+            statusLabel = 'En Cola';
+            dotColor = 'bg-indigo-500';
+        } else if (order.status === 'en_proceso') {
+            statusClasses = 'bg-amber-50/50 text-amber-600 border-amber-200/50';
+            statusLabel = 'Preparación';
+            dotColor = 'bg-amber-500';
+        } else if (order.status === 'terminado') {
+            statusClasses = 'bg-emerald-50/50 text-emerald-600 border-emerald-200/50';
+            statusLabel = 'Venta Exitosa';
+            dotColor = 'bg-emerald-500';
+        } else if (order.status === 'cancelado') {
+            statusClasses = 'bg-rose-50/50 text-rose-600 border-rose-200/50';
+            statusLabel = 'Anulado';
+            dotColor = 'bg-rose-500';
+        }
+
+        const dateObj = new Date(order.created_at);
+        const dateStr = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+        const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+        const orderJson = JSON.stringify(order).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+
+        const actionsHtml = `
+            <div class="flex items-center justify-center">
+                <button onclick='viewOrder(${orderJson})' 
+                    class="group flex items-center space-x-2 bg-brand-600 text-white px-5 py-2.5 rounded-2xl hover:bg-brand-700 hover:scale-105 active:scale-95 transition-all font-black text-[10px] uppercase tracking-[0.11em] shadow-xl shadow-brand-500/20 whitespace-nowrap">
+                    <i class="fas fa-bolt-lightning text-amber-400 group-hover:text-white transition"></i>
+                    <span>VER DETALLE</span>
+                </button>
+            </div>
+        `;
+
+        ordersDataTable.row.add([
+            `<div class="flex items-center space-x-3 py-2">
+                <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center solid-slate-400 border border-slate-200 group-hover:bg-brand-500 group-hover:text-white group-hover:border-brand-400 transition-all shadow-sm">
+                    <i class="fas fa-fingerprint text-xs"></i>
+                </div>
+                <span class="font-extrabold solid-slate-600 tracking-tighter text-sm">ID-${order.id}</span>
+            </div>`,
+            `<div class="flex flex-col py-2">
+                <span class="text-[13px] font-extrabold solid-slate-500 tracking-tight whitespace-nowrap">${dateStr}</span>
+                <span class="text-[10px] font-bold solid-slate-400 uppercase tracking-widest">${timeStr}</span>
+            </div>`,
+            `<div class="flex items-center space-x-3 py-2 px-2">
+                <div class="relative flex-shrink-0">
+                    <div class="w-10 h-10 bg-emerald-50/50 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-100 shadow-sm transition-all group-hover:rotate-12">
+                        <i class="fab fa-whatsapp text-lg"></i>
+                    </div>
+                </div>
+                <div class="min-w-[100px]">
+                    <span class="text-[9px] font-bold solid-slate-400 uppercase tracking-tight block">Canal IoT</span>
+                    <span class="text-[11px] font-extrabold solid-slate-500 whitespace-nowrap">WhatsApp Business</span>
+                </div>
+            </div>`,
+            `<div class="flex flex-col items-center py-2">
+                <span class="text-[9px] font-bold solid-slate-400 uppercase tracking-widest mb-1">Monto Neto</span>
+                <div class="bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl group-hover:bg-brand-50 group-hover:border-brand-100 transition-all shadow-sm">
+                    <span class="text-[15px] font-extrabold solid-slate-600">
+                        <span class="solid-brand-500 mr-0.5 font-bold">S/.</span>${parseFloat(order.total).toFixed(2)}
+                    </span>
+                </div>
+            </div>`,
+            `<div class="flex justify-center py-2">
+                <span class="relative px-5 py-2.5 inline-flex items-center text-[10px] font-extrabold rounded-xl ${statusClasses} uppercase tracking-widest border shadow-sm transition-all overflow-hidden group/badge min-w-[140px] justify-center">
+                    <span class="w-1.5 h-1.5 rounded-full ${dotColor} mr-2 animate-pulse"></span>
+                    ${statusLabel}
+                </span>
+            </div>`,
+            actionsHtml
+        ]);
+    });
+
+    ordersDataTable.order([1, 'desc']).draw();
 }
 
 // Order Modal Vars
@@ -272,39 +591,51 @@ window.viewOrder = function (order) {
     currentOrderId = order.id;
     window.currentFullOrder = order; // Save full object
     document.getElementById('orderModalId').textContent = '#' + order.id;
-    document.getElementById('orderDate').textContent = new Date(order.created_at).toLocaleString();
 
-    // Status
+    const dateObj = new Date(order.created_at);
+    document.getElementById('orderDate').textContent = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Status Pro Badge
     const statusEl = document.getElementById('orderStatusDisplay');
-    statusEl.textContent = order.status.toUpperCase();
-    statusEl.className = 'font-bold px-2 py-1 rounded text-xs bg-gray-100 text-gray-800'; // Default
-    if (order.status === 'iniciado') statusEl.className += ' bg-blue-100 text-blue-800';
-    if (order.status === 'terminado') statusEl.className += ' bg-green-100 text-green-800';
+    statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full mr-2 animate-pulse bg-current"></span> ${order.status.replace('_', ' ').toUpperCase()}`;
+
+    let statusPillClasses = 'border-slate-200 text-slate-500 bg-slate-50';
+    if (order.status === 'iniciado') statusPillClasses = 'border-indigo-100 text-indigo-600 bg-indigo-50/50';
+    if (order.status === 'en_proceso') statusPillClasses = 'border-amber-100 text-amber-600 bg-amber-50/50';
+    if (order.status === 'terminado') statusPillClasses = 'border-emerald-100 text-emerald-600 bg-emerald-50/50';
+    if (order.status === 'cancelado') statusPillClasses = 'border-rose-100 text-rose-600 bg-rose-50/50';
+
+    statusEl.className = 'inline-flex items-center px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ' + statusPillClasses;
 
     // Select init
     document.getElementById('orderStatusSelect').value = order.status;
 
-    // Customer Info
-    // Customer Info
+    // Customer Info refined
     const infoEl = document.getElementById('orderCustomerInfo');
     if (order.customer_info) {
         let infoHtml = '';
         const info = order.customer_info;
 
-        // Hide technical fields like user_agent unless needed, or format nicely
-        if (info.phone) infoHtml += `<div class="mb-2 text-lg text-sky-700 font-bold"><i class="fab fa-whatsapp text-green-500 mr-2"></i> ${info.phone}</div>`;
-
-        infoEl.innerHTML = infoHtml || 'Información básica disponible.';
+        if (info.phone) {
+            infoHtml += `
+            <div class="flex items-center space-x-3 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 shadow-sm">
+                <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20"><i class="fab fa-whatsapp text-lg"></i></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">WhatsApp Contact</span>
+                    <span class="text-[15px] font-black text-slate-800">${info.phone}</span>
+                </div>
+            </div> `;
+        }
+        infoEl.innerHTML = infoHtml || '<p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Sin datos adicionales</p>';
     } else {
-        infoEl.textContent = 'Sin información adicional.';
+        infoEl.innerHTML = '<p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Sin información adicional</p>';
     }
 
-    // Items
+    // Items List Pro
     const itemsBody = document.getElementById('orderItemsTable');
     itemsBody.innerHTML = '';
 
     let items = order.items;
-    // Check if items is array or object string? Supabase returns jsonb mainly effectively.
     if (typeof items === 'string') {
         try { items = JSON.parse(items); } catch (e) { }
     }
@@ -312,17 +643,29 @@ window.viewOrder = function (order) {
     if (Array.isArray(items)) {
         items.forEach(item => {
             const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-50/50 transition-all';
             row.innerHTML = `
-                <td class="px-4 py-2">${item.name}</td>
-                <td class="px-4 py-2 text-center">${item.quantity}</td>
-                <td class="px-4 py-2 text-right">S/. ${item.price}</td>
-                <td class="px-4 py-2 text-right font-bold">S/. ${item.price * item.quantity}</td>
+                <td class="px-6 py-4">
+                    <div class="flex flex-col">
+                        <span class="text-[11px] font-black text-slate-700 leading-tight">${item.name}</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">SKU-${item.id || 'N/A'}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <span class="text-[10px] font-bold text-slate-600">${item.quantity} ud.</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <span class="text-[11px] font-black text-slate-700">S/. ${(item.price * item.quantity).toFixed(2)}</span>
+                </td>
             `;
             itemsBody.appendChild(row);
         });
     }
 
-    document.getElementById('orderTotal').textContent = 'S/. ' + parseFloat(order.total).toFixed(2);
+    document.getElementById('orderTotal').innerHTML = `
+        <span class="text-brand-500/50 font-black mr-1 text-base">S/.</span>
+        ${parseFloat(order.total).toFixed(2)}
+    `;
 
     document.getElementById('orderModal').classList.remove('hidden');
 }
@@ -401,7 +744,7 @@ window.printOrder = function () {
                 <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: right;">S/. ${item.price}</td>
                 <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: right;">S/. ${(item.price * item.quantity).toFixed(2)}</td>
-            </tr>`;
+            </tr> `;
         });
     }
 
@@ -409,29 +752,69 @@ window.printOrder = function () {
     printWindow.document.write(`
         <html>
         <head>
-            <title>Recibo de Venta #${order.id}</title>
+            <title>Solbin-X Elite Receipt #${order.id}</title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <style>
-                body { font-family: 'Courier New', Courier, monospace; padding: 20px; }
-                .header { text-align: center; margin-bottom: 20px; }
-                .logo-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
-                .logo-icon { font-size: 24px; color: #667eea; }
-                .logo-text { font-size: 24px; font-weight: bold; }
-                .info { margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                th { text-align: left; border-bottom: 1px solid #000; }
-                .total { text-align: right; font-size: 1.2em; font-weight: bold; margin-top: 10px;}
-                .footer { margin-top: 30px; text-align: center; font-size: 0.8em; }
+                body { 
+                    font-family: 'Plus Jakarta Sans', sans-serif; 
+                    padding: 40px; 
+                    color: #1e293b;
+                    line-height: 1.5;
+                }
+                .header { 
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 40px;
+                    border-bottom: 2px solid #f1f5f9;
+                    padding-bottom: 20px;
+                }
+                .logo-img { height: 60px; width: auto; }
+                .receipt-meta { text-align: right; }
+                .receipt-meta h1 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #64748b; margin: 0 0 8px 0; }
+                .receipt-meta p { margin: 2px 0; font-size: 11px; font-weight: 700; color: #94a3b8; }
+                .info { 
+                    margin-bottom: 30px; 
+                    padding: 20px; 
+                    background: #f8fafc; 
+                    border-radius: 12px;
+                    border: 1px solid #e2e8f0;
+                }
+                .info p { margin: 5px 0; font-size: 13px; font-weight: 600; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                th { 
+                    text-align: left; 
+                    padding: 12px; 
+                    border-bottom: 2px solid #e2e8f0;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                    color: #64748b;
+                }
+                td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; font-weight: 500; }
+                .total { 
+                    text-align: right; 
+                    font-size: 20px; 
+                    font-weight: 800; 
+                    color: #2563eb;
+                    margin-top: 10px;
+                    border-top: 2px solid #e2e8f0;
+                    padding-top: 15px;
+                }
+                .footer { margin-top: 50px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 600; }
             </style>
         </head>
         <body>
             <div class="header">
-                <div class="logo-container">
-                    <i class="fas fa-laptop-code logo-icon"></i>
-                    <span class="logo-text">Solbin-X</span>
+                <img src="assets/img/logo-full.png" class="logo-img" alt="Solbin-X Logo">
+                <div class="receipt-meta">
+                    <h1>ORDEN DE VENTA</h1>
+                    <p>Orden ID: #${order.id}</p>
+                    <p>Fecha: ${new Date(order.created_at).toLocaleDateString()}</p>
+                    <p>Hora: ${new Date(order.created_at).toLocaleTimeString()}</p>
                 </div>
-                <p>Comprobante de Pedido #${order.id}</p>
-                <p>Fecha: ${new Date(order.created_at).toLocaleString()}</p>
             </div>
             <div class="info">
                 <p><strong>Cliente (WhatsApp):</strong> ${order.customer_info?.phone || 'N/A'}</p>
@@ -454,14 +837,15 @@ window.printOrder = function () {
                 Total a Pagar: S/. ${parseFloat(order.total).toFixed(2)}
             </div>
             <div class="footer">
-                <p>Gracias por su preferencia.</p>
+                <p>Gracias por confiar en Solbin-X • Gestión Elite de Inventarios</p>
+                <p>www.solbin-x.com</p>
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
             </script>
         </body>
         </html>
-    `);
+        `);
     printWindow.document.close();
 }
 
