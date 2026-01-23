@@ -484,7 +484,10 @@ if (document.readyState === 'loading') {
         setTimeout(async () => {
             const client = window.supabaseClient || window.supabase;
             if (client && typeof client.rpc === 'function') {
-                await client.rpc('increment_visit_count');
+                if (!sessionStorage.getItem('visit_tracked')) {
+                    await client.rpc('increment_visit_count');
+                    sessionStorage.setItem('visit_tracked', 'true');
+                }
             }
         }, 1000);
     } catch (e) {

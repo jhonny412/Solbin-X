@@ -23,8 +23,11 @@ async function checkAuth() {
 async function trackVisits() {
     try {
         const client = window.supabaseClient || window.supabase;
-        // Increment visit count via RPC
-        await client.rpc('increment_visit_count');
+        // Only increment once per session
+        if (!sessionStorage.getItem('visit_tracked')) {
+            await client.rpc('increment_visit_count');
+            sessionStorage.setItem('visit_tracked', 'true');
+        }
 
         // Fetch current count
         const { data, error } = await client
