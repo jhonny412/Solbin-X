@@ -466,7 +466,7 @@ window.printProductDetail = function () {
             </head>
             <body>
                 <div class="print-header">
-                    <img src="Imagenes/Logotipo.png" class="company-logo">
+                    <img src="Imagenes/Version_Web.png" class="company-logo">
                     <div class="header-info">
                         <h2>Ficha Técnica de Inventario</h2>
                         <p>${new Date().toLocaleDateString()}</p>

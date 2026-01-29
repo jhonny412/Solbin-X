@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin.js
+Disallow: /login.html
+Disallow: /supabase-config.js
+Disallow: /security-utils.js
+
+Sitemap: https://solbin-x.com/sitemap.xml

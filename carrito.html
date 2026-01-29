@@ -6,7 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; img-src 'self' https: data:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https:;">
-    <title>Carrito de Compras - Solbin-X</title>
+
+    <!-- SEO Meta Tags -->
+    <link rel="icon" type="image/svg+xml" href="Imagenes/logo.svg">
+    <title>Carrito de Compras | Solbin-X - Finaliza tu Pedido</title>
+    <meta name="description"
+        content="Revisa tu carrito de compras en Solbin-X. Completa tu pedido de laptops, componentes y accesorios tecnológicos de forma segura. Envíos a todo el Perú.">
+    <meta name="keywords"
+        content="carrito de compras, solbin-x, comprar laptops peru, tienda online tecnologia, checkout, finalizar compra">
+    <meta name="robots" content="noindex, follow">
+    <!-- Carrito pages are usually noindex to avoid duplicate/empty content indexing -->
+    <meta name="author" content="Solbin-X">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://solbin-x.com/carrito.html">
+    <meta property="og:title" content="Tu Carrito de Compras | Solbin-X">
+    <meta property="og:description"
+        content="Finaliza tu compra de equipos tecnológicos en Solbin-X. Envíos seguros y garantía en todo el Perú.">
+    <meta property="og:image" content="https://solbin-x.com/Imagenes/Version_Web.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://solbin-x.com/carrito.html">
+    <meta name="twitter:title" content="Tu Carrito de Compras | Solbin-X">
+    <meta name="twitter:description" content="Finaliza tu compra de equipos tecnológicos en Solbin-X.">
+    <meta name="twitter:image" content="https://solbin-x.com/Imagenes/logo.svg">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://solbin-x.com/carrito.html">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Inicio",
+            "item": "https://solbin-x.com/"
+        },{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Carrito",
+            "item": "https://solbin-x.com/carrito.html"
+        }]
+    }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="supabase-config.js"></script>
@@ -45,10 +93,11 @@
     <!-- Navegación -->
     <nav class="bg-white dark:bg-gray-900 shadow-lg fixed w-full top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+            <div class="flex justify-between items-center h-32">
                 <div class="flex items-center">
                     <a href="index.html" class="flex items-center">
-                        <img src="Imagenes/Logotipo.png" alt="Solbin-X" class="h-10 w-auto">
+                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X"
+                            class="h-24 w-auto dark:brightness-0 dark:invert transition-all duration-300 hover:scale-110">
                     </a>
                 </div>
                 <div class="hidden md:flex space-x-8 items-center">
@@ -248,7 +297,8 @@
             <div class="grid md:grid-cols-4 gap-8 mb-8">
                 <div>
                     <div class="flex items-center mb-4">
-                        <img src="Imagenes/Logotipo.png" alt="Solbin-X" class="h-10 w-auto brightness-0 invert">
+                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X"
+                            class="h-32 w-auto brightness-0 invert transition-all duration-300 hover:opacity-80">
                     </div>
                     <p class="text-gray-400 dark:text-gray-500">Tu tienda de confianza para equipos tecnológicos de
                         última generación.</p>
