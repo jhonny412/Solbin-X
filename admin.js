@@ -1,11 +1,86 @@
 
 // Lógica del Panel de Administración
 
+// Función de inicialización al cargar la página
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('=== PÁGINA CARGADA ===');
+    console.log('Verificando secciones...');
+
+    const dashboardSection = document.getElementById('dashboardSection');
+    const productsSection = document.getElementById('productsSection');
+    const ordersSection = document.getElementById('ordersSection');
+
+    console.log('Secciones encontradas:', {
+        dashboard: !!dashboardSection,
+        products: !!productsSection,
+        orders: !!ordersSection
+    });
+
+    console.log('Verificando botones de menú...');
+
+    const sideBtnDashboard = document.getElementById('sideBtnDashboard');
+    const sideBtnProducts = document.getElementById('sideBtnProducts');
+    const sideBtnOrders = document.getElementById('sideBtnOrders');
+
+    console.log('Botones encontrados:', {
+        dashboard: !!sideBtnDashboard,
+        products: !!sideBtnProducts,
+        orders: !!sideBtnOrders
+    });
+
+    console.log('Estado inicial de secciones:', {
+        dashboard: dashboardSection?.classList.contains('hidden') ? 'oculta' : 'visible',
+        products: productsSection?.classList.contains('hidden') ? 'oculta' : 'visible',
+        orders: ordersSection?.classList.contains('hidden') ? 'oculta' : 'visible'
+    });
+
+    console.log('Estado inicial de botones:', {
+        dashboard: sideBtnDashboard?.classList.contains('active') ? 'activo' : 'inactivo',
+        products: sideBtnProducts?.classList.contains('active') ? 'activo' : 'inactivo',
+        orders: sideBtnOrders?.classList.contains('active') ? 'activo' : 'inactivo'
+    });
+
+    // Probar eventos onclick
+    console.log('Probando eventos onclick...');
+
+    if (sideBtnDashboard) {
+        sideBtnDashboard.addEventListener('click', function (e) {
+            console.log('Botón dashboard clickeado (event listener)');
+            e.preventDefault();
+            e.stopPropagation();
+            switchAdminTab('dashboard');
+        });
+    }
+
+    if (sideBtnProducts) {
+        sideBtnProducts.addEventListener('click', function (e) {
+            console.log('Botón products clickeado (event listener)');
+            e.preventDefault();
+            e.stopPropagation();
+            switchAdminTab('products');
+        });
+    }
+
+    if (sideBtnOrders) {
+        sideBtnOrders.addEventListener('click', function (e) {
+            console.log('Botón orders clickeado (event listener)');
+            e.preventDefault();
+            e.stopPropagation();
+            switchAdminTab('orders');
+        });
+    }
+
+    console.log('Event listeners agregados correctamente');
+    console.log('=== FIN DE VERIFICACIÓN ===');
+});
+
 // Verificar autenticación al inicio
 async function checkAuth() {
+    console.log('=== checkAuth iniciado ===');
     const client = window.supabaseClient || window.supabase;
     const { data: { session } } = await client.auth.getSession();
     if (!session) {
+        console.log('No hay sesión, redirigiendo a login.html');
         window.location.href = 'login.html';
         return;
     }
@@ -13,11 +88,33 @@ async function checkAuth() {
     const userEmailEl = document.getElementById('userEmail');
     if (userEmailEl) userEmailEl.textContent = session.user.email;
 
+    console.log('Sesión autenticada, cargando datos iniciales...');
+
     // Cargar datos iniciales
-    loadProducts();
-    loadOrders();
-    trackVisits();
+    try {
+        await loadProducts();
+        console.log('Productos cargados correctamente');
+    } catch (e) {
+        console.error('Error cargando productos:', e);
+    }
+
+    try {
+        await loadOrders();
+        console.log('Pedidos cargados correctamente');
+    } catch (e) {
+        console.error('Error cargando pedidos:', e);
+    }
+
+    try {
+        await trackVisits();
+        console.log('Visitas trackeadas correctamente');
+    } catch (e) {
+        console.error('Error trackeando visitas:', e);
+    }
+
+    console.log('=== checkAuth completado ===');
 }
+
 
 // Track and Load Site Visits
 async function trackVisits() {
@@ -64,9 +161,17 @@ function animateNumber(element, start, end, duration) {
 
 // Tabs Logic
 window.switchAdminTab = function (tab) {
+    console.log('=== switchAdminTab llamado con:', tab, '===');
+
     const dashboardSection = document.getElementById('dashboardSection');
     const productsSection = document.getElementById('productsSection');
     const ordersSection = document.getElementById('ordersSection');
+
+    console.log('Secciones encontradas:', {
+        dashboard: !!dashboardSection,
+        products: !!productsSection,
+        orders: !!ordersSection
+    });
 
     // Sidebar buttons
     const navButtons = {
@@ -75,128 +180,305 @@ window.switchAdminTab = function (tab) {
         orders: document.getElementById('sideBtnOrders')
     };
 
+    console.log('Botones encontrados:', {
+        dashboard: !!navButtons.dashboard,
+        products: !!navButtons.products,
+        orders: !!navButtons.orders
+    });
+
     // Hide all
     dashboardSection?.classList.add('hidden');
     productsSection?.classList.add('hidden');
     ordersSection?.classList.add('hidden');
+
+    console.log('Todas las secciones ocultadas');
 
     // Reset buttons
     Object.values(navButtons).forEach(btn => {
         if (btn) btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
     });
 
+    console.log('Botones reseteados');
+
     // Show selected
     if (tab === 'dashboard') {
+        console.log('Mostrando dashboard');
         dashboardSection?.classList.remove('hidden');
         navButtons.dashboard?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
     } else if (tab === 'products') {
+        console.log('Mostrando products');
         productsSection?.classList.remove('hidden');
         navButtons.products?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+
+        // Load products
+        console.log('Cargando productos...');
         loadProducts();
+
+        // Resize grid after showing section
+        setTimeout(() => {
+            console.log('Redimensionando productsGrid...');
+            if (jQuery('#productsGrid').length > 0) {
+                jQuery('#productsGrid').jqGrid('setGridWidth', jQuery('#productsGrid').closest('.overflow-x-auto').width());
+                jQuery('#productsGrid').trigger('reloadGrid');
+            }
+        }, 100);
     } else if (tab === 'orders') {
+        console.log('Mostrando orders');
         ordersSection?.classList.remove('hidden');
         navButtons.orders?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+
+        // Load orders
+        console.log('Cargando pedidos...');
         loadOrders();
+
+        // Resize grid after showing section
+        setTimeout(() => {
+            console.log('Redimensionando ordersGrid...');
+            if (jQuery('#ordersGrid').length > 0) {
+                jQuery('#ordersGrid').jqGrid('setGridWidth', jQuery('#ordersGrid').closest('.overflow-x-auto').width());
+                jQuery('#ordersGrid').trigger('reloadGrid');
+            }
+        }, 100);
+    } else {
+        console.error('Tab no reconocido:', tab);
     }
+
+    console.log('=== switchAdminTab completado ===');
 }
 
 
 
-// Pagination state (No longer needed with DataTables, but kept for compatibility if referenced elsewhere)
-let currentProductPage = 1;
-const productsPerPage = 10;
-let inventoryDataTable = null;
-let ordersDataTable = null;
 
-const spanishLanguage = {
-    "decimal": "",
-    "emptyTable": "No hay datos disponibles en la tabla",
-    "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-    "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
-    "infoFiltered": "(filtrado de _MAX_ entradas totales)",
-    "infoPostFix": "",
-    "thousands": ",",
-    "lengthMenu": "Mostrar _MENU_ entradas",
-    "loadingRecords": "Cargando...",
-    "processing": "Procesando...",
-    "search": "Buscar:",
-    "zeroRecords": "No se encontraron registros coincidentes",
-    "paginate": {
-        "first": "Primero",
-        "last": "Último",
-        "next": "Siguiente",
-        "previous": "Anterior"
-    },
-    "aria": {
-        "sortAscending": ": activar para ordenar la columna ascendente",
-        "sortDescending": ": activar para ordenar la columna descendente"
+// jqGrid instances
+let productsGrid = null;
+let ordersGrid = null;
+
+// Resize jqGrid when window is resized
+window.addEventListener('resize', function () {
+    if (jQuery('#productsGrid').length > 0 && !jQuery('#productsGrid').closest('#productsSection').hasClass('hidden')) {
+        jQuery('#productsGrid').jqGrid('setGridWidth', jQuery('#productsGrid').closest('.overflow-x-auto').width());
     }
-};
-
-// Initialize DataTables
-function initInventoryTable() {
-    if ($.fn.DataTable.isDataTable('#inventoryTable')) {
-        return $('#inventoryTable').DataTable();
+    if (jQuery('#ordersGrid').length > 0 && !jQuery('#ordersGrid').closest('#ordersSection').hasClass('hidden')) {
+        jQuery('#ordersGrid').jqGrid('setGridWidth', jQuery('#ordersGrid').closest('.overflow-x-auto').width());
     }
+});
 
-    return $('#inventoryTable').DataTable({
-        language: spanishLanguage,
-        pageLength: 10,
-        responsive: true,
-        autoWidth: false,
-        width: '100%',
-        order: [[0, 'desc']], // Order by No. (Most recent first)
-        columnDefs: [
+// Función de prueba para verificar el estado de la aplicación
+window.testMenuNavigation = function () {
+    console.log('=== TEST MENÚ NAVEGACIÓN ===');
+
+    console.log('1. Verificando secciones:');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const productsSection = document.getElementById('productsSection');
+    const ordersSection = document.getElementById('ordersSection');
+
+    console.log('  Dashboard:', !!dashboardSection, '- Estado:', dashboardSection?.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Products:', !!productsSection, '- Estado:', productsSection?.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Orders:', !!ordersSection, '- Estado:', ordersSection?.classList.contains('hidden') ? 'oculta' : 'visible');
+
+    console.log('2. Verificando botones:');
+    const sideBtnDashboard = document.getElementById('sideBtnDashboard');
+    const sideBtnProducts = document.getElementById('sideBtnProducts');
+    const sideBtnOrders = document.getElementById('sideBtnOrders');
+
+    console.log('  Dashboard Button:', !!sideBtnDashboard);
+    console.log('  Products Button:', !!sideBtnProducts);
+    console.log('  Orders Button:', !!sideBtnOrders);
+
+    console.log('3. Verificando función switchAdminTab:');
+    console.log('  Función definida:', typeof window.switchAdminTab);
+
+    console.log('4. Verificando jqGrids:');
+    console.log('  productsGrid:', !!productsGrid);
+    console.log('  ordersGrid:', !!ordersGrid);
+    console.log('  productsGrid element:', jQuery('#productsGrid').length > 0 ? 'existe' : 'no existe');
+    console.log('  ordersGrid element:', jQuery('#ordersGrid').length > 0 ? 'existe' : 'no existe');
+
+    console.log('5. Verificando jQuery:');
+    console.log('  jQuery cargado:', typeof jQuery !== 'undefined');
+    console.log('  jqGrid cargado:', typeof jQuery.fn.jqGrid !== 'undefined');
+
+    console.log('=== FIN TEST ===');
+}
+
+// Ejecutar test al inicio
+setTimeout(() => {
+    console.log('Ejecutando test inicial de navegación...');
+    window.testMenuNavigation();
+}, 1000);
+
+// Initialize jqGrid for Products
+function initProductsGrid() {
+    console.log('Inicializando jqGrid para productos...');
+
+    jQuery('#productsGrid').jqGrid({
+        datatype: 'local',
+        colModel: [
             {
-                targets: 0,
-                type: 'num',
-                render: function (data, type, row) {
-                    if (type === 'display') {
-                        return `<span class="text-[11px] font-bold solid-slate-400 block text-center">#${data}</span>`;
-                    }
-                    return data;
+                name: 'id',
+                label: 'REF.',
+                width: 80,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return `<span class="text-[11px] font-bold text-slate-400">#${cellvalue}</span>`;
                 }
             },
-            { orderable: false, targets: [5] }, // Non-orderable columns (Actions)
-            { className: "dt-center", targets: [0, 3, 4, 5] }
+            {
+                name: 'name_display',
+                label: 'Especificación',
+                width: 400,
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'category_display',
+                label: 'Categoría',
+                width: 150,
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'stock_display',
+                label: 'Stock',
+                width: 120,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'price_display',
+                label: 'Valorización',
+                width: 150,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'actions',
+                label: 'Operaciones',
+                width: 150,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            }
         ],
-        dom: '<"flex justify-between items-center mb-6"lf>rt<"flex justify-between items-center mt-6"ip>',
-        drawCallback: function () {
-            $('.futuristic-row').addClass('fadeInUp');
+        viewrecords: true,
+        width: null,
+        height: 'auto',
+        rowNum: 10,
+        rowList: [10, 20, 30, 50],
+        pager: '#productsPager',
+        styleUI: 'jQueryUI',
+        gridview: true,
+        autoencode: false,
+        pginput: true,
+        pgbuttons: true,
+        pgtext: 'Página {0} de {1}',
+        recordpos: 'left',
+        pagerpos: 'center',
+        loadComplete: function () {
+            console.log('jqGrid de productos cargado correctamente');
         }
     });
+
+    console.log('jqGrid de productos inicializado');
 }
 
-// Initialize Orders DataTables
-function initOrdersTable() {
-    if ($.fn.DataTable.isDataTable('#ordersTable')) {
-        return $('#ordersTable').DataTable();
-    }
+// Initialize jqGrid for Orders
+function initOrdersGrid() {
+    console.log('Inicializando jqGrid para pedidos...');
 
-    return $('#ordersTable').DataTable({
-        language: spanishLanguage,
-        pageLength: 10,
-        responsive: true,
-        autoWidth: false,
-        width: '100%',
-        order: [[1, 'desc']], // Order by Date
-        columnDefs: [
-            { orderable: false, targets: [5] }, // Non-orderable columns (Actions)
-            { className: "dt-center", targets: [3, 4, 5] }
+    jQuery('#ordersGrid').jqGrid({
+        datatype: 'local',
+        colModel: [
+            {
+                name: 'id_display',
+                label: 'Ref.',
+                width: 100,
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'date_display',
+                label: 'Fecha',
+                width: 150,
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'channel_display',
+                label: 'Canal',
+                width: 200,
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'total_display',
+                label: 'Total',
+                width: 150,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'status_display',
+                label: 'Estado',
+                width: 150,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            },
+            {
+                name: 'actions',
+                label: 'Acciones',
+                width: 150,
+                align: 'center',
+                formatter: function (cellvalue, options, rowObject) {
+                    return cellvalue || '';
+                }
+            }
         ],
-        dom: '<"flex justify-between items-center mb-8"lf>rt<"flex justify-between items-center mt-8"ip>',
-        createdRow: function (row, data, dataIndex) {
-            $(row).addClass('futuristic-row group');
-        },
-        drawCallback: function () {
-            $('.futuristic-row').addClass('fadeInUp');
+        viewrecords: true,
+        width: null,
+        height: 'auto',
+        rowNum: 10,
+        rowList: [10, 20, 30, 50],
+        pager: '#ordersPager',
+        styleUI: 'jQueryUI',
+        gridview: true,
+        autoencode: false,
+        pginput: true,
+        pgbuttons: true,
+        pgtext: 'Página {0} de {1}',
+        recordpos: 'left',
+        pagerpos: 'center',
+        loadComplete: function () {
+            console.log('jqGrid de pedidos cargado correctamente');
         }
     });
+
+    console.log('jqGrid de pedidos inicializado');
 }
+
 
 // Cargar productos
 window.loadProducts = async function () {
     try {
+        console.log('=== INICIANDO CARGA DE PRODUCTOS ===');
+
+        // Mostrar loading
+        showProductsLoading();
+
         const client = window.supabaseClient || window.supabase;
         const { data: products, error } = await client
             .from('products')
@@ -205,100 +487,160 @@ window.loadProducts = async function () {
 
         if (error) throw error;
 
+        console.log('Productos cargados de Supabase:', products.length);
+        console.log('Productos ordenados desde Supabase:', products.map(p => ({ id: p.id, sku: 'SKU-' + p.id.toString().padStart(5, '0') })));
+        console.log('Primeros 5 IDs:', products.slice(0, 5).map(p => p.id));
+        console.log('Últimos 5 IDs:', products.slice(-5).map(p => p.id));
+
         window.allAdminProducts = products;
 
         // Dashboard count update
         const dashCount = document.getElementById('dashProductsCount');
         if (dashCount) dashCount.textContent = products.length;
 
-        // Initialize table if not done
-        if (!inventoryDataTable) {
-            inventoryDataTable = initInventoryTable();
+        // Initialize grid if not done
+        if (!productsGrid) {
+            console.log('Inicializando jqGrid para productos...');
+            initProductsGrid();
         }
 
-        // Render with DataTables
-        renderProductsToTable(products);
+        // Render with jqGrid
+        console.log('Renderizando productos...');
+        renderProductsToGrid(products);
+
+        // Ocultar loading
+        hideProductsLoading();
+
+        console.log('=== CARGA DE PRODUCTOS COMPLETADA ===');
 
     } catch (err) {
         console.error('Error cargando productos:', err);
+        hideProductsLoading();
         Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
     }
 }
 
-// Render products using DataTables
-function renderProductsToTable(products) {
-    if (!inventoryDataTable) return;
-    inventoryDataTable.clear();
+// Mostrar loading de productos
+function showProductsLoading() {
+    const gridContainer = document.getElementById('productsGrid');
+    if (gridContainer) {
+        // Crear overlay de loading si no existe
+        let loadingOverlay = document.getElementById('productsLoadingOverlay');
+        if (!loadingOverlay) {
+            loadingOverlay = document.createElement('div');
+            loadingOverlay.id = 'productsLoadingOverlay';
+            loadingOverlay.className = 'absolute inset-0 bg-white/90 flex items-center justify-center z-50';
+            loadingOverlay.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+                    <span class="mt-3 text-sm font-medium text-slate-600">Cargando productos...</span>
+                </div>
+            `;
+            gridContainer.parentElement.style.position = 'relative';
+            gridContainer.parentElement.appendChild(loadingOverlay);
+        }
+        loadingOverlay.style.display = 'flex';
+    }
+}
 
-    products.forEach((p, index) => {
+// Ocultar loading de productos (con delay para mejor UX)
+function hideProductsLoading() {
+    setTimeout(() => {
+        const loadingOverlay = document.getElementById('productsLoadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+    }, 800); // Delay de 800ms para que el loading sea visible
+}
+
+// Render products using jqGrid
+function renderProductsToGrid(products) {
+    console.log('renderProductsToGrid llamado con', products.length, 'productos');
+
+    // Clear existing data
+    jQuery('#productsGrid').jqGrid('clearGridData');
+
+    const gridData = products.map(p => {
         // Category Badge Tech
         let catClasses = 'bg-slate-100 text-slate-600 border-slate-200';
-        if (p.category === 'laptops') catClasses = 'bg-indigo-50/50 text-indigo-600 border-indigo-200/50';
-        if (p.category === 'smartphones') catClasses = 'bg-sky-50/50 text-sky-600 border-sky-200/50';
-        if (p.category === 'tablets') catClasses = 'bg-purple-50/50 text-purple-600 border-purple-200/50';
-        if (p.category === 'accesorios') catClasses = 'bg-amber-50/50 text-amber-600 border-amber-200/50';
+        if (p.category === 'laptops') catClasses = 'bg-brand-50 text-brand-600 border-brand-200';
+        if (p.category === 'smartphones') catClasses = 'bg-sky-50 text-sky-600 border-sky-200';
+        if (p.category === 'tablets') catClasses = 'bg-purple-50 text-purple-600 border-purple-200';
+        if (p.category === 'accesorios') catClasses = 'bg-amber-50 text-amber-600 border-amber-200';
 
         // Stock Logic with Premium Badges
-        let stockBadge = '';
+        let stockHtml = '';
         if (p.stock <= 5) {
-            stockBadge = `<span class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-black uppercase tracking-tighter">Crítico: ${p.stock}</span>`;
+            stockHtml = `<span class="px-2 py-1 rounded-md bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-semibold uppercase">Crítico: ${p.stock}</span>`;
         } else if (p.stock <= 15) {
-            stockBadge = `<span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 text-[9px] font-black uppercase tracking-tighter">Bajo: ${p.stock}</span>`;
+            stockHtml = `<span class="px-2 py-1 rounded-md bg-amber-50 text-amber-600 border border-amber-200 text-[9px] font-semibold uppercase">Bajo: ${p.stock}</span>`;
         } else {
-            stockBadge = `<span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-black uppercase tracking-tighter">Óptimo: ${p.stock}</span>`;
+            stockHtml = `<span class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-semibold uppercase">Óptimo: ${p.stock}</span>`;
         }
 
         const cleanP = JSON.stringify(p).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
 
         const actionsHtml = `
-            <div class="flex items-center justify-center space-x-2">
-                <button onclick='viewProductDetail(${cleanP})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-brand-500 hover:text-white transition-all shadow-sm">
-                    <i class="fas fa-eye text-sm"></i>
+        <div class="flex items-center justify-center space-x-1">
+                <button onclick='viewProductDetail(${cleanP})' class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-brand-500 hover:text-white transition-colors">
+                    <i class="fas fa-eye text-[11px]"></i>
                 </button>
-                <button onclick='editProduct(${cleanP})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm">
-                    <i class="fas fa-pen-to-square text-sm"></i>
+                <button onclick='editProduct(${cleanP})' class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition-colors">
+                    <i class="fas fa-pen text-[11px]"></i>
                 </button>
-                <button onclick="deleteProduct(${p.id})" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
-                    <i class="fas fa-trash-can text-sm"></i>
+                <button onclick="deleteProduct(${p.id})" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition-colors">
+                    <i class="fas fa-trash text-[11px]"></i>
                 </button>
             </div>
         `;
 
-        inventoryDataTable.row.add([
-            p.id,
-            `<div class="flex items-center space-x-3 py-1">
-                <div class="product-img-futuristic w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shadow-sm group-hover:border-brand-400 transition-all">
-                    <img src="${p.image_url}" class="w-full h-full object-contain">
-                </div>
-                <div>
-                    <span class="block text-[13px] font-extrabold solid-slate-700 tracking-tight leading-snug">${p.name} <i class="fas fa-arrow-up-right-from-square text-[9px] solid-slate-400 ml-1"></i></span>
-                    <span class="text-[9px] font-bold solid-slate-400 uppercase tracking-widest">SKU-${p.id.toString().padStart(5, '0')}</span>
-                </div>
-            </div>`,
-            `<div class="flex items-center justify-start py-1">
-                <span class="px-3 py-1.5 text-[9px] font-bold rounded-xl ${catClasses} uppercase tracking-widest border shadow-sm">${p.category}</span>
-            </div>`,
-            `<div class="flex justify-center py-1">${stockBadge}</div>`,
-            `<div class="flex flex-col items-center py-1">
-                <div class="bg-slate-50 border border-slate-100 px-4 py-1.5 rounded-xl group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all">
-                    <span class="text-[14px] font-extrabold solid-slate-700">
-                        <span class="solid-brand-500 mr-0.5 font-bold">S/.</span>${parseFloat(p.price).toFixed(2)}
-                    </span>
-                </div>
-            </div>`,
-            actionsHtml
-        ]);
+        return {
+            id: p.id,
+            name_display: `
+        <div class="flex items-center space-x-2">
+                    <div class="product-img-futuristic w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden">
+                        <img src="${p.image_url}" class="w-full h-full object-contain p-0.5">
+                    </div>
+                    <div>
+                        <span class="block text-[12px] font-semibold text-slate-700 leading-tight">${p.name}</span>
+                        <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wide">SKU-${p.id.toString().padStart(5, '0')}</span>
+                    </div>
+                </div> `,
+            category_display: `
+        <div class="flex items-center">
+            <span class="px-2 py-1 text-[9px] font-semibold rounded-lg ${catClasses} uppercase tracking-wide border">${p.category}</span>
+                </div> `,
+            stock_display: stockHtml,
+            price_display: `
+        <div class="flex flex-col items-center">
+            <div class="bg-slate-50 border border-slate-100 px-3 py-1 rounded-md">
+                <span class="text-[13px] font-semibold text-slate-700">
+                    <span class="text-brand-500 mr-0.5">S/.</span>${parseFloat(p.price).toFixed(2)}
+                </span>
+            </div>
+                </div> `,
+            actions: actionsHtml
+        };
     });
 
-    inventoryDataTable.order([0, 'desc']).draw();
-    updateProductStats(products);
-}
-
-// Helper for pagination (now handled by DataTables)
-window.goToProductPage = function (page) {
-    if (inventoryDataTable) {
-        inventoryDataTable.page(page - 1).draw('page');
+    console.log('Ítems procesados:', gridData.length);
+    if (gridData.length > 0) {
+        console.log('Primer ítem de ejemplo:', gridData[0]);
     }
+    console.log('GridData orden:', gridData.map(g => g.id));
+
+    // Add data to jqGrid usando el ID real del producto
+    for (let i = 0; i < gridData.length; i++) {
+        jQuery('#productsGrid').jqGrid('addRowData', gridData[i].id, gridData[i]);
+    }
+
+    console.log('Filas en grid después de agregar:', jQuery('#productsGrid').jqGrid('getGridParam', 'data').map(row => row.id));
+
+    // Trigger resize to ensure grid fits properly
+    jQuery('#productsGrid').trigger('reloadGrid');
+
+    updateProductStats(products);
+    console.log('Productos renderizados con jqGrid:', gridData.length);
 }
 
 // Update inventory stats
@@ -314,226 +656,8 @@ function updateProductStats(products) {
     if (newArrivalsEl) newArrivalsEl.textContent = products.filter(p => p.is_new_arrival).length;
 }
 
-// --- PRODUCT DETAIL MODAL ---
-window.viewProductDetail = function (product) {
-    window.currentViewingProduct = product;
-    document.getElementById('detailProductName').textContent = product.name;
-    document.getElementById('detailProductImage').src = product.image_url;
-    document.getElementById('detailProductStock').textContent = product.stock;
-    document.getElementById('detailProductPrice').textContent = 'S/. ' + parseFloat(product.price).toFixed(2);
-    document.getElementById('detailProductDesc').textContent = product.description || 'Sin descripción disponible para este artículo.';
-    document.getElementById('detailProductCategory').textContent = product.category;
-
-    // Status Pill Logic
-    const statusPill = document.getElementById('detailStatusPill');
-    if (product.stock <= 5) {
-        statusPill.textContent = 'Stock Crítico';
-        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-rose-100 text-rose-600 border border-rose-200';
-    } else if (product.stock <= 15) {
-        statusPill.textContent = 'Stock Bajo';
-        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-600 border border-amber-200';
-    } else {
-        statusPill.textContent = 'Stock Disponible';
-        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-600 border border-emerald-200';
-    }
-
-    const specsContainer = document.getElementById('detailProductSpecs');
-    specsContainer.innerHTML = '';
-
-    let specs = product.specifications;
-    if (typeof specs === 'string') {
-        try { specs = JSON.parse(specs); } catch (e) { specs = null; }
-    }
-
-    if (specs && Array.isArray(specs) && specs.length > 0) {
-        document.getElementById('detailSpecsContainer').classList.remove('hidden');
-        specs.forEach(s => {
-            const row = document.createElement('div');
-            row.className = 'flex items-center justify-between py-2 border-b border-slate-100/50 hover:bg-white/50 transition-colors px-2 rounded-lg';
-            row.innerHTML = `
-                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">${s.key}</span>
-                <span class="text-[11px] font-extrabold text-slate-700">${s.value}</span>
-            `;
-            specsContainer.appendChild(row);
-        });
-    } else {
-        document.getElementById('detailSpecsContainer').classList.add('hidden');
-    }
-
-    document.getElementById('productDetailModal').classList.remove('hidden');
-}
-
-window.closeProductDetailModal = function () {
-    document.getElementById('productDetailModal').classList.add('hidden');
-}
-
-window.printProductDetail = function () {
-    const p = window.currentViewingProduct;
-    if (!p) return;
-
-    let specsHtml = '';
-    let specs = p.specifications;
-    if (typeof specs === 'string') {
-        try { specs = JSON.parse(specs); } catch (e) { specs = null; }
-    }
-    if (specs && Array.isArray(specs)) {
-        specs.forEach(s => {
-            specsHtml += `
-                <div class="print-spec-item">
-                    <span class="spec-key">${s.key}</span>
-                    <span class="spec-value">${s.value}</span>
-                </div>`;
-        });
-    }
-
-    const printWin = window.open('', '', 'width=900,height=900');
-    printWin.document.write(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <title>Ficha de Producto - ${p.name}</title>
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; background: white; line-height: 1.4; }
-                    
-                    /* Header Elite */
-                    .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px; }
-                    .company-logo { height: 50px; }
-                    .header-info { text-align: right; }
-                    .header-info h2 { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; }
-                    .header-info p { font-size: 10px; color: #cbd5e1; }
-
-                    /* Top Section Grid */
-                    .top-grid { display: grid; grid-template-columns: 380px 1fr; gap: 40px; margin-bottom: 30px; align-items: start; }
-                    
-                    /* Image Container */
-                    .product-image-container { 
-                        background: #f8fafc; 
-                        border-radius: 30px; 
-                        padding: 30px; 
-                        border: 1px solid #f1f5f9; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center; 
-                        height: 380px;
-                        overflow: hidden;
-                    }
-                    .product-image { max-width: 100%; max-height: 100%; object-fit: contain; }
-                    
-                    /* Right Info Area */
-                    .product-title-area h1 { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 25px; line-height: 1.1; letter-spacing: -0.02em; }
-                    
-                    .stats-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-                    
-                    .stat-card { 
-                        background: #f8fafc; 
-                        padding: 25px; 
-                        border-radius: 20px; 
-                        position: relative; 
-                        border: 1px solid #f1f5f9;
-                    }
-                    /* Card Ribbons like image */
-                    .stat-card.price-card { border-left: 5px solid #3b82f6; }
-                    .stat-card.stock-card { border-left: 5px solid #f59e0b; }
-                    
-                    .stat-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; display: block; }
-                    .stat-value { font-size: 24px; font-weight: 900; color: #1e293b; display: block; }
-                    .stat-value.price-color { color: #0d9488; } /* Premium Teal instead of pure green */
-
-                    /* Full Width Sections (Description & Specs) */
-                    .full-width-section { width: 100%; margin-top: 20px; border: 1px solid #f1f5f9; border-radius: 20px; overflow: hidden; }
-                    .section-header { background: #f8fafc; padding: 12px 20px; border-bottom: 1px solid #f1f5f9; }
-                    .section-header h3 { font-size: 11px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: 1px; }
-                    
-                    .section-body { padding: 25px; }
-                    .section-body p { font-size: 13px; color: #475569; line-height: 1.6; text-align: justify; }
-
-                    /* Specs Grid in Full Width */
-                    .specs-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px 40px; }
-                    .spec-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
-                    .spec-key { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; }
-                    .spec-value { font-size: 11px; font-weight: 800; color: #1e293b; }
-
-                    .print-footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #f1f5f9; text-align: center; }
-                    .print-footer p { font-size: 9px; color: #cbd5e1; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-
-                    @media print {
-                        body { padding: 20px; }
-                        .stat-card, .section-header, .product-image-container { -webkit-print-color-adjust: exact; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="print-header">
-                    <img src="Imagenes/Version_Web.png" class="company-logo">
-                    <div class="header-info">
-                        <h2>Ficha Técnica de Inventario</h2>
-                        <p>${new Date().toLocaleDateString()}</p>
-                    </div>
-                </div>
-
-                <div class="top-grid">
-                    <div class="product-image-container">
-                        <img src="${p.image_url}" class="product-image">
-                    </div>
-                    <div class="product-title-area">
-                        <h1>${p.name}</h1>
-                        <div class="stats-cards">
-                            <div class="stat-card price-card">
-                                <span class="stat-label">Precio Unitario</span>
-                                <span class="stat-value price-color">S/. ${parseFloat(p.price).toFixed(2)}</span>
-                            </div>
-                            <div class="stat-card stock-card">
-                                <span class="stat-label">Stock Neto</span>
-                                <span class="stat-value">${p.stock} Unidades</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Description Full Width (As shown in RED box) -->
-                <div class="full-width-section">
-                    <div class="section-header">
-                        <h3>Descripción Técnica</h3>
-                    </div>
-                    <div class="section-body">
-                        <p>${p.description || 'No hay descripción técnica disponible para este artículo.'}</p>
-                    </div>
-                </div>
-
-                <!-- Specifications Full Width -->
-                <div class="full-width-section" id="printSpecsSection">
-                    <div class="section-header">
-                        <h3>Especificaciones Detalladas</h3>
-                    </div>
-                    <div class="section-body">
-                        <div class="specs-grid">
-                            ${specsHtml || '<p style="font-size: 12px; color: #94a3b8;">No se registraron especificaciones.</p>'}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="print-footer">
-                    <p>Sistema Solbin-X &copy; ${new Date().getFullYear()} - Documento de Control de Inventario</p>
-                </div>
-
-                <script>
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                            window.close();
-                        }, 500);
-                    };
-                </script>
-            </body>
-        </html>
-    `);
-    printWin.document.close();
-}
-
-
 // --- PEDIDOS (ORDERS) LOGIC ---
+
 
 
 
@@ -542,6 +666,11 @@ window.printProductDetail = function () {
 
 window.loadOrders = async function () {
     try {
+        console.log('=== INICIANDO CARGA DE PEDIDOS ===');
+
+        // Mostrar loading
+        showOrdersLoading();
+
         const client = window.supabaseClient || window.supabase;
         const { data: orders, error } = await client
             .from('orders')
@@ -550,6 +679,9 @@ window.loadOrders = async function () {
 
         if (error) throw error;
 
+        console.log('Pedidos cargados de Supabase:', orders.length);
+        console.log('Datos de ejemplo:', orders.slice(0, 2));
+
         // Save for export
         window.allAdminOrders = orders;
 
@@ -557,26 +689,69 @@ window.loadOrders = async function () {
         const dashCount = document.getElementById('dashOrdersCount');
         if (dashCount) dashCount.textContent = orders.length;
 
-        // Initialize table if not done
-        if (!ordersDataTable) {
-            ordersDataTable = initOrdersTable();
+        // Initialize grid if not done
+        if (!ordersGrid) {
+            console.log('Inicializando jqGrid para pedidos...');
+            initOrdersGrid();
         }
 
-        renderOrdersToTable(orders);
+        // Render with jqGrid
+        console.log('Renderizando pedidos...');
+        renderOrdersToGrid(orders);
+
+        // Ocultar loading
+        hideOrdersLoading();
+
+        console.log('=== CARGA DE PEDIDOS COMPLETADA ===');
 
     } catch (err) {
         console.error('Error cargando ventas:', err);
+        hideOrdersLoading();
         Swal.fire('Error', 'No se pudieron cargar las ventas.', 'error');
     }
 }
 
-// Render orders using DataTables
-// Render orders using DataTables
-function renderOrdersToTable(orders) {
-    if (!ordersDataTable) return;
-    ordersDataTable.clear();
+// Mostrar loading de pedidos
+function showOrdersLoading() {
+    const gridContainer = document.getElementById('ordersGrid');
+    if (gridContainer) {
+        // Crear overlay de loading si no existe
+        let loadingOverlay = document.getElementById('ordersLoadingOverlay');
+        if (!loadingOverlay) {
+            loadingOverlay = document.createElement('div');
+            loadingOverlay.id = 'ordersLoadingOverlay';
+            loadingOverlay.className = 'absolute inset-0 bg-white/90 flex items-center justify-center z-50';
+            loadingOverlay.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+                    <span class="mt-3 text-sm font-medium text-slate-600">Cargando pedidos...</span>
+                </div>
+            `;
+            gridContainer.parentElement.style.position = 'relative';
+            gridContainer.parentElement.appendChild(loadingOverlay);
+        }
+        loadingOverlay.style.display = 'flex';
+    }
+}
 
-    orders.forEach((order, index) => {
+// Ocultar loading de pedidos (con delay para mejor UX)
+function hideOrdersLoading() {
+    setTimeout(() => {
+        const loadingOverlay = document.getElementById('ordersLoadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+    }, 800); // Delay de 800ms para que el loading sea visible
+}
+
+// Render orders using jqGrid
+function renderOrdersToGrid(orders) {
+    console.log('renderOrdersToGrid llamado con', orders.length, 'pedidos');
+
+    // Clear existing data
+    jQuery('#ordersGrid').jqGrid('clearGridData');
+
+    const gridData = orders.map(order => {
         // Status Badge Pro (Premium Tech Colors)
         let statusClasses = '';
         let statusLabel = '';
@@ -607,57 +782,74 @@ function renderOrdersToTable(orders) {
         const orderJson = JSON.stringify(order).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
 
         const actionsHtml = `
-            <div class="flex items-center justify-center">
-                <button onclick='viewOrder(${orderJson})' 
-                    class="group flex items-center space-x-2 bg-brand-600 text-white px-5 py-2.5 rounded-2xl hover:bg-brand-700 hover:scale-105 active:scale-95 transition-all font-black text-[10px] uppercase tracking-[0.11em] shadow-xl shadow-brand-500/20 whitespace-nowrap">
-                    <i class="fas fa-bolt-lightning text-amber-400 group-hover:text-white transition"></i>
-                    <span>VER DETALLE</span>
-                </button>
+        <div class="flex items-center justify-center">
+            <button onclick='viewOrder(${orderJson})'
+                class="flex items-center space-x-1.5 bg-brand-600 text-white px-3 py-1.5 rounded-md hover:bg-brand-700 transition-colors font-semibold text-[10px] uppercase tracking-wide">
+                <i class="fas fa-eye text-[10px]"></i>
+                <span>Ver</span>
+            </button>
             </div>
         `;
 
-        ordersDataTable.row.add([
-            `<div class="flex items-center space-x-3 py-2">
-                <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center solid-slate-400 border border-slate-200 group-hover:bg-brand-500 group-hover:text-white group-hover:border-brand-400 transition-all shadow-sm">
-                    <i class="fas fa-fingerprint text-xs"></i>
-                </div>
-                <span class="font-extrabold solid-slate-600 tracking-tighter text-sm">ID-${order.id}</span>
-            </div>`,
-            `<div class="flex flex-col py-2">
-                <span class="text-[13px] font-extrabold solid-slate-500 tracking-tight whitespace-nowrap">${dateStr}</span>
-                <span class="text-[10px] font-bold solid-slate-400 uppercase tracking-widest">${timeStr}</span>
-            </div>`,
-            `<div class="flex items-center space-x-3 py-2 px-2">
-                <div class="relative flex-shrink-0">
-                    <div class="w-10 h-10 bg-emerald-50/50 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-100 shadow-sm transition-all group-hover:rotate-12">
-                        <i class="fab fa-whatsapp text-lg"></i>
+        return {
+            id: order.id,
+            id_display: `
+        <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200">
+                        <i class="fas fa-fingerprint text-[10px]"></i>
                     </div>
-                </div>
-                <div class="min-w-[100px]">
-                    <span class="text-[9px] font-bold solid-slate-400 uppercase tracking-tight block">Canal IoT</span>
-                    <span class="text-[11px] font-extrabold solid-slate-500 whitespace-nowrap">WhatsApp Business</span>
-                </div>
-            </div>`,
-            `<div class="flex flex-col items-center py-2">
-                <span class="text-[9px] font-bold solid-slate-400 uppercase tracking-widest mb-1">Monto Neto</span>
-                <div class="bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl group-hover:bg-brand-50 group-hover:border-brand-100 transition-all shadow-sm">
-                    <span class="text-[15px] font-extrabold solid-slate-600">
-                        <span class="solid-brand-500 mr-0.5 font-bold">S/.</span>${parseFloat(order.total).toFixed(2)}
-                    </span>
-                </div>
-            </div>`,
-            `<div class="flex justify-center py-2">
-                <span class="relative px-5 py-2.5 inline-flex items-center text-[10px] font-extrabold rounded-xl ${statusClasses} uppercase tracking-widest border shadow-sm transition-all overflow-hidden group/badge min-w-[140px] justify-center">
-                    <span class="w-1.5 h-1.5 rounded-full ${dotColor} mr-2 animate-pulse"></span>
-                    ${statusLabel}
-                </span>
-            </div>`,
-            actionsHtml
-        ]);
+                    <span class="font-semibold text-slate-600 text-sm">ID-${order.id}</span>
+                </div> `,
+            date_display: `
+        <div class="flex flex-col">
+                    <span class="text-[12px] font-semibold text-slate-600">${dateStr}</span>
+                    <span class="text-[10px] font-medium text-slate-400">${timeStr}</span>
+                </div> `,
+            channel_display: `
+        <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 border border-emerald-100">
+                        <i class="fab fa-whatsapp text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-medium text-slate-400 block">Canal</span>
+                        <span class="text-[11px] font-semibold text-slate-600">WhatsApp</span>
+                    </div>
+                </div> `,
+            total_display: `
+        <div class="flex flex-col items-center">
+                    <div class="bg-slate-50 border border-slate-100 px-3 py-1 rounded-md">
+                        <span class="text-[13px] font-semibold text-slate-700">
+                            <span class="text-brand-500 mr-0.5">S/.</span>${parseFloat(order.total).toFixed(2)}
+                        </span>
+                    </div>
+                </div> `,
+            status_display: `
+        <div class="flex justify-center">
+            <span class="px-3 py-1.5 inline-flex items-center text-[10px] font-semibold rounded-md ${statusClasses} border">
+                <span class="w-1.5 h-1.5 rounded-full ${dotColor} mr-1.5"></span>
+                ${statusLabel}
+            </span>
+                </div> `,
+            actions: actionsHtml
+        };
     });
 
-    ordersDataTable.order([1, 'desc']).draw();
+    console.log('Ítems de pedidos procesados:', gridData.length);
+    if (gridData.length > 0) {
+        console.log('Primer ítem de pedidos:', gridData[0]);
+    }
+
+    // Add data to jqGrid usando el ID real de la orden
+    for (let i = 0; i < gridData.length; i++) {
+        jQuery('#ordersGrid').jqGrid('addRowData', gridData[i].id, gridData[i]);
+    }
+
+    // Trigger resize to ensure grid fits properly
+    jQuery('#ordersGrid').trigger('reloadGrid');
+
+    console.log('Pedidos renderizados con jqGrid:', gridData.length);
 }
+
 
 // Order Modal Vars
 let currentOrderId = null;
@@ -672,7 +864,7 @@ window.viewOrder = function (order) {
 
     // Status Pro Badge
     const statusEl = document.getElementById('orderStatusDisplay');
-    statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full mr-2 animate-pulse bg-current"></span> ${order.status.replace('_', ' ').toUpperCase()}`;
+    statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full mr-2 animate-pulse bg-current"></span> ${order.status.replace('_', ' ').toUpperCase()} `;
 
     let statusPillClasses = 'border-slate-200 text-slate-500 bg-slate-50';
     if (order.status === 'iniciado') statusPillClasses = 'border-indigo-100 text-indigo-600 bg-indigo-50/50';
@@ -693,7 +885,7 @@ window.viewOrder = function (order) {
 
         if (info.phone) {
             infoHtml += `
-            <div class="flex items-center space-x-3 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 shadow-sm">
+        <div class="flex items-center space-x-3 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 shadow-sm">
                 <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20"><i class="fab fa-whatsapp text-lg"></i></div>
                 <div class="flex flex-col">
                     <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">WhatsApp Contact</span>
@@ -720,11 +912,11 @@ window.viewOrder = function (order) {
             const row = document.createElement('tr');
             row.className = 'hover:bg-slate-50/50 transition-all';
             row.innerHTML = `
-                <td class="px-6 py-4">
-                    <div class="flex flex-col">
-                        <span class="text-[11px] font-black text-slate-700 leading-tight">${item.name}</span>
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">SKU-${item.id || 'N/A'}</span>
-                    </div>
+        < td class="px-6 py-4">
+            <div class="flex flex-col">
+                <span class="text-[11px] font-black text-slate-700 leading-tight">${item.name}</span>
+                <span class="text-[8px] font-bold text-slate-400 uppercase">SKU-${item.id || 'N/A'}</span>
+            </div>
                 </td>
                 <td class="px-6 py-4 text-center">
                     <span class="text-[10px] font-bold text-slate-600">${item.quantity} ud.</span>
@@ -732,14 +924,14 @@ window.viewOrder = function (order) {
                 <td class="px-6 py-4 text-right">
                     <span class="text-[11px] font-black text-slate-700">S/. ${(item.price * item.quantity).toFixed(2)}</span>
                 </td>
-            `;
+    `;
             itemsBody.appendChild(row);
         });
     }
 
     document.getElementById('orderTotal').innerHTML = `
-        <span class="text-brand-500/50 font-black mr-1 text-base">S/.</span>
-        ${parseFloat(order.total).toFixed(2)}
+        <span class="text-brand-500/50 font-black mr-1 text-base"> S /.</span>
+            ${parseFloat(order.total).toFixed(2)}
     `;
 
     document.getElementById('orderModal').classList.remove('hidden');
@@ -814,7 +1006,7 @@ window.printOrder = function () {
     if (Array.isArray(items)) {
         items.forEach(item => {
             itemsHtml += `
-            <tr>
+        <tr>
                 <td style="padding: 5px; border-bottom: 1px solid #eee;">${item.name}</td>
                 <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: right;">S/. ${item.price}</td>
@@ -829,98 +1021,149 @@ window.printOrder = function () {
         <head>
             <title>Solbin-X Elite Receipt #${order.id}</title>
             <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <style>
-                body { 
-                    font-family: 'Plus Jakarta Sans', sans-serif; 
-                    padding: 40px; 
-                    color: #1e293b;
-                    line-height: 1.5;
+                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                        <style>
+                            body {
+                                font-family: 'Plus Jakarta Sans', sans-serif;
+                            padding: 40px;
+                            padding-bottom: 100px;
+                            color: #1e293b;
+                            line-height: 1.5;
                 }
-                .header { 
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    margin-bottom: 40px;
-                    border-bottom: 2px solid #f1f5f9;
-                    padding-bottom: 20px;
+                            .header {
+                                text-align: left;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #f1f5f9;
+                            padding-bottom: 15px;
                 }
-                .logo-img { height: 60px; width: auto; }
-                .receipt-meta { text-align: right; }
-                .receipt-meta h1 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #64748b; margin: 0 0 8px 0; }
-                .receipt-meta p { margin: 2px 0; font-size: 11px; font-weight: 700; color: #94a3b8; }
-                .info { 
-                    margin-bottom: 30px; 
-                    padding: 20px; 
-                    background: #f8fafc; 
-                    border-radius: 12px;
-                    border: 1px solid #e2e8f0;
+                            .logo-img {height: 100px; width: auto; }
+                            .order-title-section {
+                                text-align: center;
+                                margin-bottom: 25px;
+                            }
+                            .order-title-section h1 {
+                                font-size: 18px;
+                                font-weight: 800;
+                                text-transform: uppercase;
+                                letter-spacing: 0.15em;
+                                color: #1e293b;
+                                margin: 0 0 12px 0;
+                            }
+                            .order-meta {
+                                display: flex;
+                                justify-content: center;
+                                gap: 20px;
+                                flex-wrap: wrap;
+                            }
+                            .order-meta p {
+                                margin: 0;
+                                font-size: 12px;
+                                font-weight: 700;
+                                color: #64748b;
+                            }
+                            .info {
+                                margin - bottom: 30px;
+                            padding: 20px;
+                            background: #f8fafc;
+                            border-radius: 12px;
+                            border: 1px solid #e2e8f0;
                 }
-                .info p { margin: 5px 0; font-size: 13px; font-weight: 600; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                th { 
-                    text-align: left; 
-                    padding: 12px; 
-                    border-bottom: 2px solid #e2e8f0;
-                    font-size: 11px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.1em;
-                    color: #64748b;
+                            .info p {margin: 5px 0; font-size: 13px; font-weight: 600; }
+                            table {width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                            th {
+                                text - align: left;
+                            padding: 12px;
+                            border-bottom: 2px solid #e2e8f0;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.1em;
+                            color: #64748b;
                 }
-                td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; font-weight: 500; }
-                .total { 
-                    text-align: right; 
-                    font-size: 20px; 
-                    font-weight: 800; 
-                    color: #2563eb;
-                    margin-top: 10px;
-                    border-top: 2px solid #e2e8f0;
-                    padding-top: 15px;
+                            td {padding: 12px; font-size: 13px; font-weight: 500; }
+                            .total {
+                                text - align: right;
+                            font-size: 20px;
+                            font-weight: 800;
+                            color: #2563eb;
+                            margin-top: 10px;
+                            border-top: 2px solid #e2e8f0;
+                            padding-top: 15px;
                 }
-                .footer { margin-top: 50px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 600; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <img src="assets/img/logo-full.png" class="logo-img" alt="Solbin-X Logo">
-                <div class="receipt-meta">
-                    <h1>ORDEN DE VENTA</h1>
-                    <p>Orden ID: #${order.id}</p>
-                    <p>Fecha: ${new Date(order.created_at).toLocaleDateString()}</p>
-                    <p>Hora: ${new Date(order.created_at).toLocaleTimeString()}</p>
-                </div>
-            </div>
-            <div class="info">
-                <p><strong>Cliente (WhatsApp):</strong> ${order.customer_info?.phone || 'N/A'}</p>
-                <p><strong>Estado:</strong> ${order.status.toUpperCase()}</p>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Prod</th>
-                        <th style="text-align: center;">Cant</th>
-                        <th style="text-align: right;">P.U.</th>
-                        <th style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itemsHtml}
-                </tbody>
-            </table>
-            <div class="total">
-                Total a Pagar: S/. ${parseFloat(order.total).toFixed(2)}
-            </div>
-            <div class="footer">
-                <p>Gracias por confiar en Solbin-X • Gestión Elite de Inventarios</p>
-                <p>www.solbin-x.com</p>
-            </div>
-            <script>
-                window.onload = function() { window.print(); window.close(); }
-            </script>
-        </body>
-        </html>
-        `);
+                }
+                            .footer {
+                                position: fixed;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                background: white;
+                                padding: 15px 40px;
+                                text-align: left;
+                                font-size: 11px;
+                                font-family: Arial, sans-serif;
+                                color: #1e3a8a;
+                                font-weight: normal;
+                                z-index: 1000;
+                                width: 100%;
+                                box-sizing: border-box;
+                            }
+                            .footer p {
+                                margin: 0;
+                                line-height: 1.6;
+                            }
+                            @media print {
+                                .footer {
+                                    position: fixed !important;
+                                    bottom: 0 !important;
+                                }
+                                body {
+                                    padding-bottom: 100px !important;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <img src="Imagenes/Version_Web.svg" class="logo-img" alt="Solbin-X Logo">
+                        </div>
+                        <div class="order-title-section">
+                            <h1>ORDEN DE VENTA</h1>
+                            <div class="order-meta">
+                                <p><strong>Orden ID:</strong> #${order.id}</p>
+                                <p><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+                                <p><strong>Hora:</strong> ${new Date(order.created_at).toLocaleTimeString()}</p>
+                            </div>
+                        </div>
+                        <div class="info">
+                            <p><strong>Cliente (WhatsApp):</strong> ${order.customer_info?.phone || 'N/A'}</p>
+                            <p><strong>Estado:</strong> ${order.status.toUpperCase()}</p>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Prod</th>
+                                    <th style="text-align: center;">Cant</th>
+                                    <th style="text-align: right;">P.U.</th>
+                                    <th style="text-align: right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                        <div class="total">
+                            Total a Pagar: S/. ${parseFloat(order.total).toFixed(2)}
+                        </div>
+                        <div class="footer">
+                            <p style="margin: 0; font-size: 11px; font-family: Arial, sans-serif; color: #1e3a8a; font-weight: normal; line-height: 1.6;">Gracias por confiar en Solbin-X</p>
+                            <p style="margin: 0; font-size: 11px; font-family: Arial, sans-serif; color: #1e3a8a; font-weight: normal; line-height: 1.6;">www.solbin-x.com</p>
+                        </div>
+                        <script>
+                            window.onload = function() {window.print(); window.close(); }
+                        </script>
+                    </body>
+                </html>
+                `);
     printWindow.document.close();
 }
 
@@ -1029,12 +1272,12 @@ window.addSpecRow = function (key = '', value = '') {
     div.className = 'flex space-x-2 items-center mb-2';
     div.id = rowId;
     div.innerHTML = `
-        <input type="text" placeholder="Característica (ej. Color)" class="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-sky-500 outline-none" value="${key}">
-        <input type="text" placeholder="Valor (ej. Rojo)" class="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-sky-500 outline-none" value="${value}">
-        <button type="button" onclick="removeSpecRow('${rowId}')" class="text-red-500 hover:text-red-700 px-2 rounded">
-            <i class="fas fa-trash"></i>
-        </button>
-    `;
+                <input type="text" placeholder="Característica (ej. Color)" class="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-sky-500 outline-none" value="${key}">
+                    <input type="text" placeholder="Valor (ej. Rojo)" class="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-sky-500 outline-none" value="${value}">
+                        <button type="button" onclick="removeSpecRow('${rowId}')" class="text-red-500 hover:text-red-700 px-2 rounded">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        `;
     container.appendChild(div);
 }
 
@@ -1043,6 +1286,72 @@ window.removeSpecRow = function (id) {
     if (row) row.remove();
 }
 
+// Importar especificaciones desde archivo Excel
+window.importSpecsFromExcel = function (input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    console.log('Importando especificaciones desde:', file.name);
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Leer la primera hoja
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+            console.log('Datos importados:', jsonData);
+
+            if (jsonData.length < 2) {
+                Swal.fire('Error', 'El archivo Excel está vacío o no tiene el formato correcto. Debe tener al menos una fila de encabezado y una fila de datos.', 'error');
+                return;
+            }
+
+            // Buscar las columnas "Característica" y "Valor"
+            const headers = jsonData[0].map(h => h.toString().trim().toLowerCase());
+            const caracteristicaIndex = headers.findIndex(h => h.includes('caracteristica') || h.includes('característica') || h.includes('atributo') || h.includes('key'));
+            const valorIndex = headers.findIndex(h => h.includes('valor') || h.includes('value') || h.includes('descripcion') || h.includes('descripción'));
+
+            if (caracteristicaIndex === -1 || valorIndex === -1) {
+                Swal.fire('Error', 'No se encontraron las columnas requeridas. El archivo debe tener columnas llamadas "Característica" y "Valor" (o sinónimos en inglés).', 'error');
+                return;
+            }
+
+            // Limpiar especificaciones actuales
+            document.getElementById('specsList').innerHTML = '';
+
+            // Agregar filas desde el Excel
+            let addedCount = 0;
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                if (row[caracteristicaIndex] && row[valorIndex]) {
+                    const key = row[caracteristicaIndex].toString().trim();
+                    const value = row[valorIndex].toString().trim();
+                    if (key && value) {
+                        addSpecRow(key, value);
+                        addedCount++;
+                    }
+                }
+            }
+
+            if (addedCount > 0) {
+                Swal.fire('Importación Exitosa', `Se importaron ${addedCount} especificaciones desde el archivo Excel.`, 'success');
+            } else {
+                Swal.fire('Advertencia', 'No se encontraron datos válidos para importar. Verifica que el archivo tenga datos en las columnas correctas.', 'warning');
+            }
+
+        } catch (error) {
+            console.error('Error al importar Excel:', error);
+            Swal.fire('Error', 'No se pudo leer el archivo Excel. Verifica que sea un archivo válido.', 'error');
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+    input.value = ''; // Reset input para permitir importar el mismo archivo nuevamente
+}
 
 function openModal(product = null) {
     // Resetear formulario
@@ -1253,4 +1562,674 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 // Init
 document.addEventListener('DOMContentLoaded', checkAuth);
 
+// Ver detalle de producto
+window.viewProductDetail = function (product) {
+    console.log('Abriendo detalle de producto:', product);
+
+    // Guardar referencia al producto actual
+    window.currentProductDetail = product;
+
+    // Actualizar elementos del modal
+    document.getElementById('detailProductName').textContent = product.name || 'Sin nombre';
+    document.getElementById('detailProductImage').src = product.image_url || '';
+    document.getElementById('detailProductPrice').textContent = 'S/. ' + (parseFloat(product.price) || 0).toFixed(2);
+    document.getElementById('detailProductStock').textContent = product.stock || 0;
+    document.getElementById('detailProductCategory').textContent = product.category || '-';
+    document.getElementById('detailProductDesc').textContent = product.description || 'Sin descripción';
+
+    // Actualizar status pill según el stock
+    const statusPill = document.getElementById('detailStatusPill');
+    if (product.stock <= 5) {
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-rose-100 text-rose-600';
+        statusPill.textContent = 'Stock Crítico';
+    } else if (product.stock <= 15) {
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-600';
+        statusPill.textContent = 'Stock Bajo';
+    } else {
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-600';
+        statusPill.textContent = 'Stock Disponible';
+    }
+
+    // Cargar especificaciones técnicas
+    const specsContainer = document.getElementById('detailProductSpecs');
+    const noSpecsMessage = document.getElementById('noSpecsMessage');
+    const specsWrapper = document.getElementById('detailSpecsContainer');
+
+    specsContainer.innerHTML = ''; // Limpiar especificaciones anteriores
+
+    // Debug: Ver todas las propiedades del producto
+    console.log('Todas las propiedades del producto:', Object.keys(product));
+    console.log('Contenido de product.specs:', product.specs);
+    console.log('Tipo de specs:', typeof product.specs);
+
+    let specsData = [];
+
+    // Intentar encontrar las especificaciones en cualquier campo posible
+    let specsField = product.specs || product.specifications || product.especificaciones || product.caracteristicas;
+    console.log('Campo de specs encontrado:', specsField);
+
+    // Procesar especificaciones según el formato
+    if (specsField) {
+        if (typeof specsField === 'string') {
+            try {
+                specsData = JSON.parse(specsField);
+                console.log('Specs parseados desde string:', specsData);
+            } catch (e) {
+                console.error('Error parsing specs:', e);
+                // Si no se puede parsear, intentar dividir por líneas
+                specsData = specsField.split('\n').filter(line => line.trim()).map(line => {
+                    const parts = line.split(':');
+                    return {
+                        key: parts[0]?.trim() || 'Especificación',
+                        value: parts[1]?.trim() || line.trim()
+                    };
+                });
+            }
+        } else if (Array.isArray(specsField)) {
+            specsData = specsField;
+            console.log('Specs como array:', specsData);
+        } else if (typeof specsField === 'object') {
+            // Convertir objeto a array de pares clave-valor
+            specsData = Object.entries(specsField).map(([key, value]) => ({ key, value }));
+            console.log('Specs convertidos desde objeto:', specsData);
+        }
+    } else {
+        console.log('No se encontraron especificaciones en ningún campo conocido');
+    }
+
+    console.log('Procesando especificaciones:', specsData);
+
+    if (specsData && specsData.length > 0) {
+        // Mostrar especificaciones
+        specsData.forEach((spec, index) => {
+            console.log('Procesando spec:', spec, 'Tipo:', typeof spec, 'Es array:', Array.isArray(spec));
+
+
+            let title, value;
+
+            // Si spec es un array [key, value]
+            if (Array.isArray(spec)) {
+                title = spec[0] || `Especificación ${index + 1}`;
+                value = spec[1] || '-';
+            }
+            // Si spec es un objeto
+            else if (typeof spec === 'object' && spec !== null) {
+                // Buscar en todas las posibles propiedades
+                title = spec.key ||
+                    spec.caracteristica ||
+                    spec.Característica ||
+                    spec.Caracteristica ||
+                    spec[0] ||
+                    spec['Característica'] ||
+                    Object.keys(spec)[0] ||
+                    `Especificación ${index + 1}`;
+
+                value = spec.value ||
+                    spec.valor ||
+                    spec.Valor ||
+                    spec[1] ||
+                    spec['Valor'] ||
+                    Object.values(spec)[1] ||
+                    Object.values(spec)[0] ||
+                    '-';
+            }
+            // Si spec es un string
+            else if (typeof spec === 'string') {
+                title = spec;
+                value = '-';
+            }
+
+            console.log('Título final:', title, 'Valor final:', value);
+
+            // Solo agregar si tenemos un título válido
+            if (title && title !== 'undefined' && title !== 'null') {
+                const specItem = document.createElement('div');
+                specItem.className = 'flex flex-row justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm';
+
+                specItem.innerHTML = `
+                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">${title}</span>
+                    <span class="text-xs font-semibold text-slate-800 text-right ml-2">${value}</span>
+                `;
+                specsContainer.appendChild(specItem);
+            }
+        });
+
+        specsContainer.classList.remove('hidden');
+        noSpecsMessage.classList.add('hidden');
+    } else {
+        // No hay especificaciones
+        specsContainer.classList.add('hidden');
+        noSpecsMessage.classList.remove('hidden');
+    }
+
+    // Mostrar el modal
+    const modal = document.getElementById('productDetailModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Cerrar modal de detalle de producto
+window.closeProductDetailModal = function () {
+    const modal = document.getElementById('productDetailModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    window.currentProductDetail = null;
+}
+
+// Imprimir detalle de producto usando iframe oculto (sin nueva pestaña)
+window.printProductDetail = function () {
+    if (!window.currentProductDetail) return;
+
+    const product = window.currentProductDetail;
+
+    // Crear iframe oculto para impresión
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-10000px';
+    iframe.style.left = '-10000px';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.visibility = 'hidden';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(`
+        <html>
+        <head>
+            <title>Ficha de Producto - ${product.name}</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <style>
+                @media print {
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    
+                    @page {
+                        size: A4;
+                        margin: 5mm;
+                    }
+                    
+                    html, body { 
+                        font-family: 'Segoe UI', Arial, sans-serif; 
+                        padding: 0; 
+                        background: white; 
+                        margin: 0;
+                        width: 100%;
+                        height: 100%;
+                    }
+                    
+                    body {
+                        display: flex;
+                        flex-direction: column;
+                        padding: 5mm;
+                        padding-bottom: 20mm;
+                        min-height: 100vh;
+                    }
+                    
+                    /* Header con Logo - Alineado a la izquierda, logo grande, sin slogan */
+                    .print-header { 
+                        text-align: left; 
+                        margin-bottom: 8px; 
+                        padding-bottom: 8px; 
+                        border-bottom: 2px solid #3b82f6; 
+                    }
+                    .logo-container { margin-bottom: 0; }
+                    .logo-container img { height: 55px; width: auto; }
+                    .company-name { display: none; }
+                    
+                    /* Product Header - Ultra compacto */
+                    .product-header { 
+                        text-align: center; 
+                        margin-bottom: 4px; 
+                    }
+                    .product-header h1 { 
+                        margin: 0 0 2px 0; 
+                        font-size: 11px; 
+                        color: #1e293b; 
+                        font-weight: 700; 
+                        line-height: 1.2;
+                        max-height: 28px;
+                        overflow: hidden;
+                    }
+                    .product-header .sku { 
+                        display: inline-block; 
+                        background: #f1f5f9; 
+                        padding: 1px 6px; 
+                        border-radius: 8px; 
+                        font-size: 8px; 
+                        color: #475569; 
+                        font-weight: 600; 
+                    }
+                    
+                    /* Main Content - Layout de 2 columnas */
+                    .main-content {
+                        display: flex;
+                        gap: 8px;
+                        margin: 6px 0;
+                        align-items: flex-start;
+                    }
+                    
+                    /* Columna Izquierda - Imagen grande */
+                    .left-column {
+                        flex: 1.5;
+                    }
+                    
+                    .product-image-container { 
+                        text-align: center; 
+                        padding: 8px;
+                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    
+                    .product-image { 
+                        width: 100%;
+                        max-width: 220px; 
+                        max-height: 220px; 
+                        border-radius: 8px; 
+                        object-fit: contain;
+                    }
+                    
+                    /* Columna Derecha - Tarjetas apiladas */
+                    .right-column {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 5px;
+                    }
+                    
+                    /* Tarjetas de información */
+                    .info-card {
+                        border-radius: 10px;
+                        padding: 8px 6px;
+                        text-align: center;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    
+                    .card-price { 
+                        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); 
+                        border: 1px solid #3b82f6; 
+                    }
+                    .card-stock { 
+                        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); 
+                        border: 1px solid #f59e0b; 
+                    }
+                    .card-category { 
+                        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); 
+                        border: 1px solid #6366f1; 
+                    }
+                    
+                    .card-price .card-icon, .card-stock .card-icon, .card-category .card-icon { 
+                        width: 16px; 
+                        height: 16px; 
+                        border-radius: 4px; 
+                        display: inline-flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        margin-bottom: 2px;
+                        color: white;
+                        font-size: 9px;
+                    }
+                    .card-price .card-icon { background: #3b82f6; }
+                    .card-stock .card-icon { background: #f59e0b; }
+                    .card-category .card-icon { background: #6366f1; }
+                    
+                    .card-price .card-title, .card-stock .card-title, .card-category .card-title { 
+                        font-size: 6px; 
+                        font-weight: 700; 
+                        text-transform: uppercase; 
+                        letter-spacing: 0.2px;
+                        margin-bottom: 1px;
+                    }
+                    .card-price .card-title { color: #1d4ed8; }
+                    .card-stock .card-title { color: #b45309; }
+                    .card-category .card-title { color: #4338ca; }
+                    
+                    .card-price .card-value { 
+                        font-size: 12px; 
+                        font-weight: 800; 
+                        color: #2563eb;
+                    }
+                    .card-stock .card-value { 
+                        font-size: 14px; 
+                        font-weight: 800; 
+                        color: #1e293b;
+                    }
+                    .card-stock .card-unit {
+                        font-size: 6px;
+                        color: #78716c;
+                    }
+                    .card-category .card-value { 
+                        font-size: 9px; 
+                        font-weight: 700; 
+                        color: #1e293b;
+                        text-transform: uppercase;
+                    }
+                    
+                    /* Status Badge - Ultra compacto */
+                    .status-badge {
+                        display: inline-block;
+                        padding: 2px 6px;
+                        border-radius: 8px;
+                        font-size: 7px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-top: 3px;
+                    }
+                    .status-available { background: #d1fae5; color: #065f46; }
+                    .status-critical { background: #fee2e2; color: #991b1b; }
+                    
+                    /* Description Section - Compacta para una página */
+                    .description { 
+                        margin-top: 4px; 
+                        padding: 5px; 
+                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
+                        border-radius: 6px; 
+                        border: 1px solid #e2e8f0; 
+                    }
+                    .description-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        margin-bottom: 3px;
+                        padding-bottom: 2px;
+                        border-bottom: 1px solid #cbd5e1;
+                    }
+                    .description-header i {
+                        color: #3b82f6;
+                        font-size: 8px;
+                    }
+                    .description h3 { 
+                        margin: 0; 
+                        font-size: 7px; 
+                        color: #475569; 
+                        text-transform: uppercase;
+                        letter-spacing: 0.2px;
+                        font-weight: 700;
+                    }
+                    .description p { 
+                        margin: 0; 
+                        font-size: 8px; 
+                        line-height: 1.3; 
+                        color: #334155; 
+                        white-space: pre-wrap;
+                    }
+                    
+                    /* Specifications Section */
+                    .specs-section {
+                        margin-top: 4px;
+                        padding: 5px;
+                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                        border-radius: 6px;
+                        border: 1px solid #bae6fd;
+                    }
+                    .specs-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        margin-bottom: 3px;
+                        padding-bottom: 2px;
+                        border-bottom: 1px solid #7dd3fc;
+                    }
+                    .specs-header i {
+                        color: #0284c7;
+                        font-size: 8px;
+                    }
+                    .specs-section h3 {
+                        margin: 0;
+                        font-size: 7px;
+                        color: #0369a1;
+                        text-transform: uppercase;
+                        letter-spacing: 0.2px;
+                        font-weight: 700;
+                    }
+                    .specs-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 3px;
+                    }
+                    .spec-item {
+                        background: white;
+                        padding: 3px 4px;
+                        border-radius: 4px;
+                        border: 1px solid #e0f2fe;
+                    }
+                    .spec-title {
+                        font-size: 6px;
+                        font-weight: 700;
+                        color: #64748b;
+                        text-transform: uppercase;
+                        letter-spacing: 0.2px;
+                        margin-bottom: 1px;
+                    }
+                    .spec-value {
+                        font-size: 8px;
+                        font-weight: 600;
+                        color: #0c4a6e;
+                    }
+                    
+                    /* Footer - Anclado a la parte inferior */
+                    .print-footer {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        padding: 5mm;
+                        border-top: 1px solid #e2e8f0;
+                        text-align: center;
+                        font-size: 8px;
+                        color: #64748b;
+                        background: white;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Header con Logo -->
+            <div class="print-header">
+                <div class="logo-container">
+                    <img src="Imagenes/Version_Web.svg" alt="Solbin-X">
+                </div>
+            </div>
+            
+            <!-- Contenido Principal -->
+            <div class="page-content">
+            
+            <!-- Product Header -->
+            <div class="product-header">
+                <h1>${product.name}</h1>
+                <div class="sku">SKU: SKU-${product.id.toString().padStart(5, '0')}</div>
+            </div>
+            
+            <!-- Main Content: 2 Columnas -->
+            <div class="main-content">
+                <!-- Columna Izquierda: Imagen -->
+                <div class="left-column">
+                    <div class="product-image-container">
+                        <img src="${product.image_url}" class="product-image" alt="${product.name}" onload="setTimeout(function() { window.print(); }, 200);">
+                    </div>
+                </div>
+                
+                <!-- Columna Derecha: Tarjetas -->
+                <div class="right-column">
+                    <!-- Precio -->
+                    <div class="info-card card-price">
+                        <div class="card-icon"><i class="fas fa-coins"></i></div>
+                        <div class="card-title">Precio Unitario</div>
+                        <div class="card-value">S/. ${parseFloat(product.price).toFixed(2)}</div>
+                    </div>
+                    
+                    <!-- Stock -->
+                    <div class="info-card card-stock">
+                        <div class="card-icon"><i class="fas fa-box-open"></i></div>
+                        <div class="card-title">Existencia</div>
+                        <div class="card-value">${product.stock}</div>
+                        <div class="card-unit">unidades</div>
+                    </div>
+                    
+                    <!-- Categoría -->
+                    <div class="info-card card-category">
+                        <div class="card-icon"><i class="fas fa-tags"></i></div>
+                        <div class="card-title">Categoría</div>
+                        <div class="card-value">${product.category}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status Badge -->
+            <div style="text-align: center;">
+                <span class="status-badge ${product.stock > 5 ? 'status-available' : 'status-critical'}">
+                    ${product.stock > 5 ? '✓ Disponible' : '✕ Stock Crítico'}
+                </span>
+            </div>
+            
+            <!-- Description -->
+            <div class="description">
+                <div class="description-header">
+                    <i class="fas fa-align-left"></i>
+                    <h3>Descripción Técnica</h3>
+                </div>
+                <p>${product.description || 'Sin descripción disponible'}</p>
+            </div>
+            
+            <!-- Specifications -->
+            ${(() => {
+            let specsHtml = '';
+            let specsData = [];
+
+            // Intentar encontrar las especificaciones
+            let specsField = product.specs || product.specifications || product.especificaciones || product.caracteristicas;
+
+            if (specsField) {
+                if (typeof specsField === 'string') {
+                    try {
+                        specsData = JSON.parse(specsField);
+                    } catch (e) {
+                        specsData = specsField.split('\\n').filter(line => line.trim()).map(line => {
+                            const parts = line.split(':');
+                            return { key: parts[0]?.trim() || 'Especificación', value: parts[1]?.trim() || line.trim() };
+                        });
+                    }
+                } else if (Array.isArray(specsField)) {
+                    specsData = specsField;
+                } else if (typeof specsField === 'object') {
+                    specsData = Object.entries(specsField).map(([key, value]) => ({ key, value }));
+                }
+            }
+
+            if (specsData && specsData.length > 0) {
+                specsHtml += `
+            <div class="specs-section">
+                <div class="specs-header">
+                    <i class="fas fa-sliders-h"></i>
+                    <h3>Especificaciones Técnicas</h3>
+                </div>
+                <div class="specs-grid">
+                    ${specsData.map((spec, index) => {
+                    let title, value;
+
+                    if (Array.isArray(spec)) {
+                        title = spec[0] || `Espec ${index + 1}`;
+                        value = spec[1] || '-';
+                    } else if (typeof spec === 'object' && spec !== null) {
+                        title = spec.key || spec.caracteristica || spec.Característica || spec.Caracteristica || Object.keys(spec)[0] || `Espec ${index + 1}`;
+                        value = spec.value || spec.valor || spec.Valor || Object.values(spec)[1] || Object.values(spec)[0] || '-';
+                    } else if (typeof spec === 'string') {
+                        title = spec;
+                        value = '-';
+                    }
+
+                    if (title && title !== 'undefined' && title !== 'null') {
+                        return `
+                    <div class="spec-item">
+                        <div class="spec-title">${title}</div>
+                        <div class="spec-value">${value}</div>
+                    </div>`;
+                    }
+                    return '';
+                }).join('')}
+                </div>
+            </div>`;
+            }
+
+            return specsHtml;
+        })()}
+            
+            </div><!-- Fin page-content -->
+            
+            <!-- Footer -->
+            <div class="print-footer">
+                Documento generado el ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })} • Solbin-X
+            </div>
+        </body>
+        </html>
+    `);
+    iframeDoc.close();
+
+    // Eliminar el iframe después de la impresión
+    iframe.contentWindow.onafterprint = function () {
+        document.body.removeChild(iframe);
+    };
+
+    // Fallback: eliminar después de 5 segundos si no se dispara el evento
+    setTimeout(function () {
+        if (iframe.parentNode) {
+            document.body.removeChild(iframe);
+        }
+    }, 5000);
+}
+
+// Funcionalidad de búsqueda para jqGrid
+document.addEventListener('DOMContentLoaded', function () {
+    // Buscador de productos
+    const productsSearch = document.getElementById('productsSearch');
+    if (productsSearch) {
+        productsSearch.addEventListener('input', function (e) {
+            const searchText = e.target.value.toLowerCase();
+            filterProductsGrid(searchText);
+        });
+    }
+
+    // Buscador de ventas
+    const ordersSearch = document.getElementById('ordersSearch');
+    if (ordersSearch) {
+        ordersSearch.addEventListener('input', function (e) {
+            const searchText = e.target.value.toLowerCase();
+            filterOrdersGrid(searchText);
+        });
+    }
+});
+
+// Filtrar grid de productos
+function filterProductsGrid(searchText) {
+    if (!window.allAdminProducts || !productsGrid) return;
+
+    const filteredData = window.allAdminProducts.filter(p => {
+        const searchableText = `${p.name} ${p.category} ${p.id}`.toLowerCase();
+        return searchableText.includes(searchText);
+    });
+
+    // Limpiar y recargar grid con datos filtrados
+    jQuery('#productsGrid').jqGrid('clearGridData');
+    renderProductsToGrid(filteredData);
+}
+
+// Filtrar grid de ventas
+function filterOrdersGrid(searchText) {
+    if (!window.allAdminOrders || !ordersGrid) return;
+
+    const filteredData = window.allAdminOrders.filter(o => {
+        const searchableText = `${o.id} ${o.status} ${o.total}`.toLowerCase();
+        return searchableText.includes(searchText);
+    });
+
+    // Limpiar y recargar grid con datos filtrados
+    jQuery('#ordersGrid').jqGrid('clearGridData');
+    renderOrdersToGrid(filteredData);
+}
 

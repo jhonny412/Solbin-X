@@ -361,16 +361,16 @@ window.openProductModal = function (product) {
 
     // Specs Logic
     const specsContainer = document.getElementById('modalProdSpecs');
-    let specsHtml = '<div class="divide-y divide-gray-200 dark:divide-gray-700">';
+    let specsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
 
     let hasJsonSpecs = product.specifications && Object.keys(product.specifications).length > 0;
 
     if (hasJsonSpecs) {
         Object.entries(product.specifications).forEach(([key, val]) => {
             specsHtml += `
-            <div class="py-3 grid grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                <dt class="font-medium text-gray-500 dark:text-gray-400">${key}</dt>
-                <dd class="text-gray-900 dark:text-white font-medium text-right sm:text-left">${val}</dd>
+            <div class="flex flex-row justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+                <dt class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">${key}</dt>
+                <dd class="text-xs font-bold text-gray-900 dark:text-white truncate ml-2">${val}</dd>
             </div>`;
         });
     } else {
@@ -384,21 +384,21 @@ window.openProductModal = function (product) {
                     const key = parts[0].trim();
                     const val = parts.slice(1).join(':').trim();
                     specsHtml += `
-                    <div class="py-3 grid grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                        <dt class="font-medium text-gray-500 dark:text-gray-400">${key}</dt>
-                        <dd class="text-gray-900 dark:text-white font-medium text-right sm:text-left">${val}</dd>
+                    <div class="flex flex-row justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+                        <dt class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">${key}</dt>
+                        <dd class="text-xs font-bold text-gray-900 dark:text-white truncate ml-2">${val}</dd>
                     </div>`;
-                } else if (line.length < 60 && line.indexOf('.') === -1) {
+                } else if (line.length < 40 && line.indexOf('.') === -1) {
                     specsHtml += `
-                    <div class="py-3 grid grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                        <dt class="font-medium text-gray-500 dark:text-gray-400">Detalle</dt>
-                        <dd class="text-gray-900 dark:text-white font-medium text-right sm:text-left">${line}</dd>
+                    <div class="flex flex-row justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+                        <dt class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Detalle</dt>
+                        <dd class="text-xs font-bold text-gray-900 dark:text-white truncate ml-2">${line}</dd>
                     </div>`;
                 }
             });
         }
-        if (specsHtml === '<div class="divide-y divide-gray-200 dark:divide-gray-700">') {
-            specsHtml += '<div class="py-3 text-gray-500 italic">No hay especificaciones detalladas disponibles.</div>';
+        if (specsHtml === '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">') {
+            specsHtml += '<div class="col-span-2 py-4 text-center text-gray-500 italic text-[10px] uppercase tracking-widest">Información técnica no disponible</div>';
         }
     }
     specsHtml += '</div>';
