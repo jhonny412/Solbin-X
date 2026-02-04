@@ -62,8 +62,8 @@ class CartManager {
     }
 
     // Agregar producto al carrito
-    addToCart(productName, productPrice, quantity = 1) {
-        console.log('CartManager: addToCart llamado con:', productName, productPrice, quantity);
+    addToCart(productName, productPrice, quantity = 1, productData = null) {
+        console.log('CartManager: addToCart llamado con:', productName, productPrice, quantity, productData);
         const existingItem = this.cart.find(item => item.name === productName);
 
         if (existingItem) {
@@ -71,11 +71,23 @@ class CartManager {
             existingItem.quantity += quantity;
         } else {
             console.log('CartManager: Nuevo producto, agregando al carrito');
-            this.cart.push({
+            const item = {
                 name: productName,
                 price: productPrice,
                 quantity: quantity
-            });
+            };
+
+            // Add product info if available (for image display)
+            if (productData) {
+                item.id = productData.id || null;
+                item.image = (productData.images && Array.isArray(productData.images) && productData.images.length > 0)
+                    ? productData.images[0]
+                    : (productData.image_url || '');
+                item.images = productData.images || (productData.image_url ? [productData.image_url] : []);
+                item.stock = productData.stock || 999;
+            }
+
+            this.cart.push(item);
         }
 
         console.log('CartManager: Carrito actualizado:', this.cart);
@@ -140,20 +152,34 @@ class CartManager {
     updateCartBadge() {
         console.log('CartManager: Actualizando badge del carrito...');
         const badge = document.getElementById('cart-badge');
+        const headerTotal = document.getElementById('cart-total-header');
+
+        const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        const total = this.getTotal();
+
+        // Actualizar badge
         if (badge) {
-            const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
             console.log('CartManager: Total items para badge:', totalItems);
 
             if (totalItems > 0) {
                 badge.classList.remove('hidden');
                 badge.textContent = totalItems;
+                badge.classList.remove('scale-0');
+                badge.classList.add('scale-100');
                 console.log('CartManager: Badge actualizado con', totalItems, 'items');
             } else {
                 badge.classList.add('hidden');
+                badge.classList.remove('scale-100');
+                badge.classList.add('scale-0');
                 console.log('CartManager: Badge oculto (carrito vacío)');
             }
         } else {
             console.warn('CartManager: Elemento cart-badge no encontrado en el DOM');
+        }
+
+        // Actualizar total en header
+        if (headerTotal) {
+            headerTotal.textContent = `S/. ${total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
     }
 
@@ -162,27 +188,29 @@ class CartManager {
         return this.cart.reduce((sum, item) => sum + item.quantity, 0);
     }
 
-    // Obtener subtotal
-    getSubtotal() {
+    // Obtener total de los items (Precio con IGV incluido)
+    getItemsTotal() {
         return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     }
 
-    // Obtener IGV (18%)
+    // Obtener subtotal (Base imponible: Precio / 1.18)
+    getSubtotal() {
+        return this.getItemsTotal() / 1.18;
+    }
+
+    // Obtener IGV (18% del subtotal)
     getIGV() {
-        return this.getSubtotal() * 0.18;
+        return this.getItemsTotal() - this.getSubtotal();
     }
 
-    // Obtener costo de envío
+    // Obtener costo de envío (pagado por el cliente en el courier)
     getShipping() {
-        const subtotal = this.getSubtotal();
-        // Si el carrito está vacío, no se debe cobrar envío
-        if (subtotal <= 0) return 0;
-        return subtotal >= 500 ? 0 : 50;
+        return 0;
     }
 
-    // Obtener total
+    // Obtener total (Items solamente, sin envío)
     getTotal() {
-        return this.getSubtotal() + this.getIGV() + this.getShipping();
+        return this.getItemsTotal();
     }
 
     // Sanitizar HTML para prevenir XSS

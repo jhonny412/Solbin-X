@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libro de Reclamaciones | Solbin-X</title>
+    <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg">
+    <meta name="description"
+        content="Libro de Reclamaciones virtual de Solbin-X. Registra tu reclamo o queja de manera rápida y segura.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stamp {
+            position: relative;
+        }
+
+        .stamp::after {
+            content: 'SOLBIN-X';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            border: 3px solid rgba(239, 68, 68, 0.3);
+            color: rgba(239, 68, 68, 0.2);
+            font-weight: bold;
+            font-size: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            body {
+                background: white;
+            }
+
+            .shadow-lg {
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0 text-center md:text-left">
+                    <a href="index.html" class="flex items-center justify-center md:justify-start gap-3">
+                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X" class="h-[74px] w-auto brightness-0 invert">
+                        <span class="text-2xl font-bold">Libro de Reclamaciones</span>
+                    </a>
+                    <p class="text-white/80 text-sm mt-1">Código de Protección y Defensa del Consumidor - Ley N° 29571
+                    </p>
+                </div>
+                <div class="flex gap-3 no-print">
+                    <button onclick="window.print()"
+                        class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition flex items-center gap-2">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a href="index.html"
+                        class="bg-white/20 text-white px-4 py-2 rounded-lg font-semibold hover:bg-white/30 transition flex items-center gap-2">
+                        <i class="fas fa-home"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Info Legal -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg no-print">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-bold text-blue-900">Información Importante</h3>
+                    <p class="text-blue-800 text-sm mt-1">
+                        Conforme a la Ley N° 29571, Código de Protección y Defensa del Consumidor,
+                        todo proveedor debe contar con un Libro de Reclamaciones físico y/o virtual.
+                        Su reclamo será atendido en un plazo máximo de 30 días calendario.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden stamp">
+            <!-- Número de Reclamo -->
+            <div class="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-red-600 text-white p-2 rounded-lg">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider">N° de Registro</p>
+                        <p class="text-xl font-bold text-gray-800" id="reclamo-numero">R-2024-001</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider">Fecha y Hora</p>
+                    <p class="text-lg font-bold text-gray-800" id="fecha-actual"></p>
+                </div>
+            </div>
+
+            <form id="reclamo-form" class="p-6 md:p-8">
+                <!-- Datos del Consumidor -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+                        <span
+                            class="bg-[#0D9488] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                        Datos del Consumidor
+                    </h2>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Nombre Completo <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="nombre" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="Ingresa tu nombre completo">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                DNI / CE / Pasaporte <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="documento" required maxlength="12"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="Número de documento">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Teléfono <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" name="telefono" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="Ej: 999 888 777">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Correo Electrónico <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" name="email" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="tu@email.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Dirección <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="direccion" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="Dirección completa">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos del Bien Contratado -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+                        <span
+                            class="bg-[#0D9488] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+                        Identificación del Bien Contratado
+                    </h2>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Producto / Servicio Contratado <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="producto" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="Ej: Laptop Dell Inspiron 15, Smartphone Samsung Galaxy S23">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                N° de Pedido / Factura (si aplica)
+                            </label>
+                            <input type="text" name="pedido"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="Número de orden o factura">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Fecha de Compra
+                            </label>
+                            <input type="date" name="fecha-compra"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Monto Pagado (S/.)
+                            </label>
+                            <input type="number" name="monto" step="0.01" min="0"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Reclamación -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+                        <span
+                            class="bg-[#0D9488] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
+                        Tipo de Reclamación
+                    </h2>
+
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <label
+                                class="flex items-start gap-3 cursor-pointer p-4 bg-white rounded-lg border-2 border-transparent hover:border-sky-500 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-50">
+                                <input type="radio" name="tipo" value="reclamo" required
+                                    class="mt-1 text-sky-600 focus:ring-sky-500">
+                                <div>
+                                    <span class="font-bold text-gray-800 block">Reclamo</span>
+                                    <span class="text-sm text-gray-600">Disconformidad relacionada a productos o
+                                        servicios.</span>
+                                </div>
+                            </label>
+
+                            <label
+                                class="flex items-start gap-3 cursor-pointer p-4 bg-white rounded-lg border-2 border-transparent hover:border-amber-500 transition has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50">
+                                <input type="radio" name="tipo" value="queja" required
+                                    class="mt-1 text-amber-600 focus:ring-amber-500">
+                                <div>
+                                    <span class="font-bold text-gray-800 block">Queja</span>
+                                    <span class="text-sm text-gray-600">Disconformidad no relacionada a productos o
+                                        servicios, o malestar sobre la atención al público.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Detalle de su Reclamo o Queja <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="detalle" required rows="6"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                            placeholder="Describa detalladamente su reclamo o queja. Incluya fechas, nombres de personas con las que interactuó, y cualquier detalle relevante."></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Mínimo 20 caracteres</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Pedido del Consumidor <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="pedido-consumidor" required rows="3"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition"
+                            placeholder="¿Qué solución espera? (Ej: Reembolso, cambio de producto, reparación, disculpa, etc.)"></textarea>
+                    </div>
+                </div>
+
+                <!-- Consentimiento -->
+                <div class="mb-8 bg-gray-50 p-4 rounded-lg">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="consentimiento" required
+                            class="mt-1 text-sky-600 focus:ring-sky-500 w-5 h-5">
+                        <span class="text-sm text-gray-700">
+                            Declaro que los datos consignados son correctos y autorizo a Solbin-X a contactarme a través
+                            de los medios proporcionados para la atención de mi reclamo.
+                            Acepto que mi reclamo será atendido conforme a la Ley N° 29571 y su reglamento.
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex flex-col sm:flex-row gap-4 no-print">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white py-4 px-8 rounded-xl font-bold text-lg hover:from-red-700 hover:to-red-800 transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane"></i>
+                        Registrar Reclamo
+                    </button>
+                    <button type="reset"
+                        class="sm:w-auto px-8 py-4 border-2 border-gray-300 text-gray-600 rounded-xl font-semibold hover:bg-gray-50 transition">
+                        Limpiar Formulario
+                    </button>
+                </div>
+            </form>
+
+            <!-- Mensaje de confirmación (oculto inicialmente) -->
+            <div id="confirmacion-mensaje" class="hidden p-8 text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-circle text-4xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Reclamo Registrado!</h2>
+                <p class="text-gray-600 mb-6">Su reclamo ha sido registrado exitosamente en nuestro sistema.</p>
+
+                <div class="bg-gray-50 rounded-lg p-6 mb-6 max-w-md mx-auto text-left">
+                    <p class="text-sm text-gray-600 mb-1">Número de Registro:</p>
+                    <p class="text-2xl font-bold text-sky-600 mb-4" id="confirmacion-numero"></p>
+
+                    <p class="text-sm text-gray-600 mb-1">Fecha de Registro:</p>
+                    <p class="font-semibold text-gray-800 mb-4" id="confirmacion-fecha"></p>
+
+                    <p class="text-sm text-gray-600 mb-1">Plazo de Respuesta:</p>
+                    <p class="font-semibold text-gray-800">30 días calendario</p>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Le hemos enviado un correo de confirmación con los detalles de su reclamo.
+                        Nuestro equipo de atención al cliente se comunicará con usted dentro de las 48 horas hábiles.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center no-print">
+                    <button onclick="window.print()"
+                        class="bg-gray-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-print"></i> Imprimir Comprobante
+                    </button>
+                    <a href="index.html"
+                        class="bg-[#0D9488] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0F766E] transition flex items-center justify-center gap-2">
+                        <i class="fas fa-home"></i> Volver al Inicio
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="grid md:grid-cols-3 gap-6 mt-8 no-print">
+            <div class="bg-white rounded-xl p-6 shadow-md">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-clock text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Plazo de Atención</h3>
+                <p class="text-sm text-gray-600">Su reclamo será atendido en un plazo máximo de 30 días calendario desde
+                    su registro.</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 shadow-md">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-envelope text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Notificación</h3>
+                <p class="text-sm text-gray-600">Recibirá notificaciones por email sobre el estado de su reclamo.</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 shadow-md">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-phone text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Contacto Directo</h3>
+                <p class="text-sm text-gray-600">Para consultas: <a href="tel:+51945297289"
+                        class="text-sky-600 hover:underline">+51 945 297 289</a></p>
+            </div>
+        </div>
+
+        <!-- Indecopi -->
+        <div class="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-6 no-print">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-balance-scale text-amber-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-amber-900 mb-2">¿No está satisfecho con la respuesta?</h3>
+                    <p class="text-sm text-amber-800 mb-3">
+                        Si no está conforme con la respuesta de la empresa, puede acudir a INDECOPI
+                        (Indecopi - Organismo Regulador de la Protección al Consumidor).
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="https://www.indecopi.gob.pe" target="_blank" rel="noopener noreferrer"
+                            class="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-700 transition">
+                            <i class="fas fa-external-link-alt"></i> Visitar INDECOPI
+                        </a>
+                        <span class="text-sm text-amber-700 flex items-center">
+                            <i class="fas fa-phone mr-2"></i> 0-800-44040 (Línea gratuita)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Legal -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm mb-2">Solbin-X - RUC: 107XXXXXXX</p>
+            <p class="text-xs">Este Libro de Reclamaciones cumple con la Ley N° 29571 y el Decreto Supremo N°
+                006-2018-PCM</p>
+            <p class="text-xs mt-2">&copy; <span id="current-year"></span> Solbin-X. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Generar número de reclamo y fecha
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const fechaStr = now.toLocaleDateString('es-PE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('fecha-actual').textContent = fechaStr;
+
+            // Generar número único basado en timestamp
+            const year = now.getFullYear();
+            const random = Math.floor(Math.random() * 900) + 100;
+            document.getElementById('reclamo-numero').textContent = `R-${year}-${random}`;
+        });
+
+        // Manejar envío del formulario
+        document.getElementById('reclamo-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // Validación básica
+            if (data.detalle.length < 20) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Detalle muy corto',
+                    text: 'Por favor describa su reclamo con más detalle (mínimo 20 caracteres).',
+                    confirmButtonColor: '#dc2626'
+                });
+                return;
+            }
+
+            // Aquí normalmente enviarías a tu backend
+            // Por ahora simulamos el envío exitoso
+
+            const numeroReclamo = document.getElementById('reclamo-numero').textContent;
+            const fechaReclamo = document.getElementById('fecha-actual').textContent;
+
+            // Mostrar confirmación
+            document.getElementById('confirmacion-numero').textContent = numeroReclamo;
+            document.getElementById('confirmacion-fecha').textContent = fechaReclamo;
+
+            document.getElementById('reclamo-form').classList.add('hidden');
+            document.getElementById('confirmacion-mensaje').classList.remove('hidden');
+
+            // Scroll al mensaje
+            document.getElementById('confirmacion-mensaje').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // En una implementación real, aquí enviarías los datos:
+            /*
+            fetch('/api/reclamos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            */
+        });
+
+        // Set Current Year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+
+</html>

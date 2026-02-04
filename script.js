@@ -24,41 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         themeToggleMobile.addEventListener('click', toggleTheme);
     }
 
-    // Carousel Functionality
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.carousel-slide');
-    const dots = document.querySelectorAll('.carousel-dot');
-    const totalSlides = slides.length;
-
-    function showSlide(index) {
-        // Remove active class from all slides and dots
-        slides.forEach(slide => slide.classList.remove('active'));
-        dots.forEach(dot => dot.classList.remove('active'));
-
-        // Add active class to current slide and dot
-        slides[index].classList.add('active');
-        dots[index].classList.add('active');
-    }
-
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        showSlide(currentSlide);
-    }
-
-    // Auto advance carousel every 5 seconds
-    let carouselInterval = setInterval(nextSlide, 5000);
-
-    // Dot navigation
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            currentSlide = index;
-            showSlide(currentSlide);
-
-            // Reset interval when user manually changes slide
-            clearInterval(carouselInterval);
-            carouselInterval = setInterval(nextSlide, 5000);
-        });
-    });
+    // NOTE: Carousel functionality moved to carousel.js
 
     // Mobile Menu Toggle
     const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -135,63 +101,89 @@ document.addEventListener('DOMContentLoaded', function () {
         return input.trim().substring(0, maxLength);
     }
 
-    // Contact Form Submission
+    // Contact Form Submission - Integrado con Formspree
     const contactForm = document.getElementById('contactForm');
     const formMessage = document.getElementById('formMessage');
 
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        // Get and validate form values
-        const nombre = validateFormInput(document.getElementById('nombre').value, 100);
-        const email = validateFormInput(document.getElementById('email').value, 255);
-        const telefono = validateFormInput(document.getElementById('telefono').value, 20);
-        const asunto = validateFormInput(document.getElementById('asunto').value, 200);
-        const mensaje = validateFormInput(document.getElementById('mensaje').value, 1000);
+            const submitBtn = document.getElementById('contact-submit-btn');
+            const originalBtnContent = submitBtn.innerHTML;
 
-        // Validate form (basic validation)
-        if (!nombre || !email || !telefono || !asunto || !mensaje) {
-            showMessage('Por favor, completa todos los campos.', 'error');
-            return;
-        }
+            // Get and validate form values
+            const nombre = validateFormInput(document.getElementById('nombre').value, 100);
+            const email = validateFormInput(document.getElementById('email').value, 255);
+            const telefono = validateFormInput(document.getElementById('telefono').value, 20);
+            const asunto = validateFormInput(document.getElementById('asunto').value, 200);
+            const mensaje = validateFormInput(document.getElementById('mensaje').value, 1000);
 
-        // Email validation (strict regex)
-        const emailRegex = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
-            showMessage('Por favor, ingresa un email válido.', 'error');
-            return;
-        }
+            // Validate form (basic validation)
+            if (!nombre || !email || !telefono || !asunto || !mensaje) {
+                showFormMessage('Por favor, completa todos los campos.', 'error');
+                return;
+            }
 
-        // Phone validation (basic format)
-        const phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
-        if (!phoneRegex.test(telefono)) {
-            showMessage('Por favor, ingresa un teléfono válido.', 'error');
-            return;
-        }
+            // Email validation (strict regex)
+            const emailRegex = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                showFormMessage('Por favor, ingresa un email válido.', 'error');
+                return;
+            }
 
-        // Simulate form submission (in a real scenario, you would send this to a server)
-        showMessage('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.', 'success');
+            // Phone validation (basic format)
+            const phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
+            if (!phoneRegex.test(telefono)) {
+                showFormMessage('Por favor, ingresa un teléfono válido.', 'error');
+                return;
+            }
 
-        // Reset form
-        contactForm.reset();
+            // Mostrar estado de carga
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Enviando...';
 
-        // In a real application, you would send the data to a server here:
-        // fetch('/api/contact', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-        //     body: JSON.stringify({ nombre, email, telefono, asunto, mensaje })
-        // });
-    });
+            try {
+                // Enviar a Formspree
+                const formData = new FormData(contactForm);
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
 
-    function showMessage(message, type) {
+                if (response.ok) {
+                    // Éxito - redirigir a página de gracias
+                    window.location.href = 'gracias.html';
+                } else {
+                    const data = await response.json();
+                    if (data.errors) {
+                        showFormMessage(data.errors.map(error => error.message).join(', '), 'error');
+                    } else {
+                        showFormMessage('Hubo un error al enviar el mensaje. Intenta de nuevo.', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showFormMessage('Error de conexión. Por favor intenta más tarde.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnContent;
+            }
+        });
+    }
+
+    function showFormMessage(message, type) {
         formMessage.textContent = message;
         formMessage.classList.remove('hidden');
 
         if (type === 'success') {
-            formMessage.classList.remove('text-red-600');
+            formMessage.classList.remove('text-red-600', 'bg-red-50');
             formMessage.classList.add('text-green-600', 'bg-green-50', 'p-4', 'rounded-lg', 'font-semibold');
         } else {
-            formMessage.classList.remove('text-green-600');
+            formMessage.classList.remove('text-green-600', 'bg-green-50');
             formMessage.classList.add('text-red-600', 'bg-red-50', 'p-4', 'rounded-lg', 'font-semibold');
         }
 
@@ -367,43 +359,77 @@ document.addEventListener('DOMContentLoaded', function () {
     // Shopping Cart Functionality usando CartManager global
     // (La funcionalidad del carrito ahora está en cart.js)
 
-    // Setup add to cart button handler
-    function setupCartButtons() {
-        const addToCartButtons = document.querySelectorAll('.producto-card button');
+    // Setup add to cart button handler - AHORA GLOBAL
+    window.setupCartButtons = function () {
+        // Buscar botones con clase específica add-to-cart-btn (nueva implementación)
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
         console.log('Configurando', addToCartButtons.length, 'botones de carrito');
 
         addToCartButtons.forEach((button, index) => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const productCard = button.closest('.producto-card');
-                if (!productCard) {
-                    console.error('No se encontró .producto-card para el botón', index);
-                    return;
-                }
-                const productName = productCard.getAttribute('data-name');
-                const productPrice = parseInt(productCard.getAttribute('data-price'));
-
-                if (!productName || isNaN(productPrice)) {
-                    console.error('Datos inválidos:', { productName, productPrice });
-                    return;
-                }
-
-                console.log('Agregando al carrito:', productName, productPrice);
-                // Usar el CartManager global
-                if (window.cartManager) {
-                    window.cartManager.addToCart(productName, productPrice);
-                } else {
-                    console.error('CartManager no está disponible');
-                }
-            });
+            // Remover listener anterior si existe para evitar duplicados
+            button.removeEventListener('click', handleAddToCart);
+            // Agregar nuevo listener
+            button.addEventListener('click', handleAddToCart);
         });
+    }
+
+    // Handler separado para poder removerlo si es necesario
+    function handleAddToCart(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const button = e.currentTarget;
+        const productName = button.getAttribute('data-name');
+        const productPrice = parseFloat(button.getAttribute('data-price'));
+
+        // Get product data if available
+        let productData = null;
+        const productDataAttr = button.getAttribute('data-product');
+        if (productDataAttr) {
+            try {
+                productData = JSON.parse(productDataAttr.replace(/\\'/g, "'"));
+            } catch (err) {
+                console.error('Error parsing product data:', err);
+            }
+        }
+
+        if (!productName || isNaN(productPrice)) {
+            console.error('Datos inválidos:', { productName, productPrice });
+            return;
+        }
+
+        console.log('Agregando al carrito:', productName, productPrice, productData);
+
+        // Usar el CartManager global
+        if (window.cartManager) {
+            window.cartManager.addToCart(productName, productPrice, 1, productData);
+
+            // Feedback visual en el botón
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Agregado</span>';
+            button.classList.add('bg-green-600');
+            button.classList.remove('bg-[#0D9488]', 'bg-green-600', 'bg-pink-600', 'bg-indigo-600', 'bg-purple-600');
+
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('bg-green-600');
+                // Restaurar color original basado en la clase del botón
+                if (button.classList.contains('add-to-cart-btn')) {
+                    button.classList.add('bg-[#0D9488]');
+                }
+            }, 1500);
+        } else {
+            console.error('CartManager no está disponible');
+        }
     }
 
     // Setup cart buttons cuando el DOM esté listo
     // Esperar un momento para asegurarse de que CartManager esté inicializado
     setTimeout(() => {
-        setupCartButtons();
-    }, 100);
+        if (typeof window.setupCartButtons === 'function') {
+            window.setupCartButtons();
+        }
+    }, 800); // Aumentado a 800ms para asegurar que el catálogo esté cargado
 
     window.refreshCatalogUI = function () {
         updateProductDisplay();
@@ -420,7 +446,351 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // Wishlist / Favoritos functionality
+    window.wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+    window.toggleWishlist = function (name, price, image) {
+        const index = window.wishlist.findIndex(item => item.name === name);
+        if (index === -1) {
+            window.wishlist.push({ name, price, image, addedAt: new Date().toISOString() });
+            showToast('Producto agregado a favoritos', 'success');
+        } else {
+            window.wishlist.splice(index, 1);
+            showToast('Producto eliminado de favoritos', 'info');
+        }
+        localStorage.setItem('wishlist', JSON.stringify(window.wishlist));
+        updateWishlistUI();
+    };
+
+    window.updateWishlistUI = function () {
+        const badge = document.getElementById('wishlist-badge');
+        if (badge) {
+            if (window.wishlist.length > 0) {
+                badge.textContent = window.wishlist.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        // Update wishlist buttons
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            const productName = btn.getAttribute('data-product');
+            const isInWishlist = window.wishlist.some(item => item.name === productName);
+            if (isInWishlist) {
+                btn.classList.add('text-red-500', 'bg-red-50');
+                btn.classList.remove('text-gray-400');
+            } else {
+                btn.classList.remove('text-red-500', 'bg-red-50');
+                btn.classList.add('text-gray-400');
+            }
+        });
+    };
+
+    window.showWishlist = function () {
+        if (window.wishlist.length === 0) {
+            showToast('Tu lista de favoritos está vacía', 'info');
+            return;
+        }
+
+        let html = '<div class="grid gap-4 max-h-[60vh] overflow-y-auto">';
+        window.wishlist.forEach(item => {
+            html += `
+                <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain rounded">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 dark:text-white text-sm">${item.name}</p>
+                        <p class="text-sky-600 font-bold">S/. ${parseFloat(item.price).toLocaleString()}</p>
+                    </div>
+                    <button onclick="toggleWishlist('${item.name}', ${item.price}, '${item.image}')" class="text-red-500 hover:text-red-700 p-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        Swal.fire({
+            title: 'Mis Favoritos',
+            html: html,
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: '500px'
+        });
+    };
+
+    // Global search function
+    window.filterSearchGlobal = function (val) {
+        // If on catalog section, trigger the existing filter
+        if (typeof window.filterSearch === 'function') {
+            window.filterSearch(val);
+        }
+        // Scroll to catalog if searching
+        if (val.length > 2) {
+            const catalogo = document.getElementById('catalogo');
+            if (catalogo && val.length > 3) {
+                catalogo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    };
+
+    // Toast notification helper
+    window.showToast = function (message, type = 'info') {
+        const toast = document.createElement('div');
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            info: 'bg-sky-500',
+            warning: 'bg-amber-500'
+        };
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-times-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-circle'
+        };
+
+        toast.className = `fixed bottom-24 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 z-[9999] transform translate-x-full transition-transform duration-300`;
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    };
+
     console.log('SOLBIN website loaded successfully! 🚀');
+
+    // Initialize wishlist UI
+    updateWishlistUI();
+
+    // Web Alert System
+    async function initWebAlert() {
+        console.log('[Web Alert] Initializing...');
+        try {
+            const client = window.supabaseClient || window.supabase;
+            if (!client) {
+                console.warn('[Web Alert] Supabase client not available');
+                return;
+            }
+
+            console.log('[Web Alert] Fetching configuration from Supabase...');
+            const { data, error } = await client
+                .from('site_settings')
+                .select('value')
+                .eq('key', 'web_alert')
+                .single();
+
+            if (error) {
+                console.warn('[Web Alert] Error fetching config:', error);
+                return;
+            }
+
+            if (!data?.value) {
+                console.log('[Web Alert] No configuration found');
+                return;
+            }
+
+            const config = data.value;
+            console.log('[Web Alert] Configuration loaded:', config);
+
+            if (!config.isActive) {
+                console.log('[Web Alert] Alert is not active');
+                return;
+            }
+
+            if (!config.message) {
+                console.log('[Web Alert] No message configured');
+                return;
+            }
+
+            const banner = document.getElementById('web-alert-banner');
+            const content = document.getElementById('web-alert-content');
+            const icon = document.getElementById('web-alert-icon');
+            const iconBg = document.getElementById('web-alert-icon-bg');
+            const iconPing = document.getElementById('web-alert-ping');
+            const message = document.getElementById('web-alert-message');
+
+            if (!banner || !content || !icon || !message) {
+                console.warn('[Web Alert] Required DOM elements not found');
+                return;
+            }
+
+            // Check if user has closed this alert
+            const closedAlerts = JSON.parse(localStorage.getItem('closedAlerts') || '[]');
+            const alertKey = `${config.type}_${config.message.substring(0, 50)}`;
+            if (closedAlerts.includes(alertKey)) {
+                console.log('[Web Alert] User has already closed this alert');
+                return;
+            }
+
+            // Set gradient backgrounds and styles based on type
+            const styles = {
+                info: {
+                    gradient: 'alert-gradient-info',
+                    icon: 'fa-info-circle',
+                    iconBg: 'bg-white/20',
+                    iconColor: 'text-white',
+                    textColor: 'text-white',
+                    pingBg: 'bg-white'
+                },
+                success: {
+                    gradient: 'alert-gradient-success',
+                    icon: 'fa-check-circle',
+                    iconBg: 'bg-white/20',
+                    iconColor: 'text-white',
+                    textColor: 'text-white',
+                    pingBg: 'bg-white'
+                },
+                warning: {
+                    gradient: 'alert-gradient-warning',
+                    icon: 'fa-exclamation-triangle',
+                    iconBg: 'bg-white/20',
+                    iconColor: 'text-white',
+                    textColor: 'text-white',
+                    pingBg: 'bg-white'
+                },
+                error: {
+                    gradient: 'alert-gradient-error',
+                    icon: 'fa-times-circle',
+                    iconBg: 'bg-white/20',
+                    iconColor: 'text-white',
+                    textColor: 'text-white',
+                    pingBg: 'bg-white'
+                }
+            };
+
+            const style = styles[config.type] || styles.info;
+
+            // Apply gradient background
+            content.className = `relative rounded-2xl shadow-2xl p-5 overflow-hidden backdrop-blur-sm border-2 border-white/30 ${style.gradient}`;
+
+            // Apply icon styles
+            icon.className = `fas ${style.icon} ${style.iconColor} text-2xl`;
+            if (iconBg) iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center animate-bounce-slow shadow-lg ${style.iconBg}`;
+            if (iconPing) iconPing.className = `absolute inset-0 rounded-full animate-ping opacity-25 ${style.pingBg}`;
+
+            // Apply message styles
+            message.className = `text-base font-bold leading-relaxed animate-fade-in ${style.textColor}`;
+            message.textContent = config.message;
+
+            // Show banner with animation
+            banner.classList.remove('hidden');
+            console.log('[Web Alert] Alert displayed successfully!');
+
+            // Store alert key for close functionality
+            banner.dataset.alertKey = alertKey;
+
+        } catch (e) {
+            console.error('[Web Alert] Error loading web alert:', e);
+        }
+    }
+
+    window.closeWebAlert = function () {
+        const banner = document.getElementById('web-alert-banner');
+        if (!banner) return;
+
+        const alertKey = banner.dataset.alertKey;
+        if (alertKey) {
+            const closedAlerts = JSON.parse(localStorage.getItem('closedAlerts') || '[]');
+            closedAlerts.push(alertKey);
+            localStorage.setItem('closedAlerts', JSON.stringify(closedAlerts));
+        }
+
+        banner.classList.add('hidden');
+    };
+
+    // Initialize web alert after a short delay to ensure Supabase is ready
+    setTimeout(() => {
+        initWebAlert();
+    }, 500);
+
+    // Countdown Timer para Banner de Ofertas
+    // Countdown Timer para Banner de Ofertas
+    async function initCountdownTimer() {
+        const daysEl = document.getElementById('countdown-days');
+        const hoursEl = document.getElementById('countdown-hours');
+        const minutesEl = document.getElementById('countdown-minutes');
+        const secondsEl = document.getElementById('countdown-seconds');
+        const offerBanner = document.getElementById('offer-banner-section');
+
+        if (!daysEl || !hoursEl || !minutesEl || !secondsEl) {
+            // If countdown elements don't exist, hide banner if it exists
+            if (offerBanner) {
+                offerBanner.classList.add('hidden');
+            }
+            return;
+        }
+
+        // Default Config
+        let config = {
+            isActive: true,
+            endDate: new Date(new Date().getTime() + (72 * 60 * 60 * 1000)).toISOString()
+        };
+
+        // Fetch from Supabase
+        try {
+            const client = window.supabaseClient || window.supabase;
+            if (client) {
+                const { data, error } = await client
+                    .from('site_settings')
+                    .select('value')
+                    .eq('key', 'offer_banner')
+                    .single();
+
+                if (data && data.value) {
+                    config = data.value;
+                }
+            }
+        } catch (e) {
+            console.warn('Error fetching offer settings, using default', e);
+        }
+
+        // Apply Visibility
+        if (offerBanner) {
+            if (!config.isActive) {
+                offerBanner.classList.add('hidden');
+                return; // No need to run timer if hidden
+            } else {
+                offerBanner.classList.remove('hidden');
+            }
+        }
+
+        const endDate = new Date(config.endDate);
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = endDate - now;
+
+            if (diff <= 0) {
+                // Oferta expirada
+                daysEl.textContent = '00';
+                hoursEl.textContent = '00';
+                minutesEl.textContent = '00';
+                secondsEl.textContent = '00';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            daysEl.textContent = String(days).padStart(2, '0');
+            hoursEl.textContent = String(hours).padStart(2, '0');
+            minutesEl.textContent = String(minutes).padStart(2, '0');
+            secondsEl.textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    initCountdownTimer();
+
+    // NOTE: Carousel functionality moved to carousel.js
+    // Global carousel functions are now defined in carousel.js
 
 }); // FIN de DOMContentLoaded
 

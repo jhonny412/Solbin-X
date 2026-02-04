@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensaje Enviado - Solbin-X</title>
+    <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg">
+    <meta name="robots" content="noindex, follow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+        }
+
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            margin: 10% auto;
+            box-shadow: inset 0px 0px 0px #7ac142;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #7ac142;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+
+            0%,
+            100% {
+                transform: none;
+            }
+
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 50px #7ac142;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
+        <!-- Animación de check -->
+        <div class="mb-6">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+            </svg>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">¡Mensaje Enviado!</h1>
+        <p class="text-gray-600 mb-6">
+            Gracias por contactarnos. Hemos recibido tu mensaje y te responderemos en un plazo máximo de 24 horas
+            hábiles.
+        </p>
+
+        <div class="bg-sky-50 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-center gap-2 text-sky-700 mb-2">
+                <i class="fas fa-envelope-open-text text-xl"></i>
+                <span class="font-semibold">Revisa tu correo</span>
+            </div>
+            <p class="text-sm text-[#0D9488]">
+                Te hemos enviado una copia de tu mensaje a tu correo electrónico.
+            </p>
+        </div>
+
+        <div class="space-y-3">
+            <a href="index.html"
+                class="block w-full bg-gradient-to-r from-[#0D9488] to-blue-600 text-white py-4 rounded-xl font-bold hover:from-[#0F766E] hover:to-blue-700 transition shadow-lg flex items-center justify-center gap-2">
+                <i class="fas fa-home"></i>
+                Volver al Inicio
+            </a>
+            <a href="index.html#catalogo"
+                class="block w-full border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                <i class="fas fa-shopping-bag"></i>
+                Ver Productos
+            </a>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <p class="text-sm text-gray-500 mb-3">¿Necesitas ayuda inmediata?</p>
+            <div class="flex justify-center gap-4">
+                <a href="https://wa.me/51945297289" target="_blank" rel="noopener noreferrer"
+                    class="text-green-600 hover:text-green-700 transition flex items-center gap-1">
+                    <i class="fab fa-whatsapp text-xl"></i>
+                    <span class="text-sm font-medium">WhatsApp</span>
+                </a>
+                <span class="text-gray-300">|</span>
+                <a href="tel:+51945297289"
+                    class="text-[#0D9488] hover:text-[#0F766E] transition flex items-center gap-1">
+                    <i class="fas fa-phone text-xl"></i>
+                    <span class="text-sm font-medium">Llamar</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Redirección automática después de 10 segundos -->
+    <script>
+        setTimeout(function () {
+            window.location.href = 'index.html';
+        }, 10000);
+    </script>
+</body>
+
+</html>

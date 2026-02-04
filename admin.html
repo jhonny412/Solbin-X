@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solbin-X | Admin Elite</title>
+    <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -960,7 +961,7 @@
         <div class="h-40 flex items-center justify-center p-6 mb-6">
             <div class="flex items-center justify-center w-full transition-all duration-500 group">
                 <img src="Imagenes/Version_Web.svg" alt="Solbin-X Logo"
-                    class="h-24 w-auto max-w-full object-contain transition-transform duration-500 hover:scale-105 drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                    class="h-[117px] w-auto max-w-full object-contain transition-transform duration-500 hover:scale-105 drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]">
             </div>
         </div>
 
@@ -985,6 +986,24 @@
                 class="sidebar-item group w-full flex flex-col lg:flex-row items-center py-3 lg:px-5 rounded-2xl">
                 <i class="fas fa-receipt text-lg lg:mr-4 group-hover:text-amber-400 transition"></i>
                 <span class="text-[10px] lg:text-[14px] font-semibold mt-1 lg:mt-0">Ventas</span>
+            </button>
+
+            <button onclick="switchAdminTab('carousel')" id="sideBtnCarousel"
+                class="sidebar-item group w-full flex flex-col lg:flex-row items-center py-3 lg:px-5 rounded-2xl">
+                <i class="fas fa-images text-lg lg:mr-4 group-hover:text-purple-400 transition"></i>
+                <span class="text-[10px] lg:text-[14px] font-semibold mt-1 lg:mt-0">Carrusel</span>
+            </button>
+
+            <button onclick="switchAdminTab('offers')" id="sideBtnOffers"
+                class="sidebar-item group w-full flex flex-col lg:flex-row items-center py-3 lg:px-5 rounded-2xl">
+                <i class="fas fa-tags text-lg lg:mr-4 group-hover:text-rose-400 transition"></i>
+                <span class="text-[10px] lg:text-[14px] font-semibold mt-1 lg:mt-0">Ofertas</span>
+            </button>
+
+            <button onclick="switchAdminTab('alerts')" id="sideBtnAlerts"
+                class="sidebar-item group w-full flex flex-col lg:flex-row items-center py-3 lg:px-5 rounded-2xl">
+                <i class="fas fa-bell text-lg lg:mr-4 group-hover:text-amber-400 transition"></i>
+                <span class="text-[10px] lg:text-[14px] font-semibold mt-1 lg:mt-0">Alertas</span>
             </button>
 
             <div class="py-4 my-2 border-t border-slate-800 lg:mx-4"></div>
@@ -1402,6 +1421,215 @@
                     </div>
                 </div>
 
+                <!-- CAROUSEL SECTION -->
+                <div id="carouselSection" class="hidden">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+                        <div class="relative">
+                            <div
+                                class="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-indigo-500 rounded-full">
+                            </div>
+                            <span
+                                class="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-500 uppercase tracking-[0.3em] mb-2 block">Gestión
+                                Visual</span>
+                            <h1 class="text-5xl font-black text-slate-900 tracking-tight">Banner <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">Principal</span>
+                            </h1>
+                            <p class="text-slate-400 font-semibold mt-3 text-lg">Administra las imágenes promocionales
+                                de tu portada.</p>
+                            <span
+                                class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                                <i class="fas fa-info-circle"></i> Recomendado: 1200 x 370 píxeles
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button onclick="document.getElementById('carouselFileInput').click()"
+                                class="bg-brand-600 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2">
+                                <i class="fas fa-cloud-upload-alt text-lg"></i>
+                                Subir Imágenes
+                            </button>
+                            <input type="file" id="carouselFileInput" class="hidden" multiple accept="image/*"
+                                onchange="uploadCarouselImages(this)">
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 overflow-hidden">
+                        <div class="mb-8 border-b border-slate-50 pb-6">
+                            <h3 class="text-xl font-black text-slate-800">Imágenes Activas</h3>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Gestión de
+                                impacto visual</p>
+                        </div>
+
+                        <div id="carouselImagesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- Carousel images loaded here -->
+                        </div>
+
+                        <div id="noCarouselImages"
+                            class="hidden flex flex-col items-center justify-center py-20 text-slate-300">
+                            <i class="fas fa-images text-6xl mb-4"></i>
+                            <p class="text-lg font-bold">No hay imágenes en el carrusel</p>
+                            <p class="text-sm">Sube algunas imágenes para comenzar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OFFERS SECTION -->
+                <div id="offersSection" class="hidden">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+                        <div class="relative">
+                            <div
+                                class="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-rose-500 to-pink-500 rounded-full">
+                            </div>
+                            <span
+                                class="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500 uppercase tracking-[0.3em] mb-2 block">Marketing</span>
+                            <h1 class="text-5xl font-black text-slate-900 tracking-tight">Oferta <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">Flash</span>
+                            </h1>
+                            <p class="text-slate-400 font-semibold mt-3 text-lg">Configura el temporizador y visibilidad
+                                del banner de ofertas.</p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-100 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-rose-50 rounded-bl-[10rem] -mr-16 -mt-16 opacity-50 pointer-events-none">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+                            <!-- Toggle Switch -->
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-eye text-rose-500"></i> Visibilidad del Banner
+                                </h3>
+                                <p class="text-slate-500 text-sm mb-6">Activa o desactiva la barra de descuento en la
+                                    página de inicio.</p>
+
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="offerActiveToggle" class="sr-only peer">
+                                    <div
+                                        class="relative w-14 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-rose-600">
+                                    </div>
+                                    <span
+                                        class="ms-3 text-sm font-medium text-slate-900 peer-checked:text-rose-600 font-bold"
+                                        id="offerStatusText">Desactivado</span>
+                                </label>
+                            </div>
+
+                            <!-- Date Picker -->
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-clock text-rose-500"></i> Fecha de Finalización
+                                </h3>
+                                <p class="text-slate-500 text-sm mb-6">Selecciona cuándo termina la oferta actual.</p>
+
+                                <input type="datetime-local" id="offerEndDate"
+                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition font-medium">
+                            </div>
+                        </div>
+
+                        <div class="mt-12 pt-8 border-t border-slate-100 flex justify-end">
+                            <button onclick="saveOfferSettings()"
+                                class="bg-rose-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-rose-700 transition shadow-lg shadow-rose-500/20 active:scale-95 flex items-center gap-2">
+                                <i class="fas fa-save"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ALERTS SECTION -->
+                <div id="alertsSection" class="hidden">
+                    <div class="bg-white rounded-[3rem] shadow-2xl p-10 border-4 border-amber-100">
+                        <!-- Header -->
+                        <div class="flex items-center gap-4 mb-8 pb-6 border-b-2 border-amber-100">
+                            <div
+                                class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                <i class="fas fa-bell text-white text-2xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-3xl font-black text-slate-800">Alerta Web</h2>
+                                <p class="text-slate-500 text-sm mt-1">Configura el mensaje de alerta para la página web
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Alert Configuration -->
+                        <div class="space-y-8">
+                            <!-- Visibility Toggle -->
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-eye text-amber-500"></i> Visibilidad de la Alerta
+                                </h3>
+                                <p class="text-slate-500 text-sm mb-6">Activa o desactiva el mensaje de alerta en la
+                                    página web.</p>
+
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="alertActiveToggle" class="sr-only peer">
+                                    <div
+                                        class="relative w-14 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-amber-600">
+                                    </div>
+                                    <span
+                                        class="ms-3 text-sm font-medium text-slate-900 peer-checked:text-amber-600 font-bold"
+                                        id="alertStatusText">Desactivado</span>
+                                </label>
+                            </div>
+
+                            <!-- Alert Type -->
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-palette text-amber-500"></i> Tipo de Alerta
+                                </h3>
+                                <p class="text-slate-500 text-sm mb-6">Selecciona el tipo de alerta (color y estilo).
+                                </p>
+
+                                <select id="alertType"
+                                    class="w-full px-6 py-4 rounded-2xl border-2 border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 outline-none transition text-lg font-semibold">
+                                    <option value="info">ℹ️ Información (Azul)</option>
+                                    <option value="success">✅ Éxito (Verde)</option>
+                                    <option value="warning">⚠️ Advertencia (Amarillo)</option>
+                                    <option value="error">❌ Error (Rojo)</option>
+                                </select>
+                            </div>
+
+                            <!-- Alert Message -->
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-message text-amber-500"></i> Mensaje de la Alerta
+                                </h3>
+                                <p class="text-slate-500 text-sm mb-6">Escribe el mensaje que se mostrará en la alerta.
+                                </p>
+
+                                <textarea id="alertMessage" rows="4"
+                                    class="w-full px-6 py-4 rounded-2xl border-2 border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 outline-none transition text-base resize-none"
+                                    placeholder="Ej: ¡Envíos gratis por tiempo limitado! Aprovecha nuestras ofertas especiales."></textarea>
+                                <p class="text-xs text-slate-400 mt-2">
+                                    <i class="fas fa-info-circle"></i> Máximo 200 caracteres
+                                </p>
+                            </div>
+
+                            <!-- Preview -->
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-eye text-amber-500"></i> Vista Previa
+                                </h3>
+                                <div id="alertPreview"
+                                    class="p-4 rounded-xl border-2 border-dashed border-slate-300 text-center text-slate-400">
+                                    <i class="fas fa-eye-slash mb-2"></i>
+                                    <p class="text-sm">La vista previa aparecerá aquí</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="mt-12 pt-8 border-t border-slate-100 flex justify-end">
+                            <button onclick="saveAlertSettings()"
+                                class="bg-amber-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-amber-700 transition shadow-lg shadow-amber-500/20 active:scale-95 flex items-center gap-2">
+                                <i class="fas fa-save"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
         </main>
     </div>
 
@@ -1521,53 +1749,73 @@
                         </div>
                     </div>
 
-                    <!-- Media Asset -->
+                    <!-- Media Asset - Multi Image Gallery -->
                     <div class="space-y-4 pt-4 border-t border-slate-100">
-                        <label
-                            class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Visual
-                            del Producto</label>
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest px-1">
+                                Galería de Imágenes
+                            </label>
+                            <span id="imageCountBadge"
+                                class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-1 rounded-full">
+                                0 imágenes
+                            </span>
+                        </div>
+
+                        <!-- Image Gallery Preview -->
+                        <div id="imageGalleryContainer" class="hidden">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Imágenes
+                                agregadas:</p>
+                            <div id="imageGalleryPreview" class="flex flex-wrap gap-2">
+                                <!-- Images will be rendered here -->
+                            </div>
+                        </div>
+
                         <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-4">
                             <button type="button" onclick="switchImageTab('upload')" id="tabUpload"
-                                class="flex-1 py-3 text-xs font-black rounded-xl transition-all bg-white text-brand-600 shadow-sm uppercase tracking-widest">Local</button>
+                                class="flex-1 py-3 text-xs font-black rounded-xl transition-all bg-white text-brand-600 shadow-sm uppercase tracking-widest">Subir
+                                Archivos</button>
                             <button type="button" onclick="switchImageTab('url')" id="tabUrl"
-                                class="flex-1 py-3 text-xs font-black rounded-xl transition-all text-slate-500 hover:text-slate-900 uppercase tracking-widest">Enlace
-                                Web</button>
+                                class="flex-1 py-3 text-xs font-black rounded-xl transition-all text-slate-500 hover:text-slate-900 uppercase tracking-widest">URL
+                                Externa</button>
                         </div>
 
                         <div id="uploadInputContainer">
                             <div
-                                class="relative group border-2 border-dashed border-slate-200 rounded-3xl p-10 hover:border-brand-300 hover:bg-slate-50 transition-all text-center cursor-pointer overflow-hidden">
-                                <input type="file" id="prodImageFile" accept="image/*"
-                                    class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                                class="relative group border-2 border-dashed border-slate-200 rounded-3xl p-8 hover:border-brand-300 hover:bg-slate-50 transition-all text-center cursor-pointer overflow-hidden">
+                                <input type="file" id="prodImageFile" accept="image/*" multiple
+                                    class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                    onchange="handleGalleryFileUpload(this)">
                                 <i
                                     class="fas fa-cloud-arrow-up text-3xl text-slate-300 mb-2 group-hover:text-brand-500 transition-colors"></i>
                                 <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Arrastra o
-                                    explora archivos</p>
+                                    haz clic para seleccionar</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Puedes seleccionar múltiples imágenes</p>
                             </div>
                         </div>
 
                         <div id="urlInputContainer" class="hidden">
                             <div class="flex gap-2">
                                 <input type="url" id="prodImage"
-                                    class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-brand-500/10 outline-none transition font-semibold text-sm"
+                                    class="flex-1 px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-brand-500/10 outline-none transition font-semibold text-sm"
                                     placeholder="https://dominio.com/imagen.webp">
-                                <button type="button" onclick="previewImage()"
-                                    class="w-14 bg-slate-100 text-slate-500 rounded-2xl hover:bg-slate-200 transition">
-                                    <i class="fas fa-eye"></i>
+                                <button type="button" onclick="addUrlImageToGallery()"
+                                    class="px-6 bg-brand-600 text-white rounded-2xl hover:bg-brand-700 transition font-semibold text-sm">
+                                    <i class="fas fa-plus mr-1"></i> Agregar
                                 </button>
                             </div>
                         </div>
 
+                        <!-- Single Image Preview (for URL preview) -->
                         <div id="imagePreview"
                             class="mt-4 hidden w-full h-40 bg-slate-50 rounded-[2rem] flex items-center justify-center overflow-hidden border border-slate-100 relative group">
                             <img src="" alt="Preview"
                                 class="h-full object-contain p-4 group-hover:scale-110 transition-transform">
-                            <button type="button"
-                                onclick="document.getElementById('imagePreview').classList.add('hidden'); document.getElementById('prodImageFile').value='';"
-                                class="absolute top-2 right-2 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fas fa-times text-xs"></i>
-                            </button>
                         </div>
+
+                        <p class="text-[10px] text-slate-400 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            La primera imagen será la principal. Puedes agregar hasta 8 imágenes por producto.
+                        </p>
                     </div>
 
                     <div class="pt-8 flex gap-4">
@@ -1623,8 +1871,9 @@
 
                 <div class="p-12">
                     <div class="grid lg:grid-cols-12 gap-12">
-                        <!-- Left Column: Image Center -->
-                        <div class="lg:col-span-5 space-y-8">
+                        <!-- Left Column: Image Gallery -->
+                        <div class="lg:col-span-5 space-y-6">
+                            <!-- Main Image -->
                             <div
                                 class="aspect-square bg-slate-50 rounded-[3.5rem] overflow-hidden border border-slate-100 flex items-center justify-center p-10 relative group">
                                 <div
@@ -1633,6 +1882,11 @@
                                 <img id="detailProductImage" src=""
                                     class="w-full h-full object-contain relative z-10 transition-transform duration-700 group-hover:scale-110"
                                     alt="Producto">
+                            </div>
+
+                            <!-- Image Gallery Thumbnails -->
+                            <div id="detailImageGallery" class="flex flex-wrap gap-3 justify-center hidden">
+                                <!-- Thumbnails will be rendered here -->
                             </div>
                         </div>
 
@@ -1796,24 +2050,23 @@
                                 <tr class="bg-slate-50/30 border-b border-slate-50">
                                     <th
                                         class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                        Producto</th>
+                                        PRODUCTO</th>
                                     <th
                                         class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">
-                                        Cant</th>
+                                        CANT</th>
                                     <th
                                         class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">
-                                        Subtotal</th>
+                                        SUBTOTAL</th>
                                 </tr>
                             </thead>
                             <tbody id="orderItemsTable" class="divide-y divide-slate-50"></tbody>
                             <tfoot>
-                                <tr class="bg-brand-50/50">
+                                <tr class="bg-blue-50/40">
                                     <td colspan="2"
-                                        class="px-6 py-5 text-[10px] font-black text-brand-600 uppercase tracking-widest">
+                                        class="px-6 py-8 text-[12px] font-bold text-blue-600 uppercase tracking-widest">
                                         Liquidación Consolidada</td>
-                                    <td class="px-6 py-5 text-right">
-                                        <span id="orderTotal"
-                                            class="text-xl font-black text-brand-700 tracking-tight"></span>
+                                    <td class="px-6 py-8 text-right">
+                                        <div id="orderTotal"></div>
                                     </td>
                                 </tr>
                             </tfoot>

@@ -1,250 +1,115 @@
 
 // Lógica del Panel de Administración
 
-// Función de inicialización al cargar la página
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('=== PÁGINA CARGADA ===');
-    console.log('Verificando secciones...');
+console.log('=== ADMIN.JS CARGADO ===');
 
-    const dashboardSection = document.getElementById('dashboardSection');
-    const productsSection = document.getElementById('productsSection');
-    const ordersSection = document.getElementById('ordersSection');
-
-    console.log('Secciones encontradas:', {
-        dashboard: !!dashboardSection,
-        products: !!productsSection,
-        orders: !!ordersSection
-    });
-
-    console.log('Verificando botones de menú...');
-
-    const sideBtnDashboard = document.getElementById('sideBtnDashboard');
-    const sideBtnProducts = document.getElementById('sideBtnProducts');
-    const sideBtnOrders = document.getElementById('sideBtnOrders');
-
-    console.log('Botones encontrados:', {
-        dashboard: !!sideBtnDashboard,
-        products: !!sideBtnProducts,
-        orders: !!sideBtnOrders
-    });
-
-    console.log('Estado inicial de secciones:', {
-        dashboard: dashboardSection?.classList.contains('hidden') ? 'oculta' : 'visible',
-        products: productsSection?.classList.contains('hidden') ? 'oculta' : 'visible',
-        orders: ordersSection?.classList.contains('hidden') ? 'oculta' : 'visible'
-    });
-
-    console.log('Estado inicial de botones:', {
-        dashboard: sideBtnDashboard?.classList.contains('active') ? 'activo' : 'inactivo',
-        products: sideBtnProducts?.classList.contains('active') ? 'activo' : 'inactivo',
-        orders: sideBtnOrders?.classList.contains('active') ? 'activo' : 'inactivo'
-    });
-
-    // Probar eventos onclick
-    console.log('Probando eventos onclick...');
-
-    if (sideBtnDashboard) {
-        sideBtnDashboard.addEventListener('click', function (e) {
-            console.log('Botón dashboard clickeado (event listener)');
-            e.preventDefault();
-            e.stopPropagation();
-            switchAdminTab('dashboard');
-        });
-    }
-
-    if (sideBtnProducts) {
-        sideBtnProducts.addEventListener('click', function (e) {
-            console.log('Botón products clickeado (event listener)');
-            e.preventDefault();
-            e.stopPropagation();
-            switchAdminTab('products');
-        });
-    }
-
-    if (sideBtnOrders) {
-        sideBtnOrders.addEventListener('click', function (e) {
-            console.log('Botón orders clickeado (event listener)');
-            e.preventDefault();
-            e.stopPropagation();
-            switchAdminTab('orders');
-        });
-    }
-
-    console.log('Event listeners agregados correctamente');
-    console.log('=== FIN DE VERIFICACIÓN ===');
-});
-
-// Verificar autenticación al inicio
-async function checkAuth() {
-    console.log('=== checkAuth iniciado ===');
-    const client = window.supabaseClient || window.supabase;
-    const { data: { session } } = await client.auth.getSession();
-    if (!session) {
-        console.log('No hay sesión, redirigiendo a login.html');
-        window.location.href = 'login.html';
-        return;
-    }
-    // Mostrar usuario
-    const userEmailEl = document.getElementById('userEmail');
-    if (userEmailEl) userEmailEl.textContent = session.user.email;
-
-    console.log('Sesión autenticada, cargando datos iniciales...');
-
-    // Cargar datos iniciales
-    try {
-        await loadProducts();
-        console.log('Productos cargados correctamente');
-    } catch (e) {
-        console.error('Error cargando productos:', e);
-    }
-
-    try {
-        await loadOrders();
-        console.log('Pedidos cargados correctamente');
-    } catch (e) {
-        console.error('Error cargando pedidos:', e);
-    }
-
-    try {
-        await trackVisits();
-        console.log('Visitas trackeadas correctamente');
-    } catch (e) {
-        console.error('Error trackeando visitas:', e);
-    }
-
-    console.log('=== checkAuth completado ===');
-}
-
-
-// Track and Load Site Visits
-async function trackVisits() {
-    try {
-        const client = window.supabaseClient || window.supabase;
-        // Only increment once per session
-        if (!sessionStorage.getItem('visit_tracked')) {
-            await client.rpc('increment_visit_count');
-            sessionStorage.setItem('visit_tracked', 'true');
-        }
-
-        // Fetch current count
-        const { data, error } = await client
-            .from('site_visits')
-            .select('count')
-            .eq('id', 1)
-            .single();
-
-        if (error) throw error;
-
-        const counterEl = document.getElementById('visitCounter');
-        if (counterEl && data) {
-            // Animate number change for striking effect
-            animateNumber(counterEl, 0, data.count, 1500);
-        }
-    } catch (err) {
-        console.error('Error tracking visits:', err);
-    }
-}
-
-// Helper to animate numbers strikingly
-function animateNumber(element, start, end, duration) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        element.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
-        if (progress < 1) {
-            window.requestAnimationFrame(step);
-        }
-    };
-    window.requestAnimationFrame(step);
-}
+// Global error handler
+window.onerror = function (msg, url, lineNo, columnNo, error) {
+    console.error('Error en admin.js:', msg, 'en', url, 'línea', lineNo);
+    return false;
+};
 
 // Tabs Logic
 window.switchAdminTab = function (tab) {
     console.log('=== switchAdminTab llamado con:', tab, '===');
 
-    const dashboardSection = document.getElementById('dashboardSection');
-    const productsSection = document.getElementById('productsSection');
-    const ordersSection = document.getElementById('ordersSection');
+    try {
+        const dashboardSection = document.getElementById('dashboardSection');
+        const productsSection = document.getElementById('productsSection');
+        const ordersSection = document.getElementById('ordersSection');
 
-    console.log('Secciones encontradas:', {
-        dashboard: !!dashboardSection,
-        products: !!productsSection,
-        orders: !!ordersSection
-    });
+        // Sidebar buttons
+        const navButtons = {
+            dashboard: document.getElementById('sideBtnDashboard'),
+            products: document.getElementById('sideBtnProducts'),
+            orders: document.getElementById('sideBtnOrders'),
+            carousel: document.getElementById('sideBtnCarousel'),
+            offers: document.getElementById('sideBtnOffers'),
+            alerts: document.getElementById('sideBtnAlerts')
+        };
 
-    // Sidebar buttons
-    const navButtons = {
-        dashboard: document.getElementById('sideBtnDashboard'),
-        products: document.getElementById('sideBtnProducts'),
-        orders: document.getElementById('sideBtnOrders')
-    };
+        // Hide all
+        dashboardSection?.classList.add('hidden');
+        productsSection?.classList.add('hidden');
+        ordersSection?.classList.add('hidden');
+        document.getElementById('carouselSection')?.classList.add('hidden');
+        document.getElementById('offersSection')?.classList.add('hidden');
+        document.getElementById('alertsSection')?.classList.add('hidden');
 
-    console.log('Botones encontrados:', {
-        dashboard: !!navButtons.dashboard,
-        products: !!navButtons.products,
-        orders: !!navButtons.orders
-    });
+        // Reset buttons
+        Object.values(navButtons).forEach(btn => {
+            if (btn) btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+        });
 
-    // Hide all
-    dashboardSection?.classList.add('hidden');
-    productsSection?.classList.add('hidden');
-    ordersSection?.classList.add('hidden');
-
-    console.log('Todas las secciones ocultadas');
-
-    // Reset buttons
-    Object.values(navButtons).forEach(btn => {
-        if (btn) btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-    });
-
-    console.log('Botones reseteados');
-
-    // Show selected
-    if (tab === 'dashboard') {
-        console.log('Mostrando dashboard');
-        dashboardSection?.classList.remove('hidden');
-        navButtons.dashboard?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-    } else if (tab === 'products') {
-        console.log('Mostrando products');
-        productsSection?.classList.remove('hidden');
-        navButtons.products?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-
-        // Load products
-        console.log('Cargando productos...');
-        loadProducts();
-
-        // Resize grid after showing section
-        setTimeout(() => {
-            console.log('Redimensionando productsGrid...');
-            if (jQuery('#productsGrid').length > 0) {
-                jQuery('#productsGrid').jqGrid('setGridWidth', jQuery('#productsGrid').closest('.overflow-x-auto').width());
-                jQuery('#productsGrid').trigger('reloadGrid');
+        // Show selected
+        if (tab === 'dashboard') {
+            dashboardSection?.classList.remove('hidden');
+            navButtons.dashboard?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+        } else if (tab === 'products') {
+            productsSection?.classList.remove('hidden');
+            navButtons.products?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            // Load products
+            if (typeof loadProducts === 'function') {
+                loadProducts();
             }
-        }, 100);
-    } else if (tab === 'orders') {
-        console.log('Mostrando orders');
-        ordersSection?.classList.remove('hidden');
-        navButtons.orders?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-
-        // Load orders
-        console.log('Cargando pedidos...');
-        loadOrders();
-
-        // Resize grid after showing section
-        setTimeout(() => {
-            console.log('Redimensionando ordersGrid...');
-            if (jQuery('#ordersGrid').length > 0) {
-                jQuery('#ordersGrid').jqGrid('setGridWidth', jQuery('#ordersGrid').closest('.overflow-x-auto').width());
-                jQuery('#ordersGrid').trigger('reloadGrid');
+            // Resize grid after showing section
+            setTimeout(() => {
+                if (jQuery && jQuery('#productsGrid').length > 0) {
+                    const gridWidth = jQuery('#productsGrid').closest('.overflow-x-auto').width();
+                    if (gridWidth > 0) {
+                        try {
+                            jQuery('#productsGrid').jqGrid('setGridWidth', gridWidth);
+                            jQuery('#productsGrid').trigger('reloadGrid');
+                        } catch (e) {
+                            console.log('Grid not yet ready for resize');
+                        }
+                    }
+                }
+            }, 200);
+        } else if (tab === 'orders') {
+            ordersSection?.classList.remove('hidden');
+            navButtons.orders?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            // Load orders
+            if (typeof loadOrders === 'function') {
+                loadOrders();
             }
-        }, 100);
-    } else {
-        console.error('Tab no reconocido:', tab);
+            // Resize grid after showing section
+            setTimeout(() => {
+                if (jQuery && jQuery('#ordersGrid').length > 0) {
+                    const gridWidth = jQuery('#ordersGrid').closest('.overflow-x-auto').width();
+                    if (gridWidth > 0) {
+                        try {
+                            jQuery('#ordersGrid').jqGrid('setGridWidth', gridWidth);
+                            jQuery('#ordersGrid').trigger('reloadGrid');
+                        } catch (e) {
+                            console.log('Grid not yet ready for resize');
+                        }
+                    }
+                }
+            }, 200);
+        } else if (tab === 'carousel') {
+            document.getElementById('carouselSection')?.classList.remove('hidden');
+            navButtons.carousel?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (typeof loadCarouselImages === 'function') {
+                loadCarouselImages();
+            }
+        } else if (tab === 'offers') {
+            document.getElementById('offersSection')?.classList.remove('hidden');
+            navButtons.offers?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (typeof loadOfferSettings === 'function') {
+                loadOfferSettings();
+            }
+        } else if (tab === 'alerts') {
+            document.getElementById('alertsSection')?.classList.remove('hidden');
+            navButtons.alerts?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (typeof loadAlertSettings === 'function') {
+                loadAlertSettings();
+            }
+        }
+    } catch (err) {
+        console.error('Error en switchAdminTab:', err);
     }
-
-    console.log('=== switchAdminTab completado ===');
-}
+};
 
 
 
@@ -387,6 +252,7 @@ function initProductsGrid() {
     });
 
     console.log('jqGrid de productos inicializado');
+    productsGrid = true;
 }
 
 // Initialize jqGrid for Orders
@@ -468,6 +334,7 @@ function initOrdersGrid() {
     });
 
     console.log('jqGrid de pedidos inicializado');
+    ordersGrid = true;
 }
 
 
@@ -578,17 +445,21 @@ function renderProductsToGrid(products) {
             stockHtml = `<span class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-semibold uppercase">Óptimo: ${p.stock}</span>`;
         }
 
+        // Get main image - support both old (image_url) and new (images array) format
+        const mainImage = (p.images && Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : (p.image_url || '');
+        const imageCount = (p.images && Array.isArray(p.images)) ? p.images.length : (p.image_url ? 1 : 0);
+
         const cleanP = JSON.stringify(p).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
 
         const actionsHtml = `
         <div class="flex items-center justify-center space-x-1">
-                <button onclick='viewProductDetail(${cleanP})' class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-brand-500 hover:text-white transition-colors">
+                <button onclick="viewProductById('${p.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-brand-500 hover:text-white transition-colors">
                     <i class="fas fa-eye text-[11px]"></i>
                 </button>
-                <button onclick='editProduct(${cleanP})' class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition-colors">
+                <button onclick="editProductById('${p.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition-colors">
                     <i class="fas fa-pen text-[11px]"></i>
                 </button>
-                <button onclick="deleteProduct(${p.id})" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition-colors">
+                <button onclick="deleteProduct('${p.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition-colors">
                     <i class="fas fa-trash text-[11px]"></i>
                 </button>
             </div>
@@ -598,8 +469,9 @@ function renderProductsToGrid(products) {
             id: p.id,
             name_display: `
         <div class="flex items-center space-x-2">
-                    <div class="product-img-futuristic w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden">
-                        <img src="${p.image_url}" class="w-full h-full object-contain p-0.5">
+                    <div class="product-img-futuristic w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative">
+                        <img src="${mainImage}" class="w-full h-full object-contain p-0.5">
+                        ${imageCount > 1 ? `<span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full">+${imageCount - 1}</span>` : ''}
                     </div>
                     <div>
                         <span class="block text-[12px] font-semibold text-slate-700 leading-tight">${p.name}</span>
@@ -637,7 +509,13 @@ function renderProductsToGrid(products) {
     console.log('Filas en grid después de agregar:', jQuery('#productsGrid').jqGrid('getGridParam', 'data').map(row => row.id));
 
     // Trigger resize to ensure grid fits properly
-    jQuery('#productsGrid').trigger('reloadGrid');
+    setTimeout(() => {
+        const gridWidth = jQuery('#productsGrid').closest('.overflow-x-auto').width();
+        if (gridWidth > 0) {
+            jQuery('#productsGrid').jqGrid('setGridWidth', gridWidth);
+        }
+        jQuery('#productsGrid').trigger('reloadGrid');
+    }, 100);
 
     updateProductStats(products);
     console.log('Productos renderizados con jqGrid:', gridData.length);
@@ -783,7 +661,7 @@ function renderOrdersToGrid(orders) {
 
         const actionsHtml = `
         <div class="flex items-center justify-center">
-            <button onclick='viewOrder(${orderJson})'
+            <button onclick="viewOrderById('${order.id}')"
                 class="flex items-center space-x-1.5 bg-brand-600 text-white px-3 py-1.5 rounded-md hover:bg-brand-700 transition-colors font-semibold text-[10px] uppercase tracking-wide">
                 <i class="fas fa-eye text-[10px]"></i>
                 <span>Ver</span>
@@ -845,7 +723,13 @@ function renderOrdersToGrid(orders) {
     }
 
     // Trigger resize to ensure grid fits properly
-    jQuery('#ordersGrid').trigger('reloadGrid');
+    setTimeout(() => {
+        const gridWidth = jQuery('#ordersGrid').closest('.overflow-x-auto').width();
+        if (gridWidth > 0) {
+            jQuery('#ordersGrid').jqGrid('setGridWidth', gridWidth);
+        }
+        jQuery('#ordersGrid').trigger('reloadGrid');
+    }, 100);
 
     console.log('Pedidos renderizados con jqGrid:', gridData.length);
 }
@@ -881,17 +765,41 @@ window.viewOrder = function (order) {
     const infoEl = document.getElementById('orderCustomerInfo');
     if (order.customer_info) {
         let infoHtml = '';
-        const info = order.customer_info;
+        let info = order.customer_info;
 
-        if (info.phone) {
-            infoHtml += `
-        <div class="flex items-center space-x-3 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 shadow-sm">
-                <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20"><i class="fab fa-whatsapp text-lg"></i></div>
-                <div class="flex flex-col">
-                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">WhatsApp Contact</span>
-                    <span class="text-[15px] font-black text-slate-800">${info.phone}</span>
-                </div>
-            </div> `;
+        // Robust parsing
+        if (typeof info === 'string') {
+            try { info = JSON.parse(info); } catch (e) { console.error('Error parsing customer_info:', e); }
+        }
+
+        if (info) {
+            // Bloque de Nombre
+            if (info.name) {
+                infoHtml += `
+                <div class="flex items-center space-x-3 p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100 shadow-sm mb-3">
+                    <div class="w-9 h-9 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <i class="fas fa-user text-sm"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none mb-1">Cliente</span>
+                        <span class="text-[13px] font-black text-slate-800 leading-none">${info.name}</span>
+                    </div>
+                </div>`;
+            }
+
+            // Bloque de WhatsApp
+            if (info.phone) {
+                infoHtml += `
+                <div class="flex items-center space-x-3 p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100 shadow-sm">
+                    <div class="w-9 h-9 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <i class="fab fa-whatsapp text-sm"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-1">WhatsApp Contact</span>
+                        <span class="text-[13px] font-black text-slate-800 leading-none">${info.phone}</span>
+                    </div>
+                </div>`;
+            }
         }
         infoEl.innerHTML = infoHtml || '<p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Sin datos adicionales</p>';
     } else {
@@ -910,28 +818,51 @@ window.viewOrder = function (order) {
     if (Array.isArray(items)) {
         items.forEach(item => {
             const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50/50 transition-all';
+            row.className = 'border-b border-slate-50/50';
+
             row.innerHTML = `
-        < td class="px-6 py-4">
-            <div class="flex flex-col">
-                <span class="text-[11px] font-black text-slate-700 leading-tight">${item.name}</span>
-                <span class="text-[8px] font-bold text-slate-400 uppercase">SKU-${item.id || 'N/A'}</span>
-            </div>
+                <td class="px-6 py-4">
+                    <div class="flex flex-col">
+                        <span class="text-[12px] font-bold text-slate-700 leading-tight mb-1 uppercase">${item.name}</span>
+                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">SKU-${item.id || 'N/A'}</span>
+                    </div>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <span class="text-[10px] font-bold text-slate-600">${item.quantity} ud.</span>
+                    <span class="text-[11px] font-bold text-slate-600">${item.quantity}ud.</span>
                 </td>
                 <td class="px-6 py-4 text-right">
-                    <span class="text-[11px] font-black text-slate-700">S/. ${(item.price * item.quantity).toFixed(2)}</span>
+                    <span class="text-[12px] font-bold text-slate-700">S/. ${(item.price * item.quantity).toFixed(2)}</span>
                 </td>
-    `;
+            `;
             itemsBody.appendChild(row);
         });
     }
 
+    // Summary Breakdown
+    let info = order.customer_info;
+    if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) { } }
+
+    if (info && info.shipping !== undefined) {
+        const summaryRows = [
+            { label: 'Costo de Envío', value: info.shipping, classes: info.shipping === 0 ? 'text-emerald-500' : 'text-slate-400' }
+        ];
+
+        summaryRows.forEach(rowInfo => {
+            const tr = document.createElement('tr');
+            tr.className = 'bg-slate-50/20 border-t border-slate-50/50';
+            tr.innerHTML = `
+                <td colspan="2" class="px-6 py-3 text-[9px] font-black uppercase tracking-widest ${rowInfo.classes}">${rowInfo.label}</td>
+                <td class="px-6 py-3 text-right text-[11px] font-black text-slate-600">S/. ${parseFloat(rowInfo.value).toFixed(2)}</td>
+            `;
+            itemsBody.appendChild(tr);
+        });
+    }
+
     document.getElementById('orderTotal').innerHTML = `
-        <span class="text-brand-500/50 font-black mr-1 text-base"> S /.</span>
-            ${parseFloat(order.total).toFixed(2)}
+        <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[14px] font-bold text-blue-400">S/.</span>
+            <span class="text-[26px] font-black text-blue-700 tracking-tighter">${parseFloat(order.total).toFixed(2)}</span>
+        </div>
     `;
 
     document.getElementById('orderModal').classList.remove('hidden');
@@ -1135,7 +1066,8 @@ window.printOrder = function () {
                             </div>
                         </div>
                         <div class="info">
-                            <p><strong>Cliente (WhatsApp):</strong> ${order.customer_info?.phone || 'N/A'}</p>
+                            <p><strong>Cliente:</strong> ${order.customer_info?.name || 'Cliente'}</p>
+                            <p><strong>WhatsApp:</strong> ${order.customer_info?.phone || 'N/A'}</p>
                             <p><strong>Estado:</strong> ${order.status.toUpperCase()}</p>
                         </div>
                         <table>
@@ -1171,7 +1103,8 @@ window.printOrder = function () {
 const modal = document.getElementById('productModal');
 const form = document.getElementById('productForm');
 
-// Image Tab Logic
+// Image Gallery Logic
+let productImages = []; // Array to store multiple image URLs
 let activeImageTab = 'upload'; // default
 
 window.switchImageTab = function (tab) {
@@ -1198,10 +1131,75 @@ window.switchImageTab = function (tab) {
         urlInput.classList.remove('hidden');
         uploadInput.classList.add('hidden');
     }
-    // Clear preview when switching if needed, or re-eval
-    previewImage();
 };
 
+// Add image to gallery
+window.addImageToGallery = function (url, isFile = false) {
+    if (!url) return;
+
+    // Check if image already exists
+    if (productImages.includes(url)) {
+        Swal.fire('Atención', 'Esta imagen ya está en la galería', 'warning');
+        return;
+    }
+
+    productImages.push(url);
+    renderImageGallery();
+
+    // Clear inputs
+    if (!isFile) {
+        document.getElementById('prodImage').value = '';
+    }
+};
+
+// Remove image from gallery
+window.removeImageFromGallery = function (index) {
+    productImages.splice(index, 1);
+    renderImageGallery();
+};
+
+// Render image gallery
+function renderImageGallery() {
+    // Early return if elements don't exist (modal not open yet)
+    const galleryContainer = document.getElementById('imageGalleryContainer');
+    const galleryPreview = document.getElementById('imageGalleryPreview');
+    const countBadge = document.getElementById('imageCountBadge');
+
+    // Update count badge if exists
+    if (countBadge) {
+        countBadge.textContent = `${productImages.length} imagen${productImages.length !== 1 ? 'es' : ''}`;
+    }
+
+    if (!galleryContainer || !galleryPreview) return;
+
+    if (productImages.length === 0) {
+        galleryContainer.classList.add('hidden');
+        return;
+    }
+
+    galleryContainer.classList.remove('hidden');
+    galleryPreview.innerHTML = '';
+
+    if (productImages.length === 0) return;
+
+    productImages.forEach((url, index) => {
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'relative group';
+        imgWrapper.innerHTML = `
+            <div class="w-20 h-20 rounded-xl overflow-hidden border-2 border-slate-200 group-hover:border-brand-400 transition-all">
+                <img src="${url}" class="w-full h-full object-cover" alt="Imagen ${index + 1}" onerror="this.src=''">
+            </div>
+            <button type="button" onclick="window.removeImageFromGallery(${index})" 
+                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+            ${index === 0 ? '<span class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 text-[8px] font-bold text-brand-600 bg-brand-100 px-2 py-0.5 rounded-full">Principal</span>' : ''}
+        `;
+        galleryPreview.appendChild(imgWrapper);
+    });
+}
+
+// Preview single image (for backward compatibility)
 function previewImage() {
     const preview = document.getElementById('imagePreview');
     const img = preview.querySelector('img');
@@ -1226,22 +1224,93 @@ function previewImage() {
             }
             reader.readAsDataURL(file);
         } else {
-            // Check if there is an existing image URL from edit mode to show as fallback?
-            // For now, if no new file, hide preview unless we want to show current image.
-            const currentUrl = document.getElementById('prodImage').value; // fallback to hidden url field? No, logical split.
-            if (currentUrl && document.getElementById('prodId').value) {
-                // In edit mode with no new file, show existing URL
-                img.src = currentUrl;
-                preview.classList.remove('hidden');
-            } else {
-                preview.classList.add('hidden');
-            }
+            preview.classList.add('hidden');
         }
     }
 }
 
-// Watch for file selection changes
-document.getElementById('prodImageFile').addEventListener('change', previewImage);
+// Handle file upload for gallery
+window.handleGalleryFileUpload = async function (input) {
+    const files = input.files;
+    if (!files || files.length === 0) return;
+
+    const client = window.supabaseClient || window.supabase;
+    let uploadedCount = 0;
+
+    Swal.fire({
+        title: 'Subiendo imágenes...',
+        text: `0 de ${files.length} imágenes subidas`,
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${i}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { data, error: uploadError } = await client.storage
+                .from('products')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                console.error('Error uploading image:', uploadError);
+                continue;
+            }
+
+            // Get Public URL
+            const { data: { publicUrl } } = client.storage
+                .from('products')
+                .getPublicUrl(filePath);
+
+            addImageToGallery(publicUrl, true);
+            uploadedCount++;
+
+            Swal.update({
+                text: `${uploadedCount} de ${files.length} imágenes subidas`
+            });
+
+        } catch (err) {
+            console.error('Error uploading file:', err);
+        }
+    }
+
+    Swal.close();
+
+    if (uploadedCount > 0) {
+        Swal.fire('Éxito', `${uploadedCount} imágenes subidas correctamente`, 'success');
+    } else {
+        Swal.fire('Error', 'No se pudieron subir las imágenes', 'error');
+    }
+
+    // Clear input
+    input.value = '';
+};
+
+// Add URL image to gallery
+window.addUrlImageToGallery = function () {
+    const url = document.getElementById('prodImage').value.trim();
+    if (!url) {
+        Swal.fire('Error', 'Ingresa una URL válida', 'error');
+        return;
+    }
+
+    // Validate URL
+    try {
+        new URL(url);
+    } catch (e) {
+        Swal.fire('Error', 'La URL ingresada no es válida', 'error');
+        return;
+    }
+
+    addImageToGallery(url);
+    previewImage();
+};
 
 
 // Info Tabs Logic
@@ -1361,6 +1430,10 @@ function openModal(product = null) {
     // Clear specs list
     document.getElementById('specsList').innerHTML = '';
 
+    // Reset image gallery
+    productImages = [];
+    renderImageGallery();
+
     // Default tabs
     switchImageTab('upload');
     switchInfoTab('desc');
@@ -1374,7 +1447,15 @@ function openModal(product = null) {
         document.getElementById('prodStock').value = product.stock || 0;
         document.getElementById('prodCategory').value = product.category;
         document.getElementById('prodDesc').value = product.description || '';
-        document.getElementById('prodImage').value = product.image_url;
+
+        // Load Images - Support both old (image_url) and new (images array) format
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            productImages = [...product.images];
+        } else if (product.image_url) {
+            // Backward compatibility - convert single image_url to array
+            productImages = [product.image_url];
+        }
+        renderImageGallery();
 
         // Load Specs
         if (product.specifications && Object.keys(product.specifications).length > 0) {
@@ -1382,20 +1463,16 @@ function openModal(product = null) {
                 addSpecRow(key, val);
             });
         } else {
-            // If old product with no specs, maybe try to parse description lines?
-            // Optional enhancement. For now, empty or manual.
             addSpecRow(); // Add one empty row
         }
 
         // Nuevo Ingreso checkbox
         document.getElementById('prodNewArrival').checked = !!product.is_new_arrival;
 
-        previewImage();
     } else {
         // Modo Creación
         document.getElementById('modalTitle').textContent = 'Nuevo Producto';
         addSpecRow(); // Start with one row
-        document.getElementById('prodNewArrival').checked = true; // Default to true for new products? Or false? Let's default false to be safe, or true since it is "New Product" modal. User said "check to indicate...", usually defaults to false unless explicitly new entry. Let's make it false default.
         document.getElementById('prodNewArrival').checked = false;
     }
 
@@ -1424,7 +1501,6 @@ form.addEventListener('submit', async (e) => {
         const client = window.supabaseClient || window.supabase;
         const id = document.getElementById('prodId').value;
         const name = document.getElementById('prodName').value;
-        let imageUrl = document.getElementById('prodImage').value; // Default to existing/URL input
 
         // Collect Specs
         const specsContainer = document.getElementById('specsList');
@@ -1442,39 +1518,9 @@ form.addEventListener('submit', async (e) => {
             }
         });
 
-        // Handle File Upload if active tab is upload and file selected
-        if (activeImageTab === 'upload') {
-            const fileInput = document.getElementById('prodImageFile');
-            const file = fileInput.files[0];
-
-            if (file) {
-                // Upload logic
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}.${fileExt}`;
-                const filePath = `${fileName}`;
-
-                const { data, error: uploadError } = await client.storage
-                    .from('products')
-                    .upload(filePath, file);
-
-                if (uploadError) throw new Error('Error al subir imagen: ' + uploadError.message);
-
-                // Get Public URL
-                const { data: { publicUrl } } = client.storage
-                    .from('products')
-                    .getPublicUrl(filePath);
-
-                imageUrl = publicUrl;
-            } else if (!id) {
-                // New product, upload tab active but no file
-                // If there's no URL typed in the other tab (which is hidden but value might exist?), warn?
-                // But user might have switched tabs.
-                // If active tab is upload and NO file, check if URL input has value?
-                // No, strict mode: if upload tab is active, expect file or keep existing (edit).
-                if (!imageUrl) throw new Error("Debes seleccionar una imagen o ingresar una URL.");
-            }
-        } else {
-            if (!imageUrl) throw new Error("Debes ingresar una URL de imagen.");
+        // Validate images
+        if (productImages.length === 0) {
+            throw new Error("Debes agregar al menos una imagen del producto.");
         }
 
         const productData = {
@@ -1483,7 +1529,8 @@ form.addEventListener('submit', async (e) => {
             stock: parseInt(document.getElementById('prodStock').value),
             category: document.getElementById('prodCategory').value,
             description: document.getElementById('prodDesc').value,
-            image_url: imageUrl,
+            images: productImages, // Array of image URLs
+            image_url: productImages[0], // Keep first image as main for backward compatibility
             specifications: specifications,
             is_new_arrival: document.getElementById('prodNewArrival').checked
         };
@@ -1560,6 +1607,27 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 // Init
+async function checkAuth() {
+    console.log('Verificando autenticación...');
+    try {
+        const client = window.supabaseClient || window.supabase;
+        if (!client) {
+            console.error('Supabase client no inicializado');
+            return;
+        }
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) {
+            console.warn('Sin sesión activada, redirigiendo a login...');
+            window.location.href = 'login.html';
+        } else {
+            console.log('Sesión activa:', session.user.email);
+            const userEmailEl = document.getElementById('userEmail');
+            if (userEmailEl) userEmailEl.textContent = session.user.email;
+        }
+    } catch (err) {
+        console.error('Error en checkAuth:', err);
+    }
+}
 document.addEventListener('DOMContentLoaded', checkAuth);
 
 // Ver detalle de producto
@@ -1569,13 +1637,20 @@ window.viewProductDetail = function (product) {
     // Guardar referencia al producto actual
     window.currentProductDetail = product;
 
+    // Get images array - support both old and new format
+    const images = (product.images && Array.isArray(product.images) && product.images.length > 0)
+        ? product.images
+        : (product.image_url ? [product.image_url] : []);
+
     // Actualizar elementos del modal
     document.getElementById('detailProductName').textContent = product.name || 'Sin nombre';
-    document.getElementById('detailProductImage').src = product.image_url || '';
     document.getElementById('detailProductPrice').textContent = 'S/. ' + (parseFloat(product.price) || 0).toFixed(2);
     document.getElementById('detailProductStock').textContent = product.stock || 0;
     document.getElementById('detailProductCategory').textContent = product.category || '-';
     document.getElementById('detailProductDesc').textContent = product.description || 'Sin descripción';
+
+    // Setup image gallery
+    setupProductImageGallery(images);
 
     // Actualizar status pill según el stock
     const statusPill = document.getElementById('detailStatusPill');
@@ -1707,6 +1782,46 @@ window.viewProductDetail = function (product) {
     if (modal) {
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+    }
+}
+
+// Setup product image gallery in detail modal
+function setupProductImageGallery(images) {
+    const mainImageEl = document.getElementById('detailProductImage');
+    const galleryContainer = document.getElementById('detailImageGallery');
+
+    if (!mainImageEl || !galleryContainer) return;
+
+    if (images.length === 0) {
+        mainImageEl.src = '';
+        galleryContainer.innerHTML = '';
+        return;
+    }
+
+    // Set main image
+    mainImageEl.src = images[0];
+
+    // Clear and rebuild gallery
+    galleryContainer.innerHTML = '';
+
+    if (images.length > 1) {
+        images.forEach((imgUrl, index) => {
+            const thumbBtn = document.createElement('button');
+            thumbBtn.className = `w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${index === 0 ? 'border-brand-500 ring-2 ring-brand-200' : 'border-slate-200 hover:border-brand-300'}`;
+            thumbBtn.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover" alt="Imagen ${index + 1}">`;
+            thumbBtn.onclick = () => {
+                // Update main image
+                mainImageEl.src = imgUrl;
+                // Update active state
+                galleryContainer.querySelectorAll('button').forEach((btn, i) => {
+                    btn.className = `w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${i === index ? 'border-brand-500 ring-2 ring-brand-200' : 'border-slate-200 hover:border-brand-300'}`;
+                });
+            };
+            galleryContainer.appendChild(thumbBtn);
+        });
+        galleryContainer.classList.remove('hidden');
+    } else {
+        galleryContainer.classList.add('hidden');
     }
 }
 
@@ -2184,6 +2299,176 @@ window.printProductDetail = function () {
     }, 5000);
 }
 
+// --- CAROUSEL MANAGEMENT ---
+
+window.loadCarouselImages = async function () {
+    console.log('Cargando imágenes del carrusel...');
+    const grid = document.getElementById('carouselImagesGrid');
+    const noImages = document.getElementById('noCarouselImages');
+
+    if (grid) grid.innerHTML = '<div class="col-span-full flex justify-center py-10"><i class="fas fa-spinner fa-spin text-4xl text-brand-500"></i></div>';
+
+    try {
+        const client = window.supabaseClient || window.supabase;
+        const { data, error } = await client
+            .from('carousel_images')
+            .select('*')
+            .order('order_index', { ascending: true });
+
+        if (error) throw error;
+
+        window.allCarouselImages = data || [];
+        renderCarouselImages(window.allCarouselImages);
+    } catch (err) {
+        console.error('Error al cargar carrusel:', err);
+        if (grid) grid.innerHTML = `<p class="col-span-full text-center text-rose-500">Error: ${err.message}</p>`;
+    }
+}
+
+function renderCarouselImages(images) {
+    const grid = document.getElementById('carouselImagesGrid');
+    const noImages = document.getElementById('noCarouselImages');
+
+    if (!grid) return;
+
+    if (!images || images.length === 0) {
+        grid.innerHTML = '';
+        noImages?.classList.remove('hidden');
+        return;
+    }
+
+    noImages?.classList.add('hidden');
+    grid.innerHTML = '';
+
+    images.forEach((img) => {
+        const card = document.createElement('div');
+        card.className = "group relative bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1";
+        card.innerHTML = `
+            <div class="w-full overflow-hidden bg-slate-200" style="aspect-ratio: 1200/370;">
+                <img src="${img.image_url}" class="w-full h-full object-fill transition-transform duration-700 group-hover:scale-105">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-6">
+                <div class="text-white">
+                    <p class="text-[10px] font-black uppercase tracking-widest opacity-70">Posición: ${img.order_index}</p>
+                </div>
+                <button onclick="deleteCarouselImage(${img.id}, '${img.image_url}')" 
+                    class="w-12 h-12 rounded-2xl bg-rose-500/20 backdrop-blur-md text-white border border-rose-500/30 hover:bg-rose-500 hover:scale-110 transition-all flex items-center justify-center">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+window.uploadCarouselImages = async function (input) {
+    const files = input.files;
+    if (!files || files.length === 0) return;
+
+    const client = window.supabaseClient || window.supabase;
+
+    Swal.fire({
+        title: 'Subiendo imágenes...',
+        html: `Procesando <b>0</b> de ${files.length} archivos`,
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `carousel/${fileName}`;
+
+        try {
+            // 1. Subir a Storage
+            const { error: uploadError } = await client.storage
+                .from('carousel')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            // 2. Obtener URL pública
+            const { data: { publicUrl } } = client.storage
+                .from('carousel')
+                .getPublicUrl(filePath);
+
+            // 3. Guardar en Base de Datos
+            const { error: dbError } = await client
+                .from('carousel_images')
+                .insert([{
+                    image_url: publicUrl,
+                    order_index: (window.allCarouselImages?.length || 0) + successCount
+                }]);
+
+            if (dbError) throw dbError;
+
+            successCount++;
+            Swal.getHtmlContainer().querySelector('b').textContent = successCount;
+        } catch (err) {
+            console.error(`Error subiendo ${file.name}:`, err);
+            errorCount++;
+        }
+    }
+
+    input.value = ''; // Limpiar input
+    await loadCarouselImages();
+
+    Swal.fire({
+        icon: errorCount === 0 ? 'success' : 'info',
+        title: 'Proceso completado',
+        text: `Se subieron ${successCount} imágenes correctamente.${errorCount > 0 ? ` Fallaron ${errorCount} archivos.` : ''}`
+    });
+}
+
+window.deleteCarouselImage = async function (id, imageUrl) {
+    const result = await Swal.fire({
+        title: '¿Eliminar imagen?',
+        text: "Esta acción quitará la imagen del carrusel principal.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const client = window.supabaseClient || window.supabase;
+
+            // 1. Eliminar de la base de datos
+            const { error: dbError } = await client
+                .from('carousel_images')
+                .delete()
+                .eq('id', id);
+
+            if (dbError) throw dbError;
+
+            // 2. Intentar eliminar del Storage si es de nuestro bucket
+            if (imageUrl.includes('carousel')) {
+                const fileName = imageUrl.split('/').pop();
+                await client.storage
+                    .from('carousel')
+                    .remove([`carousel/${fileName}`]);
+            }
+
+            Swal.fire('Eliminado', 'La imagen ha sido quitada del carrusel.', 'success');
+            loadCarouselImages();
+        } catch (err) {
+            console.error('Error al eliminar:', err);
+            Swal.fire('Error', 'No se pudo eliminar la imagen: ' + err.message, 'error');
+        }
+    }
+}
+
+// --- END CAROUSEL MANAGEMENT ---
+
 // Funcionalidad de búsqueda para jqGrid
 document.addEventListener('DOMContentLoaded', function () {
     // Buscador de productos
@@ -2233,3 +2518,451 @@ function filterOrdersGrid(searchText) {
     renderOrdersToGrid(filteredData);
 }
 
+// Auxiliares para buscar y procesar productos por ID desde la caché local
+window.viewProductById = function (id) {
+    console.log('viewProductById llamado con id:', id);
+    if (!window.allAdminProducts) {
+        console.warn('No hay productos cargados en memoria. Intentando cargar...');
+        loadProducts().then(() => {
+            const product = window.allAdminProducts.find(p => p.id == id);
+            if (product) window.viewProductDetail(product);
+        });
+        return;
+    }
+    const product = window.allAdminProducts.find(p => p.id == id);
+    console.log('Producto encontrado:', product);
+    if (product) {
+        window.viewProductDetail(product);
+    } else {
+        console.error('Producto no encontrado id:', id);
+    }
+};
+
+window.editProductById = function (id) {
+    console.log('editProductById llamado con id:', id);
+    if (!window.allAdminProducts) {
+        console.warn('No hay productos cargados en memoria. Intentando cargar...');
+        loadProducts().then(() => {
+            const product = window.allAdminProducts.find(p => p.id == id);
+            if (product) window.editProduct(product);
+        });
+        return;
+    }
+    const product = window.allAdminProducts.find(p => p.id == id);
+    console.log('Producto encontrado para edición:', product);
+    if (product) {
+        window.editProduct(product);
+    } else {
+        console.error('Producto no encontrado para edición id:', id);
+    }
+};
+
+window.viewOrderById = function (id) {
+    console.log('viewOrderById llamado con id:', id);
+    if (!window.allAdminOrders) {
+        console.warn('No hay pedidos cargados en memoria. Intentando cargar...');
+        loadOrders().then(() => {
+            const order = window.allAdminOrders.find(o => o.id == id);
+            if (order) window.viewOrder(order);
+        });
+        return;
+    }
+    const order = window.allAdminOrders.find(o => o.id == id);
+    console.log('Pedido encontrado:', order);
+    if (order) {
+        window.viewOrder(order);
+    } else {
+        console.error('Pedido no encontrado id:', id);
+    }
+};
+
+
+// --- OFFERS LOGIC ---
+
+window.loadOfferSettings = async function () {
+    console.log("Cargando configuración de ofertas...");
+    try {
+        const client = window.supabaseClient || window.supabase;
+        const { data, error } = await client
+            .from('site_settings')
+            .select('value')
+            .eq('key', 'offer_banner')
+            .single();
+
+        if (error) {
+            console.error('Error fetching settings:', error);
+            return;
+        }
+
+        if (data && data.value) {
+            const config = data.value;
+
+            // Set Toggle
+            const toggle = document.getElementById('offerActiveToggle');
+            const statusText = document.getElementById('offerStatusText');
+
+            if (toggle) {
+                toggle.checked = config.isActive;
+                if (statusText) statusText.textContent = config.isActive ? 'Activado' : 'Desactivado';
+
+                // Toggle event listener for immediate text update
+                toggle.onchange = function () {
+                    if (statusText) statusText.textContent = this.checked ? 'Activado' : 'Desactivado';
+                };
+            }
+
+            // Set Date
+            const dateInput = document.getElementById('offerEndDate');
+            if (dateInput && config.endDate) {
+                // Determine format
+                // datetime-local expects YYYY-MM-DDThh:mm
+                // config.endDate might be ISO string "2026-02-14T23:59:59"
+                dateInput.value = config.endDate.slice(0, 16); // Cut off seconds/timezone if needed for input
+            }
+        }
+    } catch (err) {
+        console.error('Error loading offer settings:', err);
+    }
+};
+
+window.saveOfferSettings = async function () {
+    const toggle = document.getElementById('offerActiveToggle');
+    const dateInput = document.getElementById('offerEndDate');
+
+    try {
+        const newConfig = {
+            isActive: toggle ? toggle.checked : false,
+            endDate: dateInput ? dateInput.value : null
+        };
+
+        if (!newConfig.endDate) {
+            Swal.fire('Error', 'Debes seleccionar una fecha de finalización.', 'error');
+            return;
+        }
+
+        const client = window.supabaseClient || window.supabase;
+
+        const { error } = await client
+            .from('site_settings')
+            .upsert({
+                key: 'offer_banner',
+                value: newConfig,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) {
+            let errorTitle = 'Error al Guardar';
+            let errorMessage = '';
+
+            if (error.code === '42501' || error.message.includes('row-level security')) {
+                errorTitle = 'Error de Permisos';
+                errorMessage = `
+                    <div class="text-left">
+                        <p class="font-bold mb-2">No tienes permisos para guardar esta configuración.</p>
+                        <p class="text-sm mb-2">Debes estar autenticado para realizar cambios en las ofertas.</p>
+                        <p class="text-sm mt-3 text-gray-600">
+                            <strong>Solución:</strong> Asegúrate de estar autenticado en el sistema.
+                        </p>
+                    </div>
+                `;
+            } else {
+                errorMessage = `
+                    <div class="text-left">
+                        <p class="font-bold mb-2">Ocurrió un error:</p>
+                        <p class="text-sm bg-gray-100 p-2 rounded mt-2 font-mono">${error.message}</p>
+                    </div>
+                `;
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: errorTitle,
+                html: errorMessage,
+                confirmButtonColor: '#dc2626',
+                width: '600px'
+            });
+
+            console.error('Error saving offer settings:', error);
+            return;
+        }
+
+        Swal.fire('Guardado', 'La configuración de ofertas ha sido actualizada.', 'success');
+
+    } catch (err) {
+        console.error('Error saving settings:', err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error Crítico',
+            html: `
+                <div class="text-left">
+                    <p class="font-bold mb-2">Ocurrió un error crítico:</p>
+                    <p class="text-sm bg-gray-100 p-2 rounded mt-2 font-mono">${err.message}</p>
+                </div>
+            `,
+            confirmButtonColor: '#dc2626',
+            width: '600px'
+        });
+    }
+};
+
+
+// ============================================
+// ALERT SETTINGS FUNCTIONS
+// ============================================
+
+window.loadAlertSettings = async function () {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('site_settings')
+            .select('value')
+            .eq('key', 'web_alert')
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+
+        const config = data?.value || {
+            isActive: false,
+            type: 'info',
+            message: ''
+        };
+
+        // Update UI
+        const toggle = document.getElementById('alertActiveToggle');
+        const statusText = document.getElementById('alertStatusText');
+        const typeSelect = document.getElementById('alertType');
+        const messageTextarea = document.getElementById('alertMessage');
+
+        if (toggle) {
+            toggle.checked = config.isActive;
+            if (statusText) {
+                statusText.textContent = config.isActive ? 'Activado' : 'Desactivado';
+            }
+        }
+
+        if (typeSelect) typeSelect.value = config.type || 'info';
+        if (messageTextarea) messageTextarea.value = config.message || '';
+
+        // Update preview
+        updateAlertPreview();
+
+    } catch (err) {
+        console.error('Error loading alert settings:', err);
+        Swal.fire('Error', 'No se pudieron cargar las configuraciones: ' + err.message, 'error');
+    }
+};
+
+window.saveAlertSettings = async function () {
+    try {
+        const toggle = document.getElementById('alertActiveToggle');
+        const typeSelect = document.getElementById('alertType');
+        const messageTextarea = document.getElementById('alertMessage');
+
+        const message = messageTextarea?.value?.trim() || '';
+
+        // Validation
+        if (message.length > 200) {
+            Swal.fire('Error', 'El mensaje no puede exceder 200 caracteres.', 'warning');
+            return;
+        }
+
+        if (toggle?.checked && !message) {
+            Swal.fire('Error', 'Debes escribir un mensaje para activar la alerta.', 'warning');
+            return;
+        }
+
+        const config = {
+            isActive: toggle?.checked || false,
+            type: typeSelect?.value || 'info',
+            message: message
+        };
+
+        // Upsert to database
+        const { error } = await window.supabaseClient
+            .from('site_settings')
+            .upsert({
+                key: 'web_alert',
+                value: config,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) {
+            // Provide detailed error messages based on error type
+            let errorTitle = 'Error al Guardar';
+            let errorMessage = '';
+
+            if (error.code === '42501' || error.message.includes('row-level security')) {
+                errorTitle = 'Error de Permisos';
+                errorMessage = `
+                    <div class="text-left">
+                        <p class="font-bold mb-2">No tienes permisos para guardar esta configuración.</p>
+                        <p class="text-sm mb-2">Posibles causas:</p>
+                        <ul class="list-disc list-inside text-sm space-y-1">
+                            <li><strong>No estás autenticado:</strong> Debes iniciar sesión en el panel administrativo.</li>
+                            <li><strong>Políticas RLS:</strong> Las políticas de seguridad de la base de datos requieren autenticación.</li>
+                            <li><strong>Sesión expirada:</strong> Tu sesión puede haber expirado. Intenta cerrar sesión y volver a entrar.</li>
+                        </ul>
+                        <p class="text-sm mt-3 text-gray-600">
+                            <strong>Solución:</strong> Asegúrate de estar autenticado en el sistema antes de guardar cambios.
+                        </p>
+                    </div>
+                `;
+            } else if (error.code === 'PGRST301') {
+                errorTitle = 'Error de Conexión';
+                errorMessage = `
+                    <div class="text-left">
+                        <p class="font-bold mb-2">No se pudo conectar con la base de datos.</p>
+                        <p class="text-sm">Verifica tu conexión a internet e intenta nuevamente.</p>
+                    </div>
+                `;
+            } else if (error.message.includes('JWT')) {
+                errorTitle = 'Sesión Expirada';
+                errorMessage = `
+                    <div class="text-left">
+                        <p class="font-bold mb-2">Tu sesión ha expirado.</p>
+                        <p class="text-sm">Por favor, cierra sesión y vuelve a iniciar sesión para continuar.</p>
+                    </div>
+                `;
+            } else {
+                errorMessage = `
+                    <div class="text-left">
+                        <p class="font-bold mb-2">Ocurrió un error inesperado:</p>
+                        <p class="text-sm bg-gray-100 p-2 rounded mt-2 font-mono">${error.message}</p>
+                        <p class="text-sm mt-2 text-gray-600">
+                            <strong>Código:</strong> ${error.code || 'N/A'}
+                        </p>
+                    </div>
+                `;
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: errorTitle,
+                html: errorMessage,
+                confirmButtonColor: '#dc2626',
+                width: '600px'
+            });
+
+            console.error('Error saving alert settings:', {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                hint: error.hint
+            });
+            return;
+        }
+
+        Swal.fire('Guardado', 'La configuración de alertas ha sido actualizada.', 'success');
+
+    } catch (err) {
+        console.error('Error saving alert settings:', err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error Crítico',
+            html: `
+                <div class="text-left">
+                    <p class="font-bold mb-2">Ocurrió un error crítico al guardar:</p>
+                    <p class="text-sm bg-gray-100 p-2 rounded mt-2 font-mono">${err.message}</p>
+                    <p class="text-sm mt-3 text-gray-600">
+                        Por favor, recarga la página e intenta nuevamente. Si el problema persiste, contacta al soporte técnico.
+                    </p>
+                </div>
+            `,
+            confirmButtonColor: '#dc2626',
+            width: '600px'
+        });
+    }
+};
+
+function updateAlertPreview() {
+    const typeSelect = document.getElementById('alertType');
+    const messageTextarea = document.getElementById('alertMessage');
+    const preview = document.getElementById('alertPreview');
+    const toggle = document.getElementById('alertActiveToggle');
+
+    if (!preview) return;
+
+    const message = messageTextarea?.value?.trim() || '';
+    const type = typeSelect?.value || 'info';
+    const isActive = toggle?.checked || false;
+
+    if (!message || !isActive) {
+        preview.innerHTML = `
+            <i class="fas fa-eye-slash mb-2 text-2xl"></i>
+            <p class="text-sm">La vista previa aparecerá aquí</p>
+        `;
+        preview.className = 'p-4 rounded-xl border-2 border-dashed border-slate-300 text-center text-slate-400';
+        return;
+    }
+
+    const styles = {
+        info: {
+            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            icon: 'fa-info-circle',
+            shadow: '0 10px 40px rgba(102, 126, 234, 0.4)'
+        },
+        success: {
+            gradient: 'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)',
+            icon: 'fa-check-circle',
+            shadow: '0 10px 40px rgba(11, 163, 96, 0.4)'
+        },
+        warning: {
+            gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            icon: 'fa-exclamation-triangle',
+            shadow: '0 10px 40px rgba(240, 147, 251, 0.4)'
+        },
+        error: {
+            gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            icon: 'fa-times-circle',
+            shadow: '0 10px 40px rgba(250, 112, 154, 0.4)'
+        }
+    };
+
+    const style = styles[type] || styles.info;
+
+    preview.style.background = style.gradient;
+    preview.style.boxShadow = style.shadow;
+    preview.className = 'relative p-5 rounded-2xl border-2 border-white/30 overflow-hidden';
+
+    preview.innerHTML = `
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.3) 35px, rgba(255,255,255,.3) 70px);"></div>
+        </div>
+        
+        <!-- Content -->
+        <div class="relative flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shadow-lg">
+                <i class="fas ${style.icon} text-white text-2xl"></i>
+            </div>
+            <p class="text-base font-bold text-white flex-1">${message}</p>
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <i class="fas fa-times text-white"></i>
+            </div>
+        </div>
+    `;
+}
+
+// Event listeners for preview
+document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('alertActiveToggle');
+    const typeSelect = document.getElementById('alertType');
+    const messageTextarea = document.getElementById('alertMessage');
+    const statusText = document.getElementById('alertStatusText');
+
+    if (toggle) {
+        toggle.addEventListener('change', function () {
+            if (statusText) {
+                statusText.textContent = this.checked ? 'Activado' : 'Desactivado';
+            }
+            updateAlertPreview();
+        });
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateAlertPreview);
+    }
+
+    if (messageTextarea) {
+        messageTextarea.addEventListener('input', updateAlertPreview);
+    }
+});

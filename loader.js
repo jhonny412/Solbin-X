@@ -138,51 +138,133 @@ function renderCurrentPage() {
     grid.innerHTML = '';
 
 
-    productsToShow.forEach(p => {
-
+    productsToShow.forEach((p, index) => {
         const card = document.createElement('div');
-        card.className = "producto-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover transition-colors duration-300 relative group";
+        card.className = "producto-card group relative bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700";
+
+        // Agregar atributos data para debugging
+        card.setAttribute('data-product-id', p.id || index);
+        card.setAttribute('data-product-name', p.name);
+
+        // Get images array - support both old and new format
+        const images = (p.images && Array.isArray(p.images) && p.images.length > 0)
+            ? p.images
+            : (p.image_url ? [p.image_url] : []);
+        const mainImage = images[0] || '';
+        const imageCount = images.length;
 
         let color = 'sky';
-        if (p.category === 'smartphones') color = 'green';
-        if (p.category === 'tablets') color = 'pink';
-        if (p.category === 'accesorios') color = 'indigo';
+        let categoryIcon = 'fa-laptop';
+        if (p.category === 'smartphones') { color = 'green'; categoryIcon = 'fa-mobile-alt'; }
+        if (p.category === 'tablets') { color = 'pink'; categoryIcon = 'fa-tablet-alt'; }
+        if (p.category === 'accesorios') { color = 'indigo'; categoryIcon = 'fa-headphones'; }
+        if (p.category === 'gaming') { color = 'purple'; categoryIcon = 'fa-gamepad'; }
 
         const productJson = JSON.stringify(p).replace(/"/g, '&quot;').replace(/'/g, "&#39;");
 
+        // Generar badges
+        let badges = '';
+        if (p.is_new_arrival) {
+            badges += `<div class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg z-10 animate-pulse flex items-center gap-1">
+                <i class="fas fa-sparkles"></i> NUEVO
+            </div>`;
+        }
+        if (p.is_bestseller) {
+            badges += `<div class="absolute top-3 left-3 ${!p.is_new_arrival ? '' : 'top-10'} bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg z-10 flex items-center gap-1">
+                <i class="fas fa-fire"></i> MÁS VENDIDO
+            </div>`;
+        }
+        if (p.old_price && parseFloat(p.old_price) > parseFloat(p.price)) {
+            const discount = Math.round(((parseFloat(p.old_price) - parseFloat(p.price)) / parseFloat(p.old_price)) * 100);
+            badges += `<div class="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg z-10">
+                -${discount}%
+            </div>`;
+        }
+
+        // Generar specs preview
+        let specsPreview = '';
+        if (p.specifications) {
+            const specs = Object.entries(p.specifications).slice(0, 2);
+            specsPreview = specs.map(([key, val]) => `<span class="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">${val}</span>`).join('');
+        }
+
+        // Escapar comillas simples en el nombre para evitar romper el onclick
+        const safeName = p.name.replace(/'/g, "\\'");
+
         card.innerHTML = `
-            <div class="relative h-48 overflow-hidden cursor-pointer flex items-center justify-center bg-white dark:bg-gray-700"
-                 onclick='openProductModal(${productJson})'>
-                <img src="${p.image_url}" alt="${p.name}" class="h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110">
+            <!-- Imagen Container -->
+            <div class="relative h-56 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 cursor-pointer" onclick='openProductModal(${productJson})'>
+                <img src="${mainImage}" alt="${p.name}" class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110" loading="lazy">
                 
-                ${p.is_new_arrival ? `<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-10 animate-pulse">NUEVO</div>` : ''}
+                ${badges}
                 
-                <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
+                ${imageCount > 1 ? `
+                <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 z-10">
+                    <i class="fas fa-images"></i> ${imageCount}
+                </div>
+                ` : ''}
+                
+                <!-- Overlay de acciones -->
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                    <span class="bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-4 py-2 rounded-full shadow-lg font-medium text-sm transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                        <i class="fas fa-eye mr-2"></i>Vista Rápida
+                    </span>
                 </div>
             </div>
+            
+            <!-- Botón de favorito -->
+            <button type="button" onclick="event.stopPropagation(); toggleWishlist('${safeName}', ${p.price}, '${mainImage}')" 
+                class="absolute top-3 right-3 ${p.old_price && parseFloat(p.old_price) > parseFloat(p.price) ? 'top-10' : ''} w-9 h-9 bg-white dark:bg-gray-700 rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300 z-20 wishlist-btn" data-product="${safeName}">
+                <i class="fas fa-heart"></i>
+            </button>
+
+            <!-- Contenido -->
             <div class="p-5">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-[10px] font-bold tracking-wider text-${color}-600 dark:text-${color}-400 uppercase bg-${color}-50 dark:bg-${color}-900/30 px-2 py-1 rounded">${p.category}</span>
-                    <div class="flex text-yellow-400 text-xs">
+                <!-- Categoría y Rating -->
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-bold tracking-wider text-${color}-600 dark:text-${color}-400 uppercase bg-${color}-50 dark:bg-${color}-900/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <i class="fas ${categoryIcon}"></i> ${p.category}
+                    </span>
+                    <div class="flex items-center text-yellow-400 text-xs">
                         <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+                        <span class="ml-1 text-gray-500 dark:text-gray-400">4.9</span>
                     </div>
                 </div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-sky-600 transition leading-tight min-h-[3rem]" onclick='openProductModal(${productJson})'>${p.name}</h3>
                 
-                <div class="my-3 border-t border-gray-100 dark:border-gray-700"></div>
+                <!-- Nombre del producto -->
+                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-sky-600 transition leading-snug line-clamp-2 min-h-[2.5rem]" onclick='openProductModal(${productJson})'>
+                    ${p.name}
+                </h3>
+                
+                <!-- Specs preview -->
+                <div class="flex flex-wrap gap-1 mb-3">
+                    ${specsPreview}
+                </div>
+                
+                <!-- Stock indicator -->
+                <div class="flex items-center gap-1 mb-3">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-xs text-green-600 dark:text-green-400 font-medium">En stock</span>
+                </div>
 
-                <div class="flex justify-between items-center">
+                <!-- Separador -->
+                <div class="border-t border-gray-100 dark:border-gray-700 my-3"></div>
+
+                <!-- Precio y Acción -->
+                <div class="flex justify-between items-end">
                     <div class="flex flex-col">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Precio</span>
+                        ${p.old_price && parseFloat(p.old_price) > parseFloat(p.price) ?
+                `<span class="text-xs text-gray-400 line-through">S/. ${parseFloat(p.old_price).toLocaleString()}</span>` : ''}
                         <span class="text-xl font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
                     </div>
-                    <button type="button" class="w-10 h-10 rounded-full bg-${color}-600 text-white flex items-center justify-center hover:bg-${color}-700 transition shadow-lg transform hover:scale-110" 
-                        onclick="event.stopPropagation(); addToCartSimple('${p.name}', ${p.price})" title="Agregar al carrito">
+                    <button type="button" 
+                        class="add-to-cart-btn flex items-center gap-2 bg-${color}-600 text-white px-4 py-2.5 rounded-xl hover:bg-${color}-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium text-sm"
+                        data-name="${safeName}" 
+                        data-price="${p.price}"
+                        data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'
+                        title="Agregar al carrito">
                         <i class="fas fa-cart-plus"></i>
+                        <span class="hidden sm:inline">Agregar</span>
                     </button>
                 </div>
             </div>
@@ -191,14 +273,36 @@ function renderCurrentPage() {
     });
 
     renderPaginator();
+
+    // Configurar botones del carrito después de renderizar
+    setTimeout(() => {
+        if (typeof window.setupCartButtons === 'function') {
+            window.setupCartButtons();
+        } else if (typeof setupCartButtons === 'function') {
+            setupCartButtons();
+        }
+    }, 100);
 }
 
 // Helper Cart Function (to avoid relying on DOM traversing in script.js)
-window.addToCartSimple = function (name, price) {
+window.addToCartSimple = function (name, price, productData = null) {
+    console.log('addToCartSimple llamado:', name, price, productData);
     if (window.cartManager) {
-        window.cartManager.addToCart(name, price);
+        window.cartManager.addToCart(name, price, 1, productData);
+        return true;
     } else {
         console.error('CartManager missing');
+        return false;
+    }
+};
+
+// Función para configurar botones del carrito después de renderizar
+window.refreshCartButtons = function () {
+    console.log('Refrescando botones del carrito...');
+    if (typeof window.setupCartButtons === 'function') {
+        window.setupCartButtons();
+    } else if (typeof setupCartButtons === 'function') {
+        setupCartButtons();
     }
 };
 
@@ -216,7 +320,7 @@ function renderPaginator() {
     const createBtn = (html, isDisabled, onClick) => {
         const btn = document.createElement('button');
         btn.innerHTML = html;
-        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition ${isDisabled ? 'text-gray-300 border-gray-200 cursor-not-allowed' : 'text-sky-600 border-sky-600 hover:bg-sky-600 hover:text-white'}`;
+        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition ${isDisabled ? 'text-gray-300 border-gray-200 cursor-not-allowed' : 'text-[#0D9488] border-[#0D9488] hover:bg-[#0D9488] hover:text-white'}`;
         btn.disabled = isDisabled;
         btn.onclick = onClick;
         return btn;
@@ -234,7 +338,7 @@ function renderPaginator() {
 
         const btn = document.createElement('button');
         btn.textContent = i;
-        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition font-medium ${i === currentPage ? 'bg-sky-600 text-white border-sky-600 shadow-md' : 'text-gray-600 border-gray-300 hover:border-sky-600 hover:text-sky-600'}`;
+        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition font-medium ${i === currentPage ? 'bg-[#0D9488] text-white border-[#0D9488] shadow-md' : 'text-gray-600 border-gray-300 hover:border-[#0D9488] hover:text-[#0D9488]'}`;
         btn.onclick = () => {
             catalogState.currentPage = i;
             renderCurrentPage();
@@ -259,15 +363,24 @@ window.filterSearch = function (val) {
 window.filterCategory = function (cat, btnElement) {
     catalogState.filters.category = cat;
 
-    // Update UI buttons
-    document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.remove('bg-sky-600', 'text-white');
+    // Update UI buttons - remove active state from ALL category buttons/links
+    document.querySelectorAll('.filter-btn, [onclick*="filterCategory"]').forEach(b => {
+        b.classList.remove('bg-[#0D9488]', 'text-white', 'border-[#0D9488]');
         b.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
     });
-    // Add active class to clicked button if passed, or find it
+
+    // Add active class to clicked button if passed
     if (btnElement) {
         btnElement.classList.remove('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
-        btnElement.classList.add('bg-sky-600', 'text-white');
+        btnElement.classList.add('bg-[#0D9488]', 'text-white');
+
+        // Remove active state after a short delay to prevent "stuck" appearance
+        setTimeout(() => {
+            if (!btnElement.classList.contains('filter-btn')) {
+                btnElement.classList.remove('bg-[#0D9488]', 'text-white');
+                btnElement.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
+            }
+        }, 300);
     }
 
     applyFilters();
@@ -354,10 +467,19 @@ window.openProductModal = function (product) {
     const modal = document.getElementById('productDetailModal');
     if (!modal) return;
 
-    document.getElementById('modalProdImage').src = product.image_url;
+    // Get images array - support both old and new format
+    const images = (product.images && Array.isArray(product.images) && product.images.length > 0)
+        ? product.images
+        : (product.image_url ? [product.image_url] : []);
+    const mainImage = images[0] || '';
+
+    document.getElementById('modalProdImage').src = mainImage;
     document.getElementById('modalProdTitle').textContent = product.name;
     document.getElementById('modalProdPrice').textContent = parseFloat(product.price).toLocaleString();
     document.getElementById('modalProdCategory').textContent = product.category;
+
+    // Setup image gallery in modal
+    setupModalImageGallery(images);
 
     // Specs Logic
     const specsContainer = document.getElementById('modalProdSpecs');
@@ -440,7 +562,7 @@ window.openProductModal = function (product) {
                 return;
             }
 
-            window.cartManager.addToCart(product.name, parseFloat(product.price), quantity);
+            window.cartManager.addToCart(product.name, parseFloat(product.price), quantity, product);
 
             newBtn.innerHTML = '<i class="fas fa-check"></i> Agregado';
             setTimeout(() => {
@@ -452,6 +574,43 @@ window.openProductModal = function (product) {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 };
+
+// Setup image gallery in product modal
+function setupModalImageGallery(images) {
+    const mainImg = document.getElementById('modalProdImage');
+    const imageContainer = document.getElementById('modalImageContainer') || mainImg?.closest('.relative');
+    let galleryContainer = document.getElementById('modalImageGallery');
+
+    if (!mainImg || !imageContainer) return;
+
+    // Remove existing gallery if any
+    if (galleryContainer) {
+        galleryContainer.remove();
+    }
+
+    // Create gallery container
+    galleryContainer = document.createElement('div');
+    galleryContainer.id = 'modalImageGallery';
+    galleryContainer.className = 'flex flex-wrap gap-2 justify-center mt-6 w-full';
+
+    if (images.length > 1) {
+        images.forEach((imgUrl, idx) => {
+            const thumbBtn = document.createElement('button');
+            thumbBtn.className = `w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${idx === 0 ? 'border-sky-500 ring-2 ring-sky-200 shadow-sm' : 'border-gray-200 dark:border-gray-600 hover:border-sky-400'}`;
+            thumbBtn.innerHTML = `<img src="${imgUrl}" alt="Imagen ${idx + 1}" class="w-full h-full object-cover">`;
+            thumbBtn.onclick = () => {
+                mainImg.src = imgUrl;
+                galleryContainer.querySelectorAll('button').forEach((btn, i) => {
+                    btn.className = `w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${i === idx ? 'border-sky-500 ring-2 ring-sky-200 shadow-sm' : 'border-gray-200 dark:border-gray-600 hover:border-sky-400'}`;
+                });
+            };
+            galleryContainer.appendChild(thumbBtn);
+        });
+
+        // Append gallery to image container (will show below the image because of flex-col)
+        imageContainer.appendChild(galleryContainer);
+    }
+}
 
 window.updateModalQuantity = function (change) {
     const input = document.getElementById('modalProdQuantity');
@@ -470,12 +629,209 @@ window.closeProductModal = function () {
     }
 };
 
+// Renderizar productos destacados
+function renderFeaturedProducts() {
+    const grid = document.getElementById('featured-products-grid');
+    if (!grid || !catalogState.allProducts.length) return;
+
+    // Obtener productos destacados (is_bestseller o is_new_arrival o con descuento)
+    let featured = catalogState.allProducts.filter(p =>
+        p.is_bestseller || p.is_new_arrival || (p.old_price && parseFloat(p.old_price) > parseFloat(p.price))
+    ).slice(0, 4);
+
+    // Si no hay suficientes destacados, completar con los primeros productos
+    if (featured.length < 4) {
+        const remaining = catalogState.allProducts.filter(p => !featured.includes(p)).slice(0, 4 - featured.length);
+        featured = [...featured, ...remaining];
+    }
+
+    grid.innerHTML = '';
+
+    featured.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "group relative bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 cursor-pointer";
+
+        // Get images array
+        const images = (p.images && Array.isArray(p.images) && p.images.length > 0)
+            ? p.images
+            : (p.image_url ? [p.image_url] : []);
+        const mainImage = images[0] || '';
+
+        let color = 'sky';
+        if (p.category === 'smartphones') color = 'green';
+        if (p.category === 'tablets') color = 'pink';
+        if (p.category === 'accesorios') color = 'indigo';
+
+        const productJson = JSON.stringify(p).replace(/"/g, '&quot;').replace(/'/g, "&#39;");
+
+        // Badge
+        let badge = '';
+        if (p.is_bestseller) {
+            badge = `<div class="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full z-10 flex items-center gap-1">
+                <i class="fas fa-fire"></i> TOP
+            </div>`;
+        } else if (p.old_price && parseFloat(p.old_price) > parseFloat(p.price)) {
+            const discount = Math.round(((parseFloat(p.old_price) - parseFloat(p.price)) / parseFloat(p.old_price)) * 100);
+            badge = `<div class="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">
+                -${discount}%
+            </div>`;
+        } else if (p.is_new_arrival) {
+            badge = `<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full z-10">
+                NUEVO
+            </div>`;
+        }
+
+        // Escapar comillas simples en el nombre para evitar romper el onclick
+        const safeName = p.name.replace(/'/g, "\\'");
+
+        card.innerHTML = `
+            <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-50 dark:bg-gray-800" onclick='openProductModal(${productJson})'>
+                <img src="${mainImage}" alt="${p.name}" class="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110">
+                ${badge}
+            </div>
+            <div class="p-3 sm:p-4">
+                <span class="text-[9px] font-bold text-${color}-600 dark:text-${color}-400 uppercase">${p.category}</span>
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white mt-1 line-clamp-2 min-h-[2.5rem] leading-tight" onclick='openProductModal(${productJson})'>${p.name}</h3>
+                <div class="flex items-center gap-1 mt-1">
+                    <div class="flex text-yellow-400 text-xs">
+                        <i class="fas fa-star"></i>
+                        <span class="ml-1 text-gray-500 text-[10px]">4.9</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-2">
+                    <div>
+                        ${p.old_price && parseFloat(p.old_price) > parseFloat(p.price) ?
+                `<span class="text-[10px] text-gray-400 line-through">S/. ${parseFloat(p.old_price).toLocaleString()}</span>` : ''}
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
+                    </div>
+                    <button type="button" 
+                        class="add-to-cart-btn w-8 h-8 bg-${color}-600 text-white rounded-lg hover:bg-${color}-700 transition flex items-center justify-center"
+                        data-name="${safeName}" 
+                        data-price="${p.price}"
+                        data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'
+                        title="Agregar al carrito">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+
+    // Configurar botones del carrito después de renderizar destacados
+    refreshCartButtons();
+}
+
+// --- RECURSOS DINÁMICOS (CARRUSEL) ---
+
+async function loadAndRenderCarousel() {
+    const track = document.getElementById('carousel-track');
+    const dotsContainer = document.getElementById('carousel-dots-container');
+    if (!track || !dotsContainer) return;
+
+    if (!track || !dotsContainer) return;
+
+    // Función interna para renderizar
+    const renderImages = (images) => {
+        if (!images || images.length === 0) return;
+
+        // Evitar re-renderizado innecesario si ya tenemos las mismas imágenes
+        const currentSrcs = Array.from(track.querySelectorAll('img')).map(img => img.src);
+        const newSrcs = images.map(img => img.image_url);
+        if (JSON.stringify(currentSrcs) === JSON.stringify(newSrcs)) {
+            console.log('[Carousel Loader] Imágenes actualizadas, skipiando render.');
+            return;
+        }
+
+        track.innerHTML = '';
+        dotsContainer.innerHTML = '';
+
+        images.forEach((img, index) => {
+            // Slide
+            const slide = document.createElement('div');
+            slide.className = `carousel-slide bg-slate-900 ${index === 0 ? 'active' : ''}`;
+
+            // Optimización de carga de imágenes
+            const loadingAttr = index === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
+
+            slide.innerHTML = `<img src="${img.image_url}" alt="Promoción Solbin-X" class="w-full h-full object-cover" ${loadingAttr} style="object-position: center;">`;
+            track.appendChild(slide);
+
+            // Dot
+            const dot = document.createElement('button');
+            dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+            dot.setAttribute('data-slide', index);
+            dotsContainer.appendChild(dot);
+        });
+
+        // Reiniciar el carrusel
+        if (typeof window.restartCarousel === 'function') {
+            window.restartCarousel();
+        }
+    };
+
+    try {
+        // ESTRATEGIA DE CACHÉ OPTIMIZADA
+
+        // 1. Carga inmediata desde caché local
+        const cachedCarousel = localStorage.getItem('carousel_cache');
+        if (cachedCarousel) {
+            console.log('[Carousel Loader] Cargando desde caché local...');
+            const images = JSON.parse(cachedCarousel);
+            renderImages(images);
+        }
+
+        // 2. Actualización en segundo plano desde Supabase
+        const client = window.supabaseClient || window.supabase;
+        const { data: images, error } = await client
+            .from('carousel_images')
+            .select('*')
+            .eq('active', true)
+            .order('order_index', { ascending: true });
+
+        if (error) throw error;
+
+        if (images && images.length > 0) {
+            // Actualizar caché
+            localStorage.setItem('carousel_cache', JSON.stringify(images));
+            // Renderizar con datos frescos (solo si cambiaron)
+            renderImages(images);
+            console.log('[Carousel Loader] Sincronizado con Supabase');
+        }
+
+    } catch (err) {
+        console.error('Error cargando carrusel dinámico:', err);
+        // Si no hay caché y falló la red, mostrar error
+        if (!localStorage.getItem('carousel_cache')) {
+            track.innerHTML = `
+                <div class="flex items-center justify-center h-full text-white text-center">
+                    <div>
+                        <i class="fas fa-exclamation-triangle text-4xl mb-4 text-yellow-500"></i>
+                        <p>Error al cargar el carrusel</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+}
+
 // INIT
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAndRenderProducts);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAndRenderProducts();
+        loadAndRenderCarousel(); // Cargar carrusel dinámico desde Supabase
+    });
 } else {
     loadAndRenderProducts();
+    loadAndRenderCarousel(); // Cargar carrusel dinámico desde Supabase
 }
+
+// Renderizar destacados después de cargar productos
+const originalApplyFilters = applyFilters;
+applyFilters = function () {
+    originalApplyFilters();
+    renderFeaturedProducts();
+};
 
 // Increment Site Visits on Load
 (async function () {
