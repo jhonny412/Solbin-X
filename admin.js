@@ -45,6 +45,10 @@ window.switchAdminTab = function (tab) {
         if (tab === 'dashboard') {
             dashboardSection?.classList.remove('hidden');
             navButtons.dashboard?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            // Cargar estadísticas de visitas
+            if (typeof loadVisitStats === 'function') {
+                loadVisitStats();
+            }
         } else if (tab === 'products') {
             productsSection?.classList.remove('hidden');
             navButtons.products?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
@@ -337,6 +341,78 @@ function initOrdersGrid() {
     ordersGrid = true;
 }
 
+
+// Cargar estadísticas de visitas
+window.loadVisitStats = async function (retryCount = 0) {
+    try {
+        console.log('[Visitas] Cargando estadísticas...');
+
+        let client = window.supabaseClient || window.supabase;
+
+        // Si el cliente no está listo, reintentar un par de veces
+        if (!client && retryCount < 5) {
+            console.log(`[Visitas] Cliente no listo, reintentando en 500ms... (${retryCount + 1}/5)`);
+            setTimeout(() => window.loadVisitStats(retryCount + 1), 500);
+            return;
+        }
+
+        if (!client) {
+            console.error('[Visitas] Cliente Supabase no disponible después de varios intentos');
+            updateVisitCounter('Error');
+            return;
+        }
+
+        // Primero intentar usar la función RPC get_visit_count (si existe)
+        try {
+            const { data: rpcData, error: rpcError } = await client.rpc('get_visit_count');
+
+            if (!rpcError && rpcData !== null) {
+                console.log('[Visitas] Contador cargado via RPC:', rpcData);
+                updateVisitCounter(rpcData);
+                return;
+            } else if (rpcError) {
+                console.warn('[Visitas] Error en RPC get_visit_count:', rpcError);
+            }
+        } catch (rpcErr) {
+            console.log('[Visitas] Función RPC no disponible, intentando consulta directa...');
+        }
+
+        // Si RPC falla, intentar consulta directa a la tabla
+        const { data, error } = await client
+            .from('site_stats')
+            .select('visit_count')
+            .eq('id', 1)
+            .single();
+
+        if (error) {
+            console.error('[Visitas] Error al cargar estadísticas desde tabla:', error);
+            // Si hay error, mostrar lo que había
+            return;
+        }
+
+        if (data && data.visit_count !== undefined) {
+            console.log('[Visitas] Contador cargado desde tabla:', data.visit_count);
+            updateVisitCounter(data.visit_count);
+        } else {
+            console.log('[Visitas] No hay datos de visitas en la tabla');
+            updateVisitCounter(0);
+        }
+
+    } catch (e) {
+        console.error('[Visitas] Error general en loadVisitStats:', e);
+    }
+};
+
+// Función auxiliar para actualizar el contador en el DOM
+function updateVisitCounter(count) {
+    const visitCounter = document.getElementById('visitCounter');
+    if (visitCounter) {
+        visitCounter.textContent = count.toLocaleString('es-PE');
+        console.log('[Visitas] Contador actualizado en UI:', count);
+    } else {
+        console.error('[Visitas] Elemento visitCounter no encontrado');
+    }
+}
 
 // Cargar productos
 window.loadProducts = async function () {
@@ -741,6 +817,12 @@ let currentOrderId = null;
 window.viewOrder = function (order) {
     currentOrderId = order.id;
     window.currentFullOrder = order; // Save full object
+
+    console.log('[Order] Abriendo orden ID:', order.id);
+    console.log('[Order] Estado actual:', order.status);
+    console.log('[Order] Items en orden:', order.items);
+    console.log('[Order] Productos disponibles:', window.allAdminProducts?.length || 0);
+
     document.getElementById('orderModalId').textContent = '#' + order.id;
 
     const dateObj = new Date(order.created_at);
@@ -876,32 +958,189 @@ window.updateOrderStatus = async function () {
     if (!currentOrderId) return;
 
     const newStatus = document.getElementById('orderStatusSelect').value;
+    const previousStatus = window.currentFullOrder?.status;
     const client = window.supabaseClient || window.supabase;
 
+    // Validar que no se esté intentando cambiar al mismo estado
+    if (newStatus === previousStatus) {
+        Swal.fire('Sin cambios', 'El pedido ya tiene ese estado.', 'info');
+        return;
+    }
+
+    // Verificar que los productos estén cargados antes de procesar cambios de stock
+    if (newStatus === 'terminado' || (previousStatus === 'terminado' && newStatus === 'cancelado')) {
+        if (!window.allAdminProducts || window.allAdminProducts.length === 0) {
+            console.error('[Stock] Productos no cargados al intentar actualizar stock');
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pueden actualizar los stocks porque la lista de productos no está cargada. Por favor, recarga la página e intenta nuevamente.',
+                icon: 'error'
+            });
+            return;
+        }
+    }
+
     try {
-        // Stock Update Logic: If moving TO 'terminado' FROM something else
-        if (newStatus === 'terminado' && window.currentFullOrder && window.currentFullOrder.status !== 'terminado') {
+        let stockUpdates = [];
+        let stockErrors = [];
+
+        // Caso 1: Cambio a "terminado" (ÉXITO) - DESCONTAR stock
+        if (newStatus === 'terminado' && previousStatus !== 'terminado') {
+            console.log('[Stock] Iniciando descuento de stock para venta exitosa');
+            console.log('[Stock] Productos cargados:', window.allAdminProducts?.length || 0);
+            console.log('[Stock] Items en orden:', window.currentFullOrder?.items);
+
+            try {
+                let items = window.currentFullOrder.items;
+                if (typeof items === 'string') items = JSON.parse(items);
+
+                console.log('[Stock] Items parseados:', items);
+
+                if (!Array.isArray(items)) {
+                    console.error('[Stock] Items no es un array:', items);
+                    stockErrors.push('Error: Formato de items inválido');
+                } else if (!window.allAdminProducts || window.allAdminProducts.length === 0) {
+                    console.error('[Stock] No hay productos cargados en allAdminProducts');
+                    stockErrors.push('Error: Lista de productos no disponible. Recarga la página.');
+                } else {
+                    for (const item of items) {
+                        console.log('[Stock] Procesando item:', item);
+
+                        if (!item.name) {
+                            console.error('[Stock] Item sin nombre:', item);
+                            stockErrors.push('Item sin nombre identificado');
+                            continue;
+                        }
+
+                        // Intentar buscar por ID primero (más confiable)
+                        let product = null;
+                        if (item.id) {
+                            product = window.allAdminProducts.find(p => p.id === item.id);
+                            console.log(`[Stock] Buscando por ID ${item.id}:`, product ? 'SÍ' : 'NO');
+                        }
+
+                        // Si no se encuentra por ID, buscar por nombre (comparación normalizada)
+                        if (!product) {
+                            const normalizedItemName = item.name.trim().toLowerCase();
+                            product = window.allAdminProducts.find(p => {
+                                const normalizedProductName = (p.name || '').trim().toLowerCase();
+                                return normalizedProductName === normalizedItemName;
+                            });
+                            console.log(`[Stock] Buscando por nombre "${item.name}" - Encontrado:`, product ? 'SÍ' : 'NO');
+                        }
+
+                        if (!product) {
+                            console.error(`[Stock] Producto no encontrado: "${item.name}" (ID: ${item.id || 'N/A'})`);
+                            console.log('[Stock] Productos disponibles:', window.allAdminProducts.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
+                            stockErrors.push(`${item.name}: Producto no encontrado en el catálogo`);
+                            continue;
+                        }
+
+                        if (!product.id) {
+                            console.error(`[Stock] Producto sin ID:`, product);
+                            stockErrors.push(`${item.name}: Producto sin ID válido`);
+                            continue;
+                        }
+
+                        // Verificar si hay suficiente stock
+                        const quantity = parseInt(item.quantity) || 0;
+                        if (product.stock < quantity) {
+                            stockErrors.push(`${item.name}: Stock insuficiente (disponible: ${product.stock}, requerido: ${quantity})`);
+                            continue;
+                        }
+
+                        const newStock = product.stock - quantity;
+                        console.log(`[Stock] Actualizando ${product.name} (ID: ${product.id}): ${product.stock} -> ${newStock}`);
+
+                        const { error: updateError } = await client
+                            .from('products')
+                            .update({ stock: newStock })
+                            .eq('id', product.id);
+
+                        if (updateError) {
+                            console.error(`[Stock] Error actualizando ${product.name}:`, updateError);
+                            stockErrors.push(`${product.name}: ${updateError.message}`);
+                        } else {
+                            console.log(`[Stock] Éxito: ${product.name} actualizado`);
+                            stockUpdates.push(`${product.name}: -${quantity} unidades`);
+
+                            // Actualizar el stock en memoria para futuras operaciones
+                            product.stock = newStock;
+                        }
+                    }
+
+                    if (stockUpdates.length > 0) {
+                        console.log('[Stock] Resumen de descuentos:', stockUpdates);
+                    }
+                    if (stockErrors.length > 0) {
+                        console.log('[Stock] Errores encontrados:', stockErrors);
+                    }
+                }
+            } catch (err) {
+                console.error('Error descontando stock:', err);
+                stockErrors.push('Error general al actualizar stock: ' + err.message);
+            }
+        }
+
+        // Caso 2: Cambio desde "terminado" a "cancelado" - RESTAURAR stock
+        if (previousStatus === 'terminado' && newStatus === 'cancelado') {
+            console.log('[Stock] Iniciando restauración de stock por cancelación');
+
             try {
                 let items = window.currentFullOrder.items;
                 if (typeof items === 'string') items = JSON.parse(items);
 
                 if (Array.isArray(items) && window.allAdminProducts) {
                     for (const item of items) {
-                        // Find product by name (using name as key since ID isn't in cart items yet)
-                        const product = window.allAdminProducts.find(p => p.name === item.name);
+                        // Intentar buscar por ID primero (más confiable)
+                        let product = null;
+                        if (item.id) {
+                            product = window.allAdminProducts.find(p => p.id === item.id);
+                        }
+
+                        // Si no se encuentra por ID, buscar por nombre (comparación normalizada)
+                        if (!product) {
+                            const normalizedItemName = item.name.trim().toLowerCase();
+                            product = window.allAdminProducts.find(p => {
+                                const normalizedProductName = (p.name || '').trim().toLowerCase();
+                                return normalizedProductName === normalizedItemName;
+                            });
+                        }
+
                         if (product) {
-                            const newStock = Math.max(0, product.stock - item.quantity);
-                            await client.from('products').update({ stock: newStock }).eq('id', product.id);
+                            const quantity = parseInt(item.quantity) || 0;
+                            const newStock = product.stock + quantity;
+                            console.log(`[Stock] Restaurando ${product.name}: ${product.stock} -> ${newStock}`);
+
+                            const { error: updateError } = await client
+                                .from('products')
+                                .update({ stock: newStock })
+                                .eq('id', product.id);
+
+                            if (updateError) {
+                                stockErrors.push(`${product.name}: ${updateError.message}`);
+                            } else {
+                                stockUpdates.push(`${product.name}: +${quantity} unidades (restaurado)`);
+                                // Actualizar el stock en memoria
+                                product.stock = newStock;
+                            }
+                        } else {
+                            console.error(`[Stock] Producto no encontrado para restaurar: "${item.name}"`);
+                            stockErrors.push(`${item.name}: No se pudo restaurar - producto no encontrado`);
                         }
                     }
-                    console.log('Stock updated for order', currentOrderId);
+
+                    if (stockUpdates.length > 0) {
+                        console.log('[Stock] Restaurado por cancelación:', stockUpdates);
+                    }
                 }
             } catch (err) {
-                console.error('Error updating stock:', err);
-                Swal.fire('Advertencia', 'El estado se actualizó pero hubo un error actualizando el stock.', 'warning');
+                console.error('Error restaurando stock:', err);
+                stockErrors.push('Error general al restaurar stock: ' + err.message);
             }
         }
 
+        // Actualizar el estado del pedido
         const { error } = await client
             .from('orders')
             .update({ status: newStatus })
@@ -909,14 +1148,33 @@ window.updateOrderStatus = async function () {
 
         if (error) throw error;
 
-        Swal.fire('Actualizado', 'Estado del pedido cambiado.', 'success');
+        // Mostrar mensaje según el resultado
+        let message = 'Estado del pedido cambiado exitosamente.';
+        let icon = 'success';
 
-        // Close modal
+        if (stockUpdates.length > 0) {
+            message += `\n\nActualizaciones de stock:\n${stockUpdates.join('\n')}`;
+        }
+
+        if (stockErrors.length > 0) {
+            message += `\n\nErrores en stock:\n${stockErrors.join('\n')}`;
+            icon = stockUpdates.length > 0 ? 'warning' : 'error';
+        }
+
+        Swal.fire({
+            title: 'Actualizado',
+            text: message,
+            icon: icon,
+            confirmButtonText: 'Aceptar'
+        });
+
+        // Cerrar modal y refrescar datos
         closeOrderModal();
-        loadOrders(); // Refresh orders
-        loadProducts(); // Refresh products (stock)
+        loadOrders();
+        loadProducts();
 
     } catch (e) {
+        console.error('Error en updateOrderStatus:', e);
         Swal.fire('Error', 'No se pudo actualizar el estado: ' + e.message, 'error');
     }
 }
@@ -2965,4 +3223,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (messageTextarea) {
         messageTextarea.addEventListener('input', updateAlertPreview);
     }
+
+    // Cargar estadísticas de visitas al iniciar el panel
+    setTimeout(() => {
+        if (typeof loadVisitStats === 'function') {
+            console.log('[Admin] Cargando estadísticas iniciales...');
+            loadVisitStats();
+        }
+    }, 500);
 });

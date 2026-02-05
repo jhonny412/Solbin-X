@@ -724,15 +724,70 @@ function renderFeaturedProducts() {
 
 // --- RECURSOS DINÁMICOS (CARRUSEL) ---
 
+// Función para precargar imágenes en segundo plano
+function preloadImages(imageUrls) {
+    imageUrls.forEach((url, index) => {
+        if (index === 0) return; // La primera ya se está cargando
+        const img = new Image();
+        img.src = url;
+    });
+}
+
+// Función para enviar imágenes al Service Worker para cacheo
+function sendCarouselImagesToSW(imageUrls) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        console.log('[Carousel Loader] Sending images to SW for caching...');
+        navigator.serviceWorker.controller.postMessage({
+            type: 'PRECACHE_CAROUSEL',
+            urls: imageUrls
+        });
+    }
+}
+
+// Función para verificar si el Service Worker está listo
+async function waitForServiceWorker() {
+    if (!('serviceWorker' in navigator)) {
+        return null;
+    }
+    
+    const registration = await navigator.serviceWorker.ready;
+    return registration.active;
+}
+
+// Función para crear skeleton loader
+function createSkeletonLoader() {
+    return `
+        <div class="carousel-skeleton w-full h-full bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 bg-[length:200%_100%] animate-shimmer flex items-center justify-center">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-500/50 animate-pulse"></div>
+                <div class="w-32 h-4 mx-auto bg-gray-500/50 rounded animate-pulse"></div>
+            </div>
+        </div>
+    `;
+}
+
 async function loadAndRenderCarousel() {
     const track = document.getElementById('carousel-track');
     const dotsContainer = document.getElementById('carousel-dots-container');
     if (!track || !dotsContainer) return;
 
-    if (!track || !dotsContainer) return;
+    // Mostrar skeleton loader inmediatamente
+    if (!localStorage.getItem('carousel_cache')) {
+        track.innerHTML = createSkeletonLoader();
+    }
 
-    // Función interna para renderizar
-    const renderImages = (images) => {
+    // Función interna para precargar una imagen específica
+    const preloadSingleImage = (url) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+    };
+
+    // Función interna para renderizar con transición suave
+    const renderImages = async (images) => {
         if (!images || images.length === 0) return;
 
         // Evitar re-renderizado innecesario si ya tenemos las mismas imágenes
@@ -743,6 +798,11 @@ async function loadAndRenderCarousel() {
             return;
         }
 
+        // Precargar la primera imagen antes de renderizar
+        if (images[0]) {
+            await preloadSingleImage(images[0].image_url);
+        }
+
         track.innerHTML = '';
         dotsContainer.innerHTML = '';
 
@@ -751,18 +811,30 @@ async function loadAndRenderCarousel() {
             const slide = document.createElement('div');
             slide.className = `carousel-slide bg-slate-900 ${index === 0 ? 'active' : ''}`;
 
-            // Optimización de carga de imágenes
+            // Optimización de carga de imágenes - solo la primera tiene alta prioridad
             const loadingAttr = index === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
+            const decodingAttr = index === 0 ? 'decoding="sync"' : 'decoding="async"';
 
-            slide.innerHTML = `<img src="${img.image_url}" alt="Promoción Solbin-X" class="w-full h-full object-cover" ${loadingAttr} style="object-position: center;">`;
+            slide.innerHTML = `<img src="${img.image_url}" alt="Promoción Solbin-X" class="w-full h-full object-cover" ${loadingAttr} ${decodingAttr} style="object-position: center;" width="1200" height="370">`;
             track.appendChild(slide);
 
             // Dot
             const dot = document.createElement('button');
             dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
             dot.setAttribute('data-slide', index);
+            dot.setAttribute('aria-label', `Ir a la diapositiva ${index + 1}`);
             dotsContainer.appendChild(dot);
         });
+
+        // Precargar el resto de imágenes en segundo plano
+        setTimeout(() => {
+            const urlsToPreload = images.slice(1).map(img => img.image_url);
+            preloadImages(urlsToPreload);
+        }, 100);
+
+        // Enviar todas las URLs al Service Worker para cacheo agresivo
+        const allUrls = images.map(img => img.image_url);
+        sendCarouselImagesToSW(allUrls);
 
         // Reiniciar el carrusel
         if (typeof window.restartCarousel === 'function') {
@@ -773,12 +845,15 @@ async function loadAndRenderCarousel() {
     try {
         // ESTRATEGIA DE CACHÉ OPTIMIZADA
 
-        // 1. Carga inmediata desde caché local
+        // 1. Carga inmediata desde caché local (si existe)
         const cachedCarousel = localStorage.getItem('carousel_cache');
+        let imagesFromCache = null;
+        
         if (cachedCarousel) {
             console.log('[Carousel Loader] Cargando desde caché local...');
-            const images = JSON.parse(cachedCarousel);
-            renderImages(images);
+            imagesFromCache = JSON.parse(cachedCarousel);
+            // Renderizar inmediatamente desde caché
+            await renderImages(imagesFromCache);
         }
 
         // 2. Actualización en segundo plano desde Supabase
@@ -792,11 +867,18 @@ async function loadAndRenderCarousel() {
         if (error) throw error;
 
         if (images && images.length > 0) {
-            // Actualizar caché
-            localStorage.setItem('carousel_cache', JSON.stringify(images));
-            // Renderizar con datos frescos (solo si cambiaron)
-            renderImages(images);
-            console.log('[Carousel Loader] Sincronizado con Supabase');
+            // Solo actualizar si hay cambios
+            const cacheChanged = !imagesFromCache || 
+                JSON.stringify(images.map(img => img.image_url)) !== 
+                JSON.stringify(imagesFromCache.map(img => img.image_url));
+            
+            if (cacheChanged) {
+                console.log('[Carousel Loader] Detectadas nuevas imágenes, actualizando...');
+                localStorage.setItem('carousel_cache', JSON.stringify(images));
+                await renderImages(images);
+            } else {
+                console.log('[Carousel Loader] Sin cambios en las imágenes');
+            }
         }
 
     } catch (err) {
@@ -841,13 +923,28 @@ applyFilters = function () {
             const client = window.supabaseClient || window.supabase;
             if (client && typeof client.rpc === 'function') {
                 if (!sessionStorage.getItem('visit_tracked')) {
-                    await client.rpc('increment_visit_count');
-                    sessionStorage.setItem('visit_tracked', 'true');
+                    try {
+                        console.log('[Visitas] Incrementando contador...');
+                        const { data, error } = await client.rpc('increment_visit_count');
+                        
+                        if (error) {
+                            console.error('[Visitas] Error al incrementar:', error);
+                        } else {
+                            console.log('[Visitas] Contador incrementado exitosamente:', data);
+                            sessionStorage.setItem('visit_tracked', 'true');
+                        }
+                    } catch (rpcError) {
+                        console.error('[Visitas] Error en RPC:', rpcError);
+                    }
+                } else {
+                    console.log('[Visitas] Visita ya registrada en esta sesión');
                 }
+            } else {
+                console.warn('[Visitas] Cliente Supabase no disponible');
             }
         }, 1000);
     } catch (e) {
-        // Silently fail if DB is busy or restricted
+        console.error('[Visitas] Error general:', e);
     }
 })();
 

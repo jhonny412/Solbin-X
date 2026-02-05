@@ -245,6 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const subtotal = window.cartManager.getSubtotal();
                     const igv = window.cartManager.getIGV();
+                    const shipping = window.cartManager.getShipping ? window.cartManager.getShipping() : 0;
                     const total = window.cartManager.getTotal();
 
                     let orderId = 'PENDING-' + Date.now();

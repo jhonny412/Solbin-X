@@ -16,12 +16,12 @@
     // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            // Esperar un poco para que loader.js cargue las imágenes primero
-            setTimeout(initCarousel, 500);
+            // Iniciar inmediatamente, el loader.js manejará el orden correcto
+            initCarousel();
         });
     } else {
-        // Esperar un poco para que loader.js cargue las imágenes primero
-        setTimeout(initCarousel, 500);
+        // Iniciar inmediatamente
+        initCarousel();
     }
     
     function initCarousel() {
@@ -39,22 +39,30 @@
             return;
         }
         
-        // Obtener slides y dots actualizados
-        slides = Array.from(track.querySelectorAll('.carousel-slide'));
+        // Obtener slides y dots actualizados (excluyendo el skeleton loader)
+        slides = Array.from(track.querySelectorAll('.carousel-slide:not(.carousel-skeleton)'));
         dots = Array.from(document.querySelectorAll('.carousel-dot'));
         
         console.log('[Carousel] Total slides:', slides.length);
         
         if (slides.length === 0) {
             console.warn('[Carousel] No hay slides aún, esperando carga...');
+            // Reintentar en 100ms si no hay slides
+            if (!isInitialized) {
+                setTimeout(initCarousel, 100);
+            }
             return;
         }
         
-        // Verificar que las imágenes existen
+        // Verificar que las imágenes existen y están cargadas
         slides.forEach((slide, index) => {
             const img = slide.querySelector('img');
             if (img) {
                 console.log(`[Carousel] Slide ${index}: ${img.src.split('/').pop()}`);
+                // Asegurar que la imagen tenga opacidad correcta
+                if (slide.classList.contains('active')) {
+                    img.style.opacity = '1';
+                }
             }
         });
         
@@ -62,16 +70,31 @@
         function showSlide(index) {
             if (index < 0 || index >= slides.length) return;
             
-            // Remover active de todas
+            // Remover active de todas y resetear opacidad de imágenes
             slides.forEach((slide) => {
                 slide.classList.remove('active');
+                const img = slide.querySelector('img');
+                if (img) {
+                    img.style.opacity = '0';
+                }
             });
             dots.forEach((dot) => {
                 dot.classList.remove('active');
             });
             
             // Agregar active a la slide actual
-            slides[index].classList.add('active');
+            const currentSlide = slides[index];
+            currentSlide.classList.add('active');
+            
+            // Mostrar la imagen actual con transición suave
+            const currentImg = currentSlide.querySelector('img');
+            if (currentImg) {
+                // Usar requestAnimationFrame para animación suave
+                requestAnimationFrame(() => {
+                    currentImg.style.opacity = '1';
+                });
+            }
+            
             if (dots[index]) {
                 dots[index].classList.add('active');
             }

@@ -1,5 +1,6 @@
 // Service Worker para Solbin-X - PWA
-const CACHE_NAME = 'solbin-v1';
+const CACHE_NAME = 'solbin-v2';
+const CAROUSEL_CACHE_NAME = 'solbin-carousel-v1';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -19,6 +20,12 @@ const STATIC_ASSETS = [
     '/Imagenes/Version_Web.svg',
     '/Imagenes/FavIcon.svg'
 ];
+
+// Función para verificar si una URL es una imagen del carrusel
+function isCarouselImage(url) {
+    return url.includes('supabase.co') && 
+           (url.includes('/carousel/') || url.includes('carousel-images'));
+}
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -47,7 +54,7 @@ self.addEventListener('activate', event => {
             .then(cacheNames => {
                 return Promise.all(
                     cacheNames
-                        .filter(name => name !== CACHE_NAME)
+                        .filter(name => name !== CACHE_NAME && name !== CAROUSEL_CACHE_NAME)
                         .map(name => {
                             console.log('[SW] Deleting old cache:', name);
                             return caches.delete(name);
@@ -66,12 +73,18 @@ self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Skip cross-origin requests
+    // Manejar imágenes del carrusel de Supabase - Cache First para máxima velocidad
+    if (isCarouselImage(url.href)) {
+        event.respondWith(handleCarouselImage(request));
+        return;
+    }
+
+    // Skip cross-origin requests (excepto las del carrusel que ya manejamos arriba)
     if (url.origin !== location.origin) {
         return;
     }
 
-    // Skip API requests to Supabase
+    // Skip API requests to Supabase (que no sean imágenes)
     if (url.hostname.includes('supabase.co')) {
         return;
     }
@@ -113,6 +126,101 @@ self.addEventListener('fetch', event => {
                     });
             })
     );
+});
+
+// Manejar imágenes del carrusel con estrategia Cache First + Background Update
+async function handleCarouselImage(request) {
+    const carouselCache = await caches.open(CAROUSEL_CACHE_NAME);
+    
+    // Intentar obtener del caché primero
+    const cachedResponse = await carouselCache.match(request);
+    
+    if (cachedResponse) {
+        console.log('[SW] Carousel image from cache:', request.url);
+        
+        // Actualizar en segundo plano (stale-while-revalidate)
+        fetch(request)
+            .then(networkResponse => {
+                if (networkResponse && networkResponse.status === 200) {
+                    carouselCache.put(request, networkResponse.clone());
+                    console.log('[SW] Carousel image updated in background');
+                }
+            })
+            .catch(() => {
+                // Ignorar errores de red, usamos el caché
+            });
+        
+        return cachedResponse;
+    }
+    
+    // Si no está en caché, buscar en la red
+    try {
+        const networkResponse = await fetch(request);
+        
+        if (networkResponse && networkResponse.status === 200) {
+            // Guardar en caché para futuras visitas
+            carouselCache.put(request, networkResponse.clone());
+            console.log('[SW] Carousel image cached:', request.url);
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        console.error('[SW] Failed to fetch carousel image:', error);
+        // Retornar una respuesta de error o placeholder
+        return new Response('Carousel image not available', { status: 503 });
+    }
+}
+
+// Función para precachear imágenes del carrusel (llamada desde loader.js)
+async function precacheCarouselImages(imageUrls) {
+    const carouselCache = await caches.open(CAROUSEL_CACHE_NAME);
+    let cachedCount = 0;
+    
+    for (const url of imageUrls) {
+        try {
+            // Verificar si ya está en caché
+            const cached = await carouselCache.match(url);
+            if (cached) {
+                console.log('[SW] Already cached:', url);
+                cachedCount++;
+                continue;
+            }
+            
+            // Descargar y cachear
+            const response = await fetch(url);
+            if (response.status === 200) {
+                await carouselCache.put(url, response);
+                console.log('[SW] Precached carousel image:', url);
+                cachedCount++;
+            }
+        } catch (error) {
+            console.error('[SW] Failed to precache:', url, error);
+        }
+    }
+    
+    // Enviar confirmación al cliente
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'CAROUSEL_CACHED',
+            count: cachedCount,
+            total: imageUrls.length
+        });
+    });
+}
+
+// Escuchar mensajes desde la aplicación
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'PRECACHE_CAROUSEL') {
+        console.log('[SW] Received precache request for carousel images');
+        event.waitUntil(
+            precacheCarouselImages(event.data.urls)
+        );
+    }
+    
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Handle push notifications (for future use)

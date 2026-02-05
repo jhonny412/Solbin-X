@@ -10,8 +10,10 @@
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://afhjtkifntysqnlquuyk.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://afhjtkifntysqnlquuyk.supabase.co">
 
     <!-- Preload Critical Assets -->
     <link rel="preload" href="Imagenes/Version_Web.svg" as="image" type="image/svg+xml">
@@ -279,6 +281,41 @@
             position: absolute;
             top: 0;
             left: 0;
+            will-change: transform;
+            /* Optimizar para animaciones */
+        }
+
+        /* Skeleton loader para carrusel */
+        .carousel-skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .animate-shimmer {
+            animation: shimmer 2s infinite linear;
+        }
+
+        /* Transición suave para imágenes del carrusel */
+        .carousel-slide img {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .carousel-slide.active img {
+            opacity: 1;
         }
 
         #carousel-track {
@@ -2600,10 +2637,28 @@
                     navigator.serviceWorker.register('/sw.js')
                         .then(registration => {
                             console.log('[SW] Service Worker registered:', registration.scope);
+                            
+                            // Verificar actualizaciones del SW
+                            registration.addEventListener('updatefound', () => {
+                                const newWorker = registration.installing;
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('[SW] New version available, activating...');
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    }
+                                });
+                            });
                         })
                         .catch(error => {
                             console.error('[SW] Service Worker registration failed:', error);
                         });
+                    
+                    // Escuchar mensajes del SW (para sincronización de caché)
+                    navigator.serviceWorker.addEventListener('message', event => {
+                        if (event.data && event.data.type === 'CAROUSEL_CACHED') {
+                            console.log('[SW] Carousel images cached:', event.data.count);
+                        }
+                    });
                 });
             }
         </script>
