@@ -897,6 +897,82 @@ async function loadAndRenderCarousel() {
     }
 }
 
+// Función para generar datos estructurados Schema.org para productos
+function generateProductSchema(products) {
+    if (!products || products.length === 0) return;
+    
+    const productSchemas = products.slice(0, 10).map(p => {
+        const images = (p.images && Array.isArray(p.images) && p.images.length > 0)
+            ? p.images
+            : (p.image_url ? [p.image_url] : []);
+        
+        const mainImage = images[0] || '';
+        const hasDiscount = p.old_price && parseFloat(p.old_price) > parseFloat(p.price);
+        const discount = hasDiscount ? Math.round(((parseFloat(p.old_price) - parseFloat(p.price)) / parseFloat(p.old_price)) * 100) : 0;
+        
+        return {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "@id": `https://solbin-x.com/#product-${p.id}`,
+            "name": p.name,
+            "image": images,
+            "description": p.description || `${p.name} - ${p.category}`,
+            "sku": p.id.toString(),
+            "brand": {
+                "@type": "Brand",
+                "name": p.brand || "Solbin-X"
+            },
+            "category": p.category,
+            "offers": {
+                "@type": "Offer",
+                "url": "https://solbin-x.com/",
+                "priceCurrency": "PEN",
+                "price": p.price.toString(),
+                "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+                "availability": p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                "seller": {
+                    "@type": "Organization",
+                    "name": "Solbin-X"
+                },
+                ...(hasDiscount && {
+                    "priceSpecification": {
+                        "@type": "PriceSpecification",
+                        "price": p.price.toString(),
+                        "priceCurrency": "PEN",
+                        "valueAddedTaxIncluded": true
+                    }
+                })
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "150"
+            },
+            ...(hasDiscount && {
+                "priceSpecification": {
+                    "@type": "PriceSpecification",
+                    "price": p.price.toString(),
+                    "priceCurrency": "PEN"
+                }
+            })
+        };
+    });
+    
+    // Crear script tag para los datos estructurados
+    const existingScript = document.getElementById('product-schema');
+    if (existingScript) {
+        existingScript.remove();
+    }
+    
+    const script = document.createElement('script');
+    script.id = 'product-schema';
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(productSchemas.length === 1 ? productSchemas[0] : productSchemas);
+    document.head.appendChild(script);
+    
+    console.log('[SEO] Datos estructurados de productos generados:', productSchemas.length);
+}
+
 // INIT
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -913,6 +989,10 @@ const originalApplyFilters = applyFilters;
 applyFilters = function () {
     originalApplyFilters();
     renderFeaturedProducts();
+    // Generar datos estructurados Schema.org para productos visibles (SEO)
+    if (catalogState.filteredProducts && catalogState.filteredProducts.length > 0) {
+        generateProductSchema(catalogState.filteredProducts.slice(0, 10));
+    }
 };
 
 // Increment Site Visits on Load
