@@ -1,28 +1,22 @@
 // Carrito de Compras - Funcionalidad Global
 class CartManager {
     constructor() {
-        console.log('CartManager: Constructor iniciado');
         this.cart = [];
         this.init();
     }
 
     init() {
-        console.log('CartManager: Inicializando...');
         this.loadCart();
         this.updateCartBadge();
-        console.log('CartManager: Inicializado con', this.cart.length, 'items');
     }
 
     // Cargar carrito desde localStorage
     loadCart() {
-        console.log('CartManager: Cargando carrito desde localStorage...');
         try {
             const savedCart = localStorage.getItem('cart');
-            console.log('CartManager: Datos raw del localStorage:', savedCart);
 
             if (savedCart) {
                 const parsed = JSON.parse(savedCart);
-                console.log('CartManager: Carrito parseado:', parsed);
 
                 // Validar estructura del carrito
                 if (Array.isArray(parsed)) {
@@ -35,13 +29,10 @@ class CartManager {
                         item.price > 0 &&
                         item.quantity > 0
                     );
-                    console.log('CartManager: Carrito validado con', this.cart.length, 'items válidos');
                 } else {
-                    console.warn('CartManager: Los datos no son un array, inicializando carrito vacío');
                     this.cart = [];
                 }
             } else {
-                console.log('CartManager: No hay datos en localStorage, carrito vacío');
                 this.cart = [];
             }
         } catch (e) {
@@ -55,7 +46,6 @@ class CartManager {
     saveCart() {
         try {
             localStorage.setItem('cart', JSON.stringify(this.cart));
-            console.log('Carrito guardado:', this.cart);
         } catch (e) {
             console.error('Error al guardar el carrito:', e);
         }
@@ -63,14 +53,11 @@ class CartManager {
 
     // Agregar producto al carrito
     addToCart(productName, productPrice, quantity = 1, productData = null) {
-        console.log('CartManager: addToCart llamado con:', productName, productPrice, quantity, productData);
         const existingItem = this.cart.find(item => item.name === productName);
 
         if (existingItem) {
-            console.log('CartManager: Producto existente, incrementando cantidad');
             existingItem.quantity += quantity;
         } else {
-            console.log('CartManager: Nuevo producto, agregando al carrito');
             const item = {
                 name: productName,
                 price: productPrice,
@@ -90,14 +77,11 @@ class CartManager {
             this.cart.push(item);
         }
 
-        console.log('CartManager: Carrito actualizado:', this.cart);
         this.saveCart();
         this.updateCartBadge();
 
         // Mostrar notificación
         this.showNotification(productName, quantity);
-
-        console.log('CartManager: Producto agregado exitosamente. Total items:', this.cart.length);
     }
 
     // Actualizar cantidad de un producto
@@ -122,7 +106,6 @@ class CartManager {
     // Eliminar producto del carrito
     removeFromCart(index) {
         if (index >= 0 && index < this.cart.length) {
-            const productName = this.cart[index].name;
             this.cart.splice(index, 1);
             this.saveCart();
             this.updateCartBadge();
@@ -131,8 +114,6 @@ class CartManager {
             if (typeof this.updateCartDisplay === 'function') {
                 this.updateCartDisplay();
             }
-
-            console.log(`Producto ${productName} eliminado del carrito`);
         }
     }
 
@@ -150,7 +131,6 @@ class CartManager {
 
     // Actualizar badge del carrito
     updateCartBadge() {
-        console.log('CartManager: Actualizando badge del carrito...');
         const badge = document.getElementById('cart-badge');
         const headerTotal = document.getElementById('cart-total-header');
 
@@ -159,22 +139,16 @@ class CartManager {
 
         // Actualizar badge
         if (badge) {
-            console.log('CartManager: Total items para badge:', totalItems);
-
             if (totalItems > 0) {
                 badge.classList.remove('hidden');
                 badge.textContent = totalItems;
                 badge.classList.remove('scale-0');
                 badge.classList.add('scale-100');
-                console.log('CartManager: Badge actualizado con', totalItems, 'items');
             } else {
                 badge.classList.add('hidden');
                 badge.classList.remove('scale-100');
                 badge.classList.add('scale-0');
-                console.log('CartManager: Badge oculto (carrito vacío)');
             }
-        } else {
-            console.warn('CartManager: Elemento cart-badge no encontrado en el DOM');
         }
 
         // Actualizar total en header
@@ -268,27 +242,21 @@ class CartManager {
 }
 
 // Crear instancia global del carrito
-console.log('Iniciando CartManager global...');
 window.cartManager = new CartManager();
-console.log('CartManager global creado y disponible:', window.cartManager);
 
 // Funciones globales para compatibilidad
 function addToCart(productName, productPrice, quantity = 1) {
-    console.log('Función global addToCart llamada:', productName, productPrice, quantity);
     window.cartManager.addToCart(productName, productPrice, quantity);
 }
 
 function updateQuantity(index, change) {
-    console.log('Función global updateQuantity llamada:', index, change);
     window.cartManager.updateQuantity(index, change);
 }
 
 function removeFromCart(index) {
-    console.log('Función global removeFromCart llamada:', index);
     window.cartManager.removeFromCart(index);
 }
 
 function clearCart() {
-    console.log('Función global clearCart llamada');
     window.cartManager.clearCart();
 }

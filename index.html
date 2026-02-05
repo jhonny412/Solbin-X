@@ -391,6 +391,7 @@
             0% {
                 background-position: 200% 0;
             }
+
             100% {
                 background-position: -200% 0;
             }
@@ -873,13 +874,13 @@
         }
 
         .alert-gradient-warning {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 10px 40px rgba(240, 147, 251, 0.4);
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            box-shadow: 0 10px 40px rgba(246, 211, 101, 0.4);
         }
 
         .alert-gradient-error {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            box-shadow: 0 10px 40px rgba(250, 112, 154, 0.4);
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            box-shadow: 0 10px 40px rgba(245, 87, 108, 0.4);
         }
     </style>
 
@@ -890,13 +891,9 @@
                 <!-- Logo más compacto -->
                 <div class="flex items-center flex-shrink-0">
                     <a href="#inicio" class="flex items-center" aria-label="Solbin-X - Inicio">
-                        <img src="Imagenes/Version_Web.svg" 
-                             alt="Solbin-X Logo - Tienda de Tecnología en Perú"
-                             width="300" 
-                             height="90"
-                             loading="eager"
-                             fetchpriority="high"
-                             class="h-[90px] w-auto dark:brightness-0 dark:invert transition-all duration-300 hover:scale-105">
+                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X Logo - Tienda de Tecnología en Perú"
+                            width="300" height="90" loading="eager" fetchpriority="high"
+                            class="h-[90px] w-auto dark:brightness-0 dark:invert transition-all duration-300 hover:scale-105">
                     </a>
                 </div>
 
@@ -967,28 +964,28 @@
             <!-- Barra de categorías - Segunda fila de navegación -->
             <div class="hidden lg:flex border-t border-gray-100 dark:border-gray-800 py-2">
                 <div class="flex items-center space-x-8 overflow-x-auto">
-                    <a href="#catalogo"
-                        class="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[#0D9488] dark:hover:text-[#0D9488] font-medium transition whitespace-nowrap">
+                    <a href="#catalogo" id="btn-todas-categorias" data-filter="all"
+                        class="nav-link flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap cursor-pointer">
                         <i class="fas fa-th-large text-[#0D9488]"></i>
                         <span>Todas las Categorías</span>
                     </a>
-                    <a href="#catalogo" onclick="filterCategory('laptops', this)"
+                    <a href="#catalogo" onclick="filterCategory('laptops', this)" data-filter="laptops"
                         class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-laptop mr-1"></i> Laptops
                     </a>
-                    <a href="#catalogo" onclick="filterCategory('smartphones', this)"
+                    <a href="#catalogo" onclick="filterCategory('smartphones', this)" data-filter="smartphones"
                         class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-mobile-alt mr-1"></i> Smartphones
                     </a>
-                    <a href="#catalogo" onclick="filterCategory('tablets', this)"
+                    <a href="#catalogo" onclick="filterCategory('tablets', this)" data-filter="tablets"
                         class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-tablet-alt mr-1"></i> Tablets
                     </a>
-                    <a href="#catalogo" onclick="filterCategory('accesorios', this)"
+                    <a href="#catalogo" onclick="filterCategory('accesorios', this)" data-filter="accesorios"
                         class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-headphones mr-1"></i> Accesorios
                     </a>
-                    <a href="#catalogo" onclick="filterCategory('gaming', this)"
+                    <a href="#catalogo" onclick="filterCategory('gaming', this)" data-filter="gaming"
                         class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-gamepad mr-1"></i> Gaming
                     </a>
@@ -1029,28 +1026,28 @@
             </div>
             <div class="px-2 pt-2 pb-3 space-y-1">
                 <p class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Categorías</p>
-                <a href="#catalogo" onclick="filterCategory('all', this)"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                <a href="#catalogo" id="btn-todos-productos" data-filter="all"
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
                     <i class="fas fa-th-large w-6 text-[#0D9488]"></i> Todos los Productos
                 </a>
-                <a href="#catalogo" onclick="filterCategory('laptops', this)"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                <a href="#catalogo" onclick="filterCategory('laptops', this)" data-filter="laptops"
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
                     <i class="fas fa-laptop w-6 text-[#0D9488]"></i> Laptops
                 </a>
-                <a href="#catalogo" onclick="filterCategory('smartphones', this)"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                <a href="#catalogo" onclick="filterCategory('smartphones', this)" data-filter="smartphones"
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
                     <i class="fas fa-mobile-alt w-6 text-[#0D9488]"></i> Smartphones
                 </a>
-                <a href="#catalogo" onclick="filterCategory('tablets', this)"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                <a href="#catalogo" onclick="filterCategory('tablets', this)" data-filter="tablets"
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
                     <i class="fas fa-tablet-alt w-6 text-[#0D9488]"></i> Tablets
                 </a>
-                <a href="#catalogo" onclick="filterCategory('accesorios', this)"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                <a href="#catalogo" onclick="filterCategory('accesorios', this)" data-filter="accesorios"
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
                     <i class="fas fa-headphones w-6 text-[#0D9488]"></i> Accesorios
                 </a>
-                <a href="#catalogo" onclick="filterCategory('gaming', this)"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                <a href="#catalogo" onclick="filterCategory('gaming', this)" data-filter="gaming"
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
                     <i class="fas fa-gamepad w-6 text-[#0D9488]"></i> Gaming
                 </a>
                 <div class="border-t dark:border-gray-800 my-2"></div>
@@ -1093,13 +1090,14 @@
                 <meta itemprop="position" content="1">
             </li>
             <li class="text-gray-400"><i class="fas fa-chevron-right text-xs"></i></li>
-            <li class="text-gray-800 dark:text-gray-200 font-medium" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <li class="text-gray-800 dark:text-gray-200 font-medium" aria-current="page" itemprop="itemListElement"
+                itemscope itemtype="https://schema.org/ListItem">
                 <span itemprop="name">Catálogo</span>
                 <meta itemprop="position" content="2">
             </li>
         </ol>
     </nav>
-    
+
     <!-- Breadcrumb Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
@@ -2325,19 +2323,24 @@
                     <div>
                         <h4 class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-300">Categorías</h4>
                         <ul class="space-y-2 text-sm">
-                            <li><a href="#catalogo" onclick="filterCategory('laptops', this)"
+                            <li><a href="javascript:void(0)" onclick="window.filterCategory('laptops', this)"
+                                    data-filter="laptops"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
                                         class="fas fa-laptop text-xs"></i> Laptops</a></li>
-                            <li><a href="#catalogo" onclick="filterCategory('smartphones', this)"
+                            <li><a href="javascript:void(0)" onclick="window.filterCategory('smartphones', this)"
+                                    data-filter="smartphones"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
                                         class="fas fa-mobile-alt text-xs"></i> Smartphones</a></li>
-                            <li><a href="#catalogo" onclick="filterCategory('tablets', this)"
+                            <li><a href="javascript:void(0)" onclick="window.filterCategory('tablets', this)"
+                                    data-filter="tablets"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
                                         class="fas fa-tablet-alt text-xs"></i> Tablets</a></li>
-                            <li><a href="#catalogo" onclick="filterCategory('accesorios', this)"
+                            <li><a href="javascript:void(0)" onclick="window.filterCategory('accesorios', this)"
+                                    data-filter="accesorios"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
                                         class="fas fa-headphones text-xs"></i> Accesorios</a></li>
-                            <li><a href="#catalogo" onclick="filterCategory('gaming', this)"
+                            <li><a href="javascript:void(0)" onclick="window.filterCategory('gaming', this)"
+                                    data-filter="gaming"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
                                         class="fas fa-gamepad text-xs"></i> Gaming</a></li>
                         </ul>
@@ -2593,7 +2596,7 @@
         <script src="carousel.js"></script>
         <script src="chatbot-solbin.js?v=20260114-1"></script>
         <script src="newsletter.js?v=20260114-1"></script>
-        <script src="loader.js?v=20260114-2"></script>
+        <script src="loader.js?v=20260205-1"></script>
 
         <!-- Funciones de Toast Notifications -->
         <script>
@@ -2760,7 +2763,7 @@
                     navigator.serviceWorker.register('/sw.js')
                         .then(registration => {
                             console.log('[SW] Service Worker registered:', registration.scope);
-                            
+
                             // Verificar actualizaciones del SW
                             registration.addEventListener('updatefound', () => {
                                 const newWorker = registration.installing;
@@ -2775,7 +2778,7 @@
                         .catch(error => {
                             console.error('[SW] Service Worker registration failed:', error);
                         });
-                    
+
                     // Escuchar mensajes del SW (para sincronización de caché)
                     navigator.serviceWorker.addEventListener('message', event => {
                         if (event.data && event.data.type === 'CAROUSEL_CACHED') {

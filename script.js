@@ -363,7 +363,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.setupCartButtons = function () {
         // Buscar botones con clase específica add-to-cart-btn (nueva implementación)
         const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
-        console.log('Configurando', addToCartButtons.length, 'botones de carrito');
 
         addToCartButtons.forEach((button, index) => {
             // Remover listener anterior si existe para evitar duplicados
@@ -394,11 +393,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (!productName || isNaN(productPrice)) {
-            console.error('Datos inválidos:', { productName, productPrice });
             return;
         }
-
-        console.log('Agregando al carrito:', productName, productPrice, productData);
 
         // Usar el CartManager global
         if (window.cartManager) {
@@ -560,48 +556,46 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     };
 
-    console.log('SOLBIN website loaded successfully! 🚀');
-
     // Initialize wishlist UI
     updateWishlistUI();
 
     // Web Alert System
     async function initWebAlert() {
-        console.log('[Web Alert] Initializing...');
+        console.log('[Alerta Web] Inicializando sistema v2...');
         try {
             const client = window.supabaseClient || window.supabase;
             if (!client) {
-                console.warn('[Web Alert] Supabase client not available');
+                console.warn('[Alerta Web] El cliente de Supabase no está disponible');
                 return;
             }
 
-            console.log('[Web Alert] Fetching configuration from Supabase...');
+            console.log('[Alerta Web] Consultando configuración en Supabase...');
             const { data, error } = await client
                 .from('site_settings')
-                .select('value')
+                .select('value, updated_at')
                 .eq('key', 'web_alert')
                 .single();
 
             if (error) {
-                console.warn('[Web Alert] Error fetching config:', error);
+                console.warn('[Alerta Web] Error al obtener la configuración:', error);
                 return;
             }
 
             if (!data?.value) {
-                console.log('[Web Alert] No configuration found');
+                console.log('[Alerta Web] No se encontró configuración');
                 return;
             }
 
             const config = data.value;
-            console.log('[Web Alert] Configuration loaded:', config);
+            console.log('[Alerta Web] Configuración cargada:', config);
 
             if (!config.isActive) {
-                console.log('[Web Alert] Alert is not active');
+                console.log('[Alerta Web] La alerta no está activa');
                 return;
             }
 
             if (!config.message) {
-                console.log('[Web Alert] No message configured');
+                console.log('[Alerta Web] No hay mensaje configurado');
                 return;
             }
 
@@ -613,15 +607,29 @@ document.addEventListener('DOMContentLoaded', function () {
             const message = document.getElementById('web-alert-message');
 
             if (!banner || !content || !icon || !message) {
-                console.warn('[Web Alert] Required DOM elements not found');
+                console.warn('[Alerta Web] Elementos del DOM no encontrados');
                 return;
             }
 
-            // Check if user has closed this alert
-            const closedAlerts = JSON.parse(localStorage.getItem('closedAlerts') || '[]');
-            const alertKey = `${config.type}_${config.message.substring(0, 50)}`;
+            // --- Cache & Closed Logic ---
+            // We use type + message (start) + updated_at to create a unique key
+            // This ensures that if the admin updates the alert, it shows up again even if it was closed
+            let closedAlerts = [];
+            try {
+                const stored = localStorage.getItem('closedAlerts');
+                closedAlerts = stored ? JSON.parse(stored) : [];
+                if (!Array.isArray(closedAlerts)) closedAlerts = [];
+            } catch (e) {
+                console.warn('[Alerta Web] Error al procesar closedAlerts del localStorage:', e);
+                closedAlerts = [];
+            }
+
+            const version = data.updated_at ? new Date(data.updated_at).getTime() : 'initial';
+            const alertKey = `wa_${config.type}_${version}_${config.message.substring(0, 15)}`;
+            console.log('[Alerta Web] Clave de alerta actual:', alertKey);
+
             if (closedAlerts.includes(alertKey)) {
-                console.log('[Web Alert] User has already closed this alert');
+                console.log('[Alerta Web] El usuario ya cerró esta versión específica de la alerta (clave: ' + alertKey + ')');
                 return;
             }
 
@@ -645,11 +653,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 warning: {
                     gradient: 'alert-gradient-warning',
-                    icon: 'fa-exclamation-triangle',
-                    iconBg: 'bg-white/20',
-                    iconColor: 'text-white',
-                    textColor: 'text-white',
-                    pingBg: 'bg-white'
+                    icon: 'fa-triangle-exclamation',
+                    iconBg: 'bg-black/10',
+                    iconColor: 'text-slate-900',
+                    textColor: 'text-slate-900',
+                    pingBg: 'bg-slate-900'
                 },
                 error: {
                     gradient: 'alert-gradient-error',
@@ -661,7 +669,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
 
-            const style = styles[config.type] || styles.info;
+            const alertType = (config.type || 'info').toLowerCase().trim();
+            const style = styles[alertType] || styles.info;
 
             // Apply gradient background
             content.className = `relative rounded-2xl shadow-2xl p-5 overflow-hidden backdrop-blur-sm border-2 border-white/30 ${style.gradient}`;
@@ -675,30 +684,45 @@ document.addEventListener('DOMContentLoaded', function () {
             message.className = `text-base font-bold leading-relaxed animate-fade-in ${style.textColor}`;
             message.textContent = config.message;
 
-            // Show banner with animation
-            banner.classList.remove('hidden');
-            console.log('[Web Alert] Alert displayed successfully!');
-
-            // Store alert key for close functionality
+            // Store alert key for closure functionality
             banner.dataset.alertKey = alertKey;
 
+            // MOSTRAR BANNER
+            banner.classList.remove('hidden');
+            console.log('[Alerta Web] ÉXITO: El banner de alerta es visible.');
+
+
+
         } catch (e) {
-            console.error('[Web Alert] Error loading web alert:', e);
+            console.error('[Alerta Web] Error crítico al cargar la alerta web:', e);
         }
     }
 
     window.closeWebAlert = function () {
         const banner = document.getElementById('web-alert-banner');
-        if (!banner) return;
+        if (banner) {
+            const alertKey = banner.dataset.alertKey;
 
-        const alertKey = banner.dataset.alertKey;
-        if (alertKey) {
-            const closedAlerts = JSON.parse(localStorage.getItem('closedAlerts') || '[]');
-            closedAlerts.push(alertKey);
-            localStorage.setItem('closedAlerts', JSON.stringify(closedAlerts));
+            if (alertKey) {
+                try {
+                    let closedAlerts = [];
+                    const stored = localStorage.getItem('closedAlerts');
+                    closedAlerts = stored ? JSON.parse(stored) : [];
+                    if (Array.isArray(closedAlerts)) {
+                        if (!closedAlerts.includes(alertKey)) {
+                            closedAlerts.push(alertKey);
+                            // Limitar tamaño de localStorage para evitar llenarlo si hay muchas alertas
+                            if (closedAlerts.length > 30) closedAlerts.shift();
+                            localStorage.setItem('closedAlerts', JSON.stringify(closedAlerts));
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Alerta Web] Error al guardar el estado de cierre en localStorage:', e);
+                }
+            }
+
+            banner.classList.add('hidden');
         }
-
-        banner.classList.add('hidden');
     };
 
     // Initialize web alert after a short delay to ensure Supabase is ready

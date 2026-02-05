@@ -286,7 +286,6 @@ function renderCurrentPage() {
 
 // Helper Cart Function (to avoid relying on DOM traversing in script.js)
 window.addToCartSimple = function (name, price, productData = null) {
-    console.log('addToCartSimple llamado:', name, price, productData);
     if (window.cartManager) {
         window.cartManager.addToCart(name, price, 1, productData);
         return true;
@@ -298,7 +297,6 @@ window.addToCartSimple = function (name, price, productData = null) {
 
 // Función para configurar botones del carrito después de renderizar
 window.refreshCartButtons = function () {
-    console.log('Refrescando botones del carrito...');
     if (typeof window.setupCartButtons === 'function') {
         window.setupCartButtons();
     } else if (typeof setupCartButtons === 'function') {
@@ -360,31 +358,48 @@ window.filterSearch = function (val) {
     applyFilters();
 }
 
-window.filterCategory = function (cat, btnElement) {
+function filterCategory(cat, btnElement) {
     catalogState.filters.category = cat;
 
-    // Update UI buttons - remove active state from ALL category buttons/links
-    document.querySelectorAll('.filter-btn, [onclick*="filterCategory"]').forEach(b => {
-        b.classList.remove('bg-[#0D9488]', 'text-white', 'border-[#0D9488]');
-        b.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
-    });
-
-    // Add active class to clicked button if passed
-    if (btnElement) {
-        btnElement.classList.remove('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
-        btnElement.classList.add('bg-[#0D9488]', 'text-white');
-
-        // Remove active state after a short delay to prevent "stuck" appearance
-        setTimeout(() => {
-            if (!btnElement.classList.contains('filter-btn')) {
-                btnElement.classList.remove('bg-[#0D9488]', 'text-white');
-                btnElement.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
+    // Actualizar estados visuales en toda la página (Navbar, Sidebar, Footer, etc.)
+    document.querySelectorAll('[data-filter]').forEach(el => {
+        const filterVal = el.getAttribute('data-filter');
+        if (filterVal === cat) {
+            if (el.classList.contains('filter-btn')) {
+                // Estilo para botones del sidebar
+                el.classList.add('bg-[#0D9488]', 'text-white');
+                el.classList.remove('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
+                const checkIcon = el.querySelector('.fa-check-circle');
+                if (checkIcon) checkIcon.classList.remove('hidden');
+            } else {
+                // Estilo para links del navbar/footer
+                el.classList.add('text-[#0D9488]', 'font-bold');
+                el.classList.remove('text-gray-700', 'text-gray-600', 'dark:text-gray-300', 'dark:text-gray-400');
             }
-        }, 300);
-    }
+        } else {
+            if (el.classList.contains('filter-btn')) {
+                // Reset sidebar buttons
+                el.classList.remove('bg-[#0D9488]', 'text-white');
+                el.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
+                const checkIcon = el.querySelector('.fa-check-circle');
+                if (checkIcon) checkIcon.classList.add('hidden');
+            } else {
+                // Reset navbar/footer links
+                el.classList.remove('text-[#0D9488]', 'font-bold');
+                if (el.closest('.lg\\:flex')) {
+                    el.classList.add('text-gray-700', 'dark:text-gray-300');
+                } else {
+                    el.classList.add('text-gray-600', 'dark:text-gray-400');
+                }
+            }
+        }
+    });
 
     applyFilters();
 }
+
+// Exponer globalmente
+window.filterCategory = filterCategory;
 
 window.filterBrand = function (checkbox) {
     const val = checkbox.value;
@@ -416,7 +431,8 @@ window.filterSort = function (val) {
     applyFilters();
 }
 
-window.resetCatalogFilters = function () {
+function resetCatalogFilters(triggerElement) {
+    // 1. Resetear el estado de filtros
     catalogState.filters = {
         category: 'all',
         search: '',
@@ -425,16 +441,34 @@ window.resetCatalogFilters = function () {
         sort: 'default'
     };
 
-    // UI Reset
-    document.getElementById('searchInput').value = '';
-    document.querySelectorAll('.brand-checkbox').forEach(c => c.checked = false);
-    document.getElementById('priceRange').value = 10000;
-    document.getElementById('priceValue').textContent = 'S/. 10,000';
-    document.getElementById('sortSelect').value = 'default';
+    // 2. Limpiar todos los campos de búsqueda (Global, Móvil y Lateral)
+    ['globalSearch', 'mobileSearch', 'searchInput'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+    });
 
-    // Reset category buttons visual
-    filterCategory('all', document.querySelector('.filter-btn[data-filter="all"]'));
+    // 3. Limpiar selección de marcas
+    document.querySelectorAll('.brand-checkbox').forEach(c => c.checked = false);
+
+    // 4. Resetear rango de precios
+    const priceRange = document.getElementById('priceRange');
+    if (priceRange) {
+        priceRange.value = 10000;
+        const priceValue = document.getElementById('priceValue');
+        if (priceValue) priceValue.textContent = 'S/. 10,000';
+    }
+
+    // 5. Resetear ordenamiento
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) sortSelect.value = 'default';
+
+    // 6. Sincronizar UI de categorías y aplicar filtros
+    filterCategory('all', triggerElement);
+    applyFilters();
 }
+
+// Exponer globalmente
+window.resetCatalogFilters = resetCatalogFilters;
 
 // --- MODAL LOGIC (Kept same) ---
 
@@ -749,7 +783,7 @@ async function waitForServiceWorker() {
     if (!('serviceWorker' in navigator)) {
         return null;
     }
-    
+
     const registration = await navigator.serviceWorker.ready;
     return registration.active;
 }
@@ -848,7 +882,7 @@ async function loadAndRenderCarousel() {
         // 1. Carga inmediata desde caché local (si existe)
         const cachedCarousel = localStorage.getItem('carousel_cache');
         let imagesFromCache = null;
-        
+
         if (cachedCarousel) {
             console.log('[Carousel Loader] Cargando desde caché local...');
             imagesFromCache = JSON.parse(cachedCarousel);
@@ -868,10 +902,10 @@ async function loadAndRenderCarousel() {
 
         if (images && images.length > 0) {
             // Solo actualizar si hay cambios
-            const cacheChanged = !imagesFromCache || 
-                JSON.stringify(images.map(img => img.image_url)) !== 
+            const cacheChanged = !imagesFromCache ||
+                JSON.stringify(images.map(img => img.image_url)) !==
                 JSON.stringify(imagesFromCache.map(img => img.image_url));
-            
+
             if (cacheChanged) {
                 console.log('[Carousel Loader] Detectadas nuevas imágenes, actualizando...');
                 localStorage.setItem('carousel_cache', JSON.stringify(images));
@@ -900,16 +934,16 @@ async function loadAndRenderCarousel() {
 // Función para generar datos estructurados Schema.org para productos
 function generateProductSchema(products) {
     if (!products || products.length === 0) return;
-    
+
     const productSchemas = products.slice(0, 10).map(p => {
         const images = (p.images && Array.isArray(p.images) && p.images.length > 0)
             ? p.images
             : (p.image_url ? [p.image_url] : []);
-        
+
         const mainImage = images[0] || '';
         const hasDiscount = p.old_price && parseFloat(p.old_price) > parseFloat(p.price);
         const discount = hasDiscount ? Math.round(((parseFloat(p.old_price) - parseFloat(p.price)) / parseFloat(p.old_price)) * 100) : 0;
-        
+
         return {
             "@context": "https://schema.org",
             "@type": "Product",
@@ -957,19 +991,19 @@ function generateProductSchema(products) {
             })
         };
     });
-    
+
     // Crear script tag para los datos estructurados
     const existingScript = document.getElementById('product-schema');
     if (existingScript) {
         existingScript.remove();
     }
-    
+
     const script = document.createElement('script');
     script.id = 'product-schema';
     script.type = 'application/ld+json';
     script.textContent = JSON.stringify(productSchemas.length === 1 ? productSchemas[0] : productSchemas);
     document.head.appendChild(script);
-    
+
     console.log('[SEO] Datos estructurados de productos generados:', productSchemas.length);
 }
 
@@ -977,11 +1011,32 @@ function generateProductSchema(products) {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         loadAndRenderProducts();
-        loadAndRenderCarousel(); // Cargar carrusel dinámico desde Supabase
+        loadAndRenderCarousel();
+        setupCategoryButtons();
     });
 } else {
     loadAndRenderProducts();
-    loadAndRenderCarousel(); // Cargar carrusel dinámico desde Supabase
+    loadAndRenderCarousel();
+    setupCategoryButtons();
+}
+
+// Configurar botones de categoría después de que el DOM esté listo
+function setupCategoryButtons() {
+    // Botón "Todas las Categorías" del navbar
+    const btnTodasCategorias = document.getElementById('btn-todas-categorias');
+    if (btnTodasCategorias) {
+        btnTodasCategorias.addEventListener('click', function (e) {
+            resetCatalogFilters(this);
+        });
+    }
+
+    // Botón "Todos los Productos" del menú móvil
+    const btnTodosProductos = document.getElementById('btn-todos-productos');
+    if (btnTodosProductos) {
+        btnTodosProductos.addEventListener('click', function (e) {
+            resetCatalogFilters(this);
+        });
+    }
 }
 
 // Renderizar destacados después de cargar productos
@@ -1006,7 +1061,7 @@ applyFilters = function () {
                     try {
                         console.log('[Visitas] Incrementando contador...');
                         const { data, error } = await client.rpc('increment_visit_count');
-                        
+
                         if (error) {
                             console.error('[Visitas] Error al incrementar:', error);
                         } else {
