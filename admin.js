@@ -402,7 +402,7 @@ function initProductsGridJS() {
         columns: [
             { 
                 name: 'REF.',
-                formatter: (cell) => g.html(`<span class="text-[11px] font-bold text-slate-400">#${cell}</span>`)
+                formatter: (cell) => g.html(cell)
             },
             { 
                 name: 'Especificación',
@@ -503,9 +503,17 @@ function renderProductsToGridJS(products) {
                 </button>
             </div>`;
 
-        // GridJS interpreta strings HTML directamente
+        // Formato igual a la versión original jqGrid
+        const idDisplayHtml = `
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200">
+                    <i class="fas fa-fingerprint text-[10px]"></i>
+                </div>
+                <span class="font-semibold text-slate-600 text-sm">ID-${p.id}</span>
+            </div>`;
+        
         return [
-            `<span class="text-[11px] font-bold text-slate-400">#${p.id}</span>`,
+            idDisplayHtml,
             nameHtml,
             categoryHtml,
             stockHtml,
@@ -594,15 +602,48 @@ function renderOrdersToGridJS(orders) {
     }
     
     const gridData = orders.map(o => {
-        const statusColors = {
-            'pendiente': 'bg-amber-50 text-amber-600 border-amber-200',
-            'procesando': 'bg-blue-50 text-blue-600 border-blue-200',
-            'completado': 'bg-emerald-50 text-emerald-600 border-emerald-200',
-            'cancelado': 'bg-rose-50 text-rose-600 border-rose-200'
-        };
-        const statusClass = statusColors[o.status?.toLowerCase()] || 'bg-slate-100 text-slate-600 border-slate-200';
+        // Status Badge Pro (Premium Tech Colors) - igual a versión original
+        let statusClasses = '';
+        let statusLabel = '';
+        let dotColor = '';
 
-        const channelHtml = `
+        if (o.status === 'iniciado') {
+            statusClasses = 'bg-indigo-50/50 text-indigo-600 border-indigo-200/50';
+            statusLabel = 'En Cola';
+            dotColor = 'bg-indigo-500';
+        } else if (o.status === 'en_proceso') {
+            statusClasses = 'bg-amber-50/50 text-amber-600 border-amber-200/50';
+            statusLabel = 'Preparación';
+            dotColor = 'bg-amber-500';
+        } else if (o.status === 'terminado') {
+            statusClasses = 'bg-emerald-50/50 text-emerald-600 border-emerald-200/50';
+            statusLabel = 'Venta Exitosa';
+            dotColor = 'bg-emerald-500';
+        } else if (o.status === 'cancelado') {
+            statusClasses = 'bg-rose-50/50 text-rose-600 border-rose-200/50';
+            statusLabel = 'Anulado';
+            dotColor = 'bg-rose-500';
+        }
+
+        const dateObj = new Date(o.created_at);
+        const dateStr = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+        const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+        const idDisplayHtml = `
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200">
+                    <i class="fas fa-fingerprint text-[10px]"></i>
+                </div>
+                <span class="font-semibold text-slate-600 text-sm">ID-${o.id}</span>
+            </div>`;
+
+        const dateDisplayHtml = `
+            <div class="flex flex-col">
+                <span class="text-[12px] font-semibold text-slate-600">${dateStr}</span>
+                <span class="text-[10px] font-medium text-slate-400">${timeStr}</span>
+            </div>`;
+
+        const channelDisplayHtml = `
             <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 border border-emerald-100">
                     <i class="fab fa-whatsapp text-sm"></i>
@@ -612,23 +653,40 @@ function renderOrdersToGridJS(orders) {
                     <span class="text-[11px] font-semibold text-slate-600">WhatsApp</span>
                 </div>
             </div>`;
-        
-        const statusHtml = `<span class="px-2 py-1 text-[9px] font-semibold rounded-lg ${statusClass} uppercase tracking-wide border">${o.status || 'Desconocido'}</span>`;
-        
+
+        const totalDisplayHtml = `
+            <div class="flex flex-col items-center">
+                <div class="bg-slate-50 border border-slate-100 px-3 py-1 rounded-md">
+                    <span class="text-[13px] font-semibold text-slate-700">
+                        <span class="text-brand-500 mr-0.5">S/.</span>${parseFloat(o.total || 0).toFixed(2)}
+                    </span>
+                </div>
+            </div>`;
+
+        const statusDisplayHtml = `
+            <div class="flex justify-center">
+                <span class="px-3 py-1.5 inline-flex items-center text-[10px] font-semibold rounded-md ${statusClasses} border">
+                    <span class="w-1.5 h-1.5 rounded-full ${dotColor} mr-1.5"></span>
+                    ${statusLabel}
+                </span>
+            </div>`;
+
         const actionsHtml = `
-            <div class="flex items-center justify-center space-x-1">
-                <button onclick="viewOrderById('${o.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-brand-500 hover:text-white transition-colors">
-                    <i class="fas fa-eye text-[11px]"></i>
+            <div class="flex items-center justify-center">
+                <button onclick="viewOrderById('${o.id}')"
+                    class="flex items-center space-x-1.5 bg-brand-600 text-white px-3 py-1.5 rounded-md hover:bg-brand-700 transition-colors font-semibold text-[10px] uppercase tracking-wide">
+                    <i class="fas fa-eye text-[10px]"></i>
+                    <span>Ver</span>
                 </button>
             </div>`;
 
-        // GridJS interpreta strings HTML directamente
+        // Formato igual a la versión original jqGrid
         return [
-            `<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`,
-            o.created_at ? new Date(o.created_at).toLocaleDateString('es-PE') : '-',
-            channelHtml,
-            `<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`,
-            statusHtml,
+            idDisplayHtml,
+            dateDisplayHtml,
+            channelDisplayHtml,
+            totalDisplayHtml,
+            statusDisplayHtml,
             actionsHtml
         ];
     });
