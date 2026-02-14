@@ -51,12 +51,12 @@ window.switchAdminTab = function (tab) {
     console.log('=== switchAdminTab llamado con:', tab, '===');
 
     try {
-        const dashboardSection = document.getElementById('dashboardSection');
-        const productsSection = document.getElementById('productsSection');
-        const ordersSection = document.getElementById('ordersSection');
+        var dashboardSection = document.getElementById('dashboardSection');
+        var productsSection = document.getElementById('productsSection');
+        var ordersSection = document.getElementById('ordersSection');
 
         // Sidebar buttons
-        const navButtons = {
+        var navButtons = {
             dashboard: document.getElementById('sideBtnDashboard'),
             products: document.getElementById('sideBtnProducts'),
             orders: document.getElementById('sideBtnOrders'),
@@ -66,67 +66,70 @@ window.switchAdminTab = function (tab) {
         };
 
         // Hide all
-        dashboardSection?.classList.add('hidden');
-        productsSection?.classList.add('hidden');
-        ordersSection?.classList.add('hidden');
-        document.getElementById('carouselSection')?.classList.add('hidden');
-        document.getElementById('offersSection')?.classList.add('hidden');
-        document.getElementById('alertsSection')?.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.add('hidden');
+        if (productsSection) productsSection.classList.add('hidden');
+        if (ordersSection) ordersSection.classList.add('hidden');
+        var carouselSection = document.getElementById('carouselSection');
+        if (carouselSection) carouselSection.classList.add('hidden');
+        var offersSection = document.getElementById('offersSection');
+        if (offersSection) offersSection.classList.add('hidden');
+        var alertsSection = document.getElementById('alertsSection');
+        if (alertsSection) alertsSection.classList.add('hidden');
 
         // Reset buttons
-        Object.values(navButtons).forEach(btn => {
+        Object.values(navButtons).forEach(function(btn) {
             if (btn) btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
         });
 
         // Show selected
         if (tab === 'dashboard') {
-            dashboardSection?.classList.remove('hidden');
-            navButtons.dashboard?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (dashboardSection) dashboardSection.classList.remove('hidden');
+            if (navButtons.dashboard) navButtons.dashboard.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
             // Cargar estadísticas de visitas
             if (typeof loadVisitStats === 'function') {
                 loadVisitStats();
             }
         } else if (tab === 'products') {
-            productsSection?.classList.remove('hidden');
-            navButtons.products?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (productsSection) productsSection.classList.remove('hidden');
+            if (navButtons.products) navButtons.products.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
             // Load products
             if (typeof loadProducts === 'function') {
                 loadProducts();
             }
             // Resize grid after showing section
-            setTimeout(() => {
+            setTimeout(function() {
                 if (productsGridInstance) {
                     productsGridInstance.forceRender();
                 }
             }, 200);
         } else if (tab === 'orders') {
-            ordersSection?.classList.remove('hidden');
-            navButtons.orders?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (ordersSection) ordersSection.classList.remove('hidden');
+            if (navButtons.orders) navButtons.orders.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
             // Load orders
             if (typeof loadOrders === 'function') {
                 loadOrders();
             }
             // Resize grid after showing section
-            setTimeout(() => {
+            setTimeout(function() {
                 if (ordersGridInstance) {
                     ordersGridInstance.forceRender();
                 }
             }, 200);
         } else if (tab === 'carousel') {
-            document.getElementById('carouselSection')?.classList.remove('hidden');
-            navButtons.carousel?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (carouselSection) carouselSection.classList.remove('hidden');
+            if (navButtons.carousel) navButtons.carousel.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
             if (typeof loadCarouselImages === 'function') {
                 loadCarouselImages();
             }
         } else if (tab === 'offers') {
-            document.getElementById('offersSection')?.classList.remove('hidden');
-            navButtons.offers?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (offersSection) offersSection.classList.remove('hidden');
+            if (navButtons.offers) navButtons.offers.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
             if (typeof loadOfferSettings === 'function') {
                 loadOfferSettings();
             }
         } else if (tab === 'alerts') {
-            document.getElementById('alertsSection')?.classList.remove('hidden');
-            navButtons.alerts?.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
+            if (alertsSection) alertsSection.classList.remove('hidden');
+            if (navButtons.alerts) navButtons.alerts.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
             if (typeof loadAlertSettings === 'function') {
                 loadAlertSettings();
             }
@@ -165,9 +168,9 @@ window.testMenuNavigation = function () {
     const productsSection = document.getElementById('productsSection');
     const ordersSection = document.getElementById('ordersSection');
 
-    console.log('  Dashboard:', !!dashboardSection, '- Estado:', dashboardSection?.classList.contains('hidden') ? 'oculta' : 'visible');
-    console.log('  Products:', !!productsSection, '- Estado:', productsSection?.classList.contains('hidden') ? 'oculta' : 'visible');
-    console.log('  Orders:', !!ordersSection, '- Estado:', ordersSection?.classList.contains('hidden') ? 'oculta' : 'visible');
+        console.log('  Dashboard:', !!dashboardSection, '- Estado:', dashboardSection && dashboardSection.classList.contains('hidden') ? 'oculta' : 'visible');
+        console.log('  Products:', !!productsSection, '- Estado:', productsSection && productsSection.classList.contains('hidden') ? 'oculta' : 'visible');
+        console.log('  Orders:', !!ordersSection, '- Estado:', ordersSection && ordersSection.classList.contains('hidden') ? 'oculta' : 'visible');
 
     console.log('2. Verificando botones:');
     const sideBtnDashboard = document.getElementById('sideBtnDashboard');
@@ -1331,7 +1334,7 @@ window.updateOrderStatus = async function () {
     if (!currentOrderId) return;
 
     const newStatus = document.getElementById('orderStatusSelect').value;
-    const previousStatus = window.currentFullOrder?.status;
+        var previousStatus = window.currentFullOrder ? window.currentFullOrder.status : undefined;
     const client = window.supabaseClient || window.supabase;
 
     // Validar que no se esté intentando cambiar al mismo estado
@@ -3349,7 +3352,7 @@ window.loadAlertSettings = async function () {
 
         if (error && error.code !== 'PGRST116') throw error;
 
-        const config = data?.value || {
+        var config = data ? data.value : {
             isActive: false,
             type: 'info',
             message: ''
@@ -3386,7 +3389,7 @@ window.saveAlertSettings = async function () {
         const typeSelect = document.getElementById('alertType');
         const messageTextarea = document.getElementById('alertMessage');
 
-        const message = messageTextarea?.value?.trim() || '';
+        var message = messageTextarea ? messageTextarea.value.trim() : '';
 
         // Validation
         if (message.length > 200) {
