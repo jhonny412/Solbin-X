@@ -406,6 +406,7 @@ function initProductsGridJS() {
             },
             { 
                 name: 'Especificación',
+                width: '370px',
                 formatter: (cell) => g.html(cell)
             },
             { 
