@@ -399,7 +399,32 @@ function initProductsGridJS() {
     gridContainer.innerHTML = '';
     
     productsGridInstance = new g.Grid({
-        columns: ['REF.', 'Especificación', 'Categoría', 'Stock', 'Valorización', 'Operaciones'],
+        columns: [
+            { 
+                name: 'REF.',
+                formatter: (cell) => g.html(`<span class="text-[11px] font-bold text-slate-400">#${cell}</span>`)
+            },
+            { 
+                name: 'Especificación',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Categoría',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Stock',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Valorización',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Operaciones',
+                formatter: (cell) => g.html(cell)
+            }
+        ],
         data: []
     }).render(gridContainer);
     
@@ -519,7 +544,32 @@ function initOrdersGridJS() {
     gridContainer.innerHTML = '';
     
     ordersGridInstance = new g.Grid({
-        columns: ['Ref.', 'Fecha', 'Cliente', 'Total', 'Estado', 'Operaciones'],
+        columns: [
+            { 
+                name: 'Ref.',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Fecha',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Cliente',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Total',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Estado',
+                formatter: (cell) => g.html(cell)
+            },
+            { 
+                name: 'Operaciones',
+                formatter: (cell) => g.html(cell)
+            }
+        ],
         data: []
     }).render(gridContainer);
     
