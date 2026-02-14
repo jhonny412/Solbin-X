@@ -29,26 +29,26 @@ function isCarouselImage(url) {
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
-    console.log('[SW] Installing Service Worker...');
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[SW] Caching static assets');
+                
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                console.log('[SW] Static assets cached');
+                
                 return self.skipWaiting();
             })
             .catch(err => {
-                console.error('[SW] Error caching static assets:', err);
+                
             })
     );
 });
 
 // Activate event - cleanup old caches
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating Service Worker...');
+    
     event.waitUntil(
         caches.keys()
             .then(cacheNames => {
@@ -56,13 +56,13 @@ self.addEventListener('activate', event => {
                     cacheNames
                         .filter(name => name !== CACHE_NAME && name !== CAROUSEL_CACHE_NAME)
                         .map(name => {
-                            console.log('[SW] Deleting old cache:', name);
+                            
                             return caches.delete(name);
                         })
                 );
             })
             .then(() => {
-                console.log('[SW] Activated');
+                
                 return self.clients.claim();
             })
     );
@@ -94,7 +94,7 @@ self.addEventListener('fetch', event => {
             .then(cachedResponse => {
                 if (cachedResponse) {
                     // Return cached version
-                    console.log('[SW] Serving from cache:', request.url);
+                    
                     return cachedResponse;
                 }
 
@@ -136,14 +136,14 @@ async function handleCarouselImage(request) {
     const cachedResponse = await carouselCache.match(request);
     
     if (cachedResponse) {
-        console.log('[SW] Carousel image from cache:', request.url);
+        
         
         // Actualizar en segundo plano (stale-while-revalidate)
         fetch(request)
             .then(networkResponse => {
                 if (networkResponse && networkResponse.status === 200) {
                     carouselCache.put(request, networkResponse.clone());
-                    console.log('[SW] Carousel image updated in background');
+                    
                 }
             })
             .catch(() => {
@@ -160,12 +160,12 @@ async function handleCarouselImage(request) {
         if (networkResponse && networkResponse.status === 200) {
             // Guardar en caché para futuras visitas
             carouselCache.put(request, networkResponse.clone());
-            console.log('[SW] Carousel image cached:', request.url);
+            
         }
         
         return networkResponse;
     } catch (error) {
-        console.error('[SW] Failed to fetch carousel image:', error);
+        
         // Retornar una respuesta de error o placeholder
         return new Response('Carousel image not available', { status: 503 });
     }
@@ -181,7 +181,7 @@ async function precacheCarouselImages(imageUrls) {
             // Verificar si ya está en caché
             const cached = await carouselCache.match(url);
             if (cached) {
-                console.log('[SW] Already cached:', url);
+                
                 cachedCount++;
                 continue;
             }
@@ -190,11 +190,11 @@ async function precacheCarouselImages(imageUrls) {
             const response = await fetch(url);
             if (response.status === 200) {
                 await carouselCache.put(url, response);
-                console.log('[SW] Precached carousel image:', url);
+                
                 cachedCount++;
             }
         } catch (error) {
-            console.error('[SW] Failed to precache:', url, error);
+            
         }
     }
     
@@ -212,7 +212,7 @@ async function precacheCarouselImages(imageUrls) {
 // Escuchar mensajes desde la aplicación
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'PRECACHE_CAROUSEL') {
-        console.log('[SW] Received precache request for carousel images');
+        
         event.waitUntil(
             precacheCarouselImages(event.data.urls)
         );
@@ -225,7 +225,7 @@ self.addEventListener('message', event => {
 
 // Handle push notifications (for future use)
 self.addEventListener('push', event => {
-    console.log('[SW] Push received');
+    
     const data = event.data?.json() || {};
     const title = data.title || 'Solbin-X';
     const options = {
@@ -245,7 +245,7 @@ self.addEventListener('push', event => {
 
 // Handle notification click
 self.addEventListener('notificationclick', event => {
-    console.log('[SW] Notification clicked');
+    
     event.notification.close();
 
     const url = event.notification.data?.url || '/';
@@ -269,7 +269,7 @@ self.addEventListener('notificationclick', event => {
 
 // Background sync (for future use - save cart offline)
 self.addEventListener('sync', event => {
-    console.log('[SW] Background sync:', event.tag);
+    
     if (event.tag === 'sync-cart') {
         event.waitUntil(syncCart());
     }
@@ -295,8 +295,8 @@ async function syncCart() {
             }
         }
     } catch (err) {
-        console.error('[SW] Error syncing cart:', err);
+        
     }
 }
 
-console.log('[SW] Service Worker loaded');
+

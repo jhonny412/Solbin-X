@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             } catch (error) {
-                console.error('Error:', error);
+                
                 showFormMessage('Error de conexión. Por favor intenta más tarde.', 'error');
             } finally {
                 submitBtn.disabled = false;
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Validate URL before setting
         if (!isValidImageUrl(imageSrc)) {
-            console.error('Invalid image URL');
+            
             return;
         }
 
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 productData = JSON.parse(productDataAttr.replace(/\\'/g, "'"));
             } catch (err) {
-                console.error('Error parsing product data:', err);
+                
             }
         }
 
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }, 1500);
         } else {
-            console.error('CartManager no está disponible');
+            
         }
     }
 
@@ -561,15 +561,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Web Alert System
     async function initWebAlert() {
-        console.log('[Alerta Web] Inicializando sistema v2...');
+        
         try {
             const client = window.supabaseClient || window.supabase;
             if (!client) {
-                console.warn('[Alerta Web] El cliente de Supabase no está disponible');
+                
                 return;
             }
 
-            console.log('[Alerta Web] Consultando configuración en Supabase...');
+            
             const { data, error } = await client
                 .from('site_settings')
                 .select('value, updated_at')
@@ -577,25 +577,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 .single();
 
             if (error) {
-                console.warn('[Alerta Web] Error al obtener la configuración:', error);
+                
                 return;
             }
 
             if (!data?.value) {
-                console.log('[Alerta Web] No se encontró configuración');
+                
                 return;
             }
 
             const config = data.value;
-            console.log('[Alerta Web] Configuración cargada:', config);
+            
 
             if (!config.isActive) {
-                console.log('[Alerta Web] La alerta no está activa');
+                
                 return;
             }
 
             if (!config.message) {
-                console.log('[Alerta Web] No hay mensaje configurado');
+                
                 return;
             }
 
@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const message = document.getElementById('web-alert-message');
 
             if (!banner || !content || !icon || !message) {
-                console.warn('[Alerta Web] Elementos del DOM no encontrados');
+                
                 return;
             }
 
@@ -620,16 +620,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 closedAlerts = stored ? JSON.parse(stored) : [];
                 if (!Array.isArray(closedAlerts)) closedAlerts = [];
             } catch (e) {
-                console.warn('[Alerta Web] Error al procesar closedAlerts del localStorage:', e);
+                
                 closedAlerts = [];
             }
 
             const version = data.updated_at ? new Date(data.updated_at).getTime() : 'initial';
             const alertKey = `wa_${config.type}_${version}_${config.message.substring(0, 15)}`;
-            console.log('[Alerta Web] Clave de alerta actual:', alertKey);
+            
 
             if (closedAlerts.includes(alertKey)) {
-                console.log('[Alerta Web] El usuario ya cerró esta versión específica de la alerta (clave: ' + alertKey + ')');
+                ');
                 return;
             }
 
@@ -689,12 +689,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // MOSTRAR BANNER
             banner.classList.remove('hidden');
-            console.log('[Alerta Web] ÉXITO: El banner de alerta es visible.');
+            
 
 
 
         } catch (e) {
-            console.error('[Alerta Web] Error crítico al cargar la alerta web:', e);
+            
         }
     }
 
@@ -717,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 } catch (e) {
-                    console.error('[Alerta Web] Error al guardar el estado de cierre en localStorage:', e);
+                    
                 }
             }
 
@@ -768,7 +768,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         } catch (e) {
-            console.warn('Error fetching offer settings, using default', e);
+            
         }
 
         // Apply Visibility

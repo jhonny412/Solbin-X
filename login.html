@@ -8,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="supabase-config.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -139,7 +140,6 @@
                 window.location.href = 'admin.html';
 
             } catch (err) {
-                console.error(err);
                 loginAttempts++;
                 lastAttemptTime = now;
 

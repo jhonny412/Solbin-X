@@ -3,7 +3,7 @@
 
 // Global error handler
 window.onerror = function (msg, url, lineNo, columnNo, error) {
-    console.error('Error en admin.js:', msg, 'en', url, 'línea', lineNo);
+    
     return false;
 };
 
@@ -103,7 +103,7 @@ window.switchAdminTab = function (tab) {
             }
         }
     } catch (err) {
-        console.error('Error en switchAdminTab:', err);
+        
     }
 };
 
@@ -289,13 +289,13 @@ window.loadVisitStats = async function (retryCount = 0) {
 
         // Si el cliente no está listo, reintentar un par de veces
         if (!client && retryCount < 5) {
-            console.log(`[Visitas] Cliente no listo, reintentando en 500ms... (${retryCount + 1}/5)`);
+            `);
             setTimeout(() => window.loadVisitStats(retryCount + 1), 500);
             return;
         }
 
         if (!client) {
-            console.error('[Visitas] Cliente Supabase no disponible después de varios intentos');
+            
             updateVisitCounter('Error');
             return;
         }
@@ -308,7 +308,7 @@ window.loadVisitStats = async function (retryCount = 0) {
                                 updateVisitCounter(rpcData);
                 return;
             } else if (rpcError) {
-                console.warn('[Visitas] Error en RPC get_visit_count:', rpcError);
+                
             }
         } catch (rpcErr) {
                     }
@@ -321,7 +321,7 @@ window.loadVisitStats = async function (retryCount = 0) {
             .single();
 
         if (error) {
-            console.error('[Visitas] Error al cargar estadísticas desde tabla:', error);
+            
             // Si hay error, mostrar lo que había
             return;
         }
@@ -333,7 +333,7 @@ window.loadVisitStats = async function (retryCount = 0) {
         }
 
     } catch (e) {
-        console.error('[Visitas] Error general en loadVisitStats:', e);
+        
     }
 };
 
@@ -343,7 +343,7 @@ function updateVisitCounter(count) {
     if (visitCounter) {
         visitCounter.textContent = count.toLocaleString('es-PE');
             } else {
-        console.error('[Visitas] Elemento visitCounter no encontrado');
+        
     }
 }
 
@@ -361,9 +361,9 @@ window.loadProducts = async function () {
 
         if (error) throw error;
 
-                console.log('Productos ordenados desde Supabase:', products.map(p => ({ id: p.id, sku: 'SKU-' + p.id.toString().padStart(5, '0') })));
-        console.log('Primeros 5 IDs:', products.slice(0, 5).map(p => p.id));
-        console.log('Últimos 5 IDs:', products.slice(-5).map(p => p.id));
+                .padStart(5, '0') })));
+        .map(p => p.id));
+        .map(p => p.id));
 
         window.allAdminProducts = products;
 
@@ -383,7 +383,7 @@ window.loadProducts = async function () {
         hideProductsLoading();
 
             } catch (err) {
-        console.error('Error cargando productos:', err);
+        
         hideProductsLoading();
         Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
     }
@@ -497,14 +497,14 @@ function renderProductsToGrid(products) {
 
         if (gridData.length > 0) {
             }
-    console.log('GridData orden:', gridData.map(g => g.id));
+    );
 
     // Add data to jqGrid usando el ID real del producto
     for (let i = 0; i < gridData.length; i++) {
         jQuery('#productsGrid').jqGrid('addRowData', gridData[i].id, gridData[i]);
     }
 
-    console.log('Filas en grid después de agregar:', jQuery('#productsGrid').jqGrid('getGridParam', 'data').map(row => row.id));
+    .jqGrid('getGridParam', 'data').map(row => row.id));
 
     // Trigger resize to ensure grid fits properly
     setTimeout(() => {
@@ -552,7 +552,7 @@ window.loadOrders = async function () {
 
         if (error) throw error;
 
-                console.log('Datos de ejemplo:', orders.slice(0, 2));
+                );
 
         // Save for export
         window.allAdminOrders = orders;
@@ -573,7 +573,7 @@ window.loadOrders = async function () {
         hideOrdersLoading();
 
             } catch (err) {
-        console.error('Error cargando ventas:', err);
+        
         hideOrdersLoading();
         Swal.fire('Error', 'No se pudieron cargar las ventas.', 'error');
     }
@@ -755,7 +755,7 @@ window.viewOrder = function (order) {
 
         // Robust parsing
         if (typeof info === 'string') {
-            try { info = JSON.parse(info); } catch (e) { console.error('Error parsing customer_info:', e); }
+            try { info = JSON.parse(info); } catch (e) {  }
         }
 
         if (info) {
@@ -874,7 +874,7 @@ window.updateOrderStatus = async function () {
     // Verificar que los productos estén cargados antes de procesar cambios de stock
     if (newStatus === 'terminado' || (previousStatus === 'terminado' && newStatus === 'cancelado')) {
         if (!window.allAdminProducts || window.allAdminProducts.length === 0) {
-            console.error('[Stock] Productos no cargados al intentar actualizar stock');
+            
             Swal.fire({
                 title: 'Error',
                 text: 'No se pueden actualizar los stocks porque la lista de productos no está cargada. Por favor, recarga la página e intenta nuevamente.',
@@ -895,15 +895,15 @@ window.updateOrderStatus = async function () {
                 if (typeof items === 'string') items = JSON.parse(items);
 
                                 if (!Array.isArray(items)) {
-                    console.error('[Stock] Items no es un array:', items);
+                    
                     stockErrors.push('Error: Formato de items inválido');
                 } else if (!window.allAdminProducts || window.allAdminProducts.length === 0) {
-                    console.error('[Stock] No hay productos cargados en allAdminProducts');
+                    
                     stockErrors.push('Error: Lista de productos no disponible. Recarga la página.');
                 } else {
                     for (const item of items) {
                                                 if (!item.name) {
-                            console.error('[Stock] Item sin nombre:', item);
+                            
                             stockErrors.push('Item sin nombre identificado');
                             continue;
                         }
@@ -924,14 +924,14 @@ window.updateOrderStatus = async function () {
                                                     }
 
                         if (!product) {
-                            console.error(`[Stock] Producto no encontrado: "${item.name}" (ID: ${item.id || 'N/A'})`);
-                            console.log('[Stock] Productos disponibles:', window.allAdminProducts.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
+                            `);
+                            .map(p => ({ id: p.id, name: p.name })));
                             stockErrors.push(`${item.name}: Producto no encontrado en el catálogo`);
                             continue;
                         }
 
                         if (!product.id) {
-                            console.error(`[Stock] Producto sin ID:`, product);
+                            
                             stockErrors.push(`${item.name}: Producto sin ID válido`);
                             continue;
                         }
@@ -944,7 +944,7 @@ window.updateOrderStatus = async function () {
                         }
 
                         const newStock = product.stock - quantity;
-                        console.log(`[Stock] Actualizando ${product.name} (ID: ${product.id}): ${product.stock} -> ${newStock}`);
+                        : ${product.stock} -> ${newStock}`);
 
                         const { error: updateError } = await client
                             .from('products')
@@ -952,7 +952,7 @@ window.updateOrderStatus = async function () {
                             .eq('id', product.id);
 
                         if (updateError) {
-                            console.error(`[Stock] Error actualizando ${product.name}:`, updateError);
+                            
                             stockErrors.push(`${product.name}: ${updateError.message}`);
                         } else {
                                                         stockUpdates.push(`${product.name}: -${quantity} unidades`);
@@ -968,7 +968,7 @@ window.updateOrderStatus = async function () {
                                             }
                 }
             } catch (err) {
-                console.error('Error descontando stock:', err);
+                
                 stockErrors.push('Error general al actualizar stock: ' + err.message);
             }
         }
@@ -1012,7 +1012,7 @@ window.updateOrderStatus = async function () {
                                 product.stock = newStock;
                             }
                         } else {
-                            console.error(`[Stock] Producto no encontrado para restaurar: "${item.name}"`);
+                            
                             stockErrors.push(`${item.name}: No se pudo restaurar - producto no encontrado`);
                         }
                     }
@@ -1021,7 +1021,7 @@ window.updateOrderStatus = async function () {
                                             }
                 }
             } catch (err) {
-                console.error('Error restaurando stock:', err);
+                
                 stockErrors.push('Error general al restaurar stock: ' + err.message);
             }
         }
@@ -1060,7 +1060,7 @@ window.updateOrderStatus = async function () {
         loadProducts();
 
     } catch (e) {
-        console.error('Error en updateOrderStatus:', e);
+        
         Swal.fire('Error', 'No se pudo actualizar el estado: ' + e.message, 'error');
     }
 }
@@ -1403,7 +1403,7 @@ window.handleGalleryFileUpload = async function (input) {
                 .upload(filePath, file);
 
             if (uploadError) {
-                console.error('Error uploading image:', uploadError);
+                
                 continue;
             }
 
@@ -1420,7 +1420,7 @@ window.handleGalleryFileUpload = async function (input) {
             });
 
         } catch (err) {
-            console.error('Error uploading file:', err);
+            
         }
     }
 
@@ -1553,7 +1553,7 @@ window.importSpecsFromExcel = function (input) {
             }
 
         } catch (error) {
-            console.error('Error al importar Excel:', error);
+            
             Swal.fire('Error', 'No se pudo leer el archivo Excel. Verifica que sea un archivo válido.', 'error');
         }
     };
@@ -1700,7 +1700,7 @@ form.addEventListener('submit', async (e) => {
         loadProducts();
 
     } catch (err) {
-        console.error(err);
+        
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -1751,19 +1751,19 @@ async function checkAuth() {
         try {
         const client = window.supabaseClient || window.supabase;
         if (!client) {
-            console.error('Supabase client no inicializado');
+            
             return;
         }
         const { data: { session } } = await client.auth.getSession();
         if (!session) {
-            console.warn('Sin sesión activada, redirigiendo a login...');
+            
             window.location.href = 'login.html';
         } else {
                         const userEmailEl = document.getElementById('userEmail');
             if (userEmailEl) userEmailEl.textContent = session.user.email;
         }
     } catch (err) {
-        console.error('Error en checkAuth:', err);
+        
     }
 }
 document.addEventListener('DOMContentLoaded', checkAuth);
@@ -1809,7 +1809,7 @@ window.viewProductDetail = function (product) {
     specsContainer.innerHTML = ''; // Limpiar especificaciones anteriores
 
     // Debug: Ver todas las propiedades del producto
-    console.log('Todas las propiedades del producto:', Object.keys(product));
+    );
             let specsData = [];
 
     // Intentar encontrar las especificaciones en cualquier campo posible
@@ -1820,7 +1820,7 @@ window.viewProductDetail = function (product) {
             try {
                 specsData = JSON.parse(specsField);
                             } catch (e) {
-                console.error('Error parsing specs:', e);
+                
                 // Si no se puede parsear, intentar dividir por líneas
                 specsData = specsField.split('\n').filter(line => line.trim()).map(line => {
                     const parts = line.split(':');
@@ -1842,7 +1842,7 @@ window.viewProductDetail = function (product) {
         if (specsData && specsData.length > 0) {
         // Mostrar especificaciones
         specsData.forEach((spec, index) => {
-            console.log('Procesando spec:', spec, 'Tipo:', typeof spec, 'Es array:', Array.isArray(spec));
+            );
 
 
             let title, value;
@@ -2442,7 +2442,7 @@ window.loadCarouselImages = async function () {
         window.allCarouselImages = data || [];
         renderCarouselImages(window.allCarouselImages);
     } catch (err) {
-        console.error('Error al cargar carrusel:', err);
+        
         if (grid) grid.innerHTML = `<p class="col-span-full text-center text-rose-500">Error: ${err.message}</p>`;
     }
 }
@@ -2533,7 +2533,7 @@ window.uploadCarouselImages = async function (input) {
             successCount++;
             Swal.getHtmlContainer().querySelector('b').textContent = successCount;
         } catch (err) {
-            console.error(`Error subiendo ${file.name}:`, err);
+            
             errorCount++;
         }
     }
@@ -2583,7 +2583,7 @@ window.deleteCarouselImage = async function (id, imageUrl) {
             Swal.fire('Eliminado', 'La imagen ha sido quitada del carrusel.', 'success');
             loadCarouselImages();
         } catch (err) {
-            console.error('Error al eliminar:', err);
+            
             Swal.fire('Error', 'No se pudo eliminar la imagen: ' + err.message, 'error');
         }
     }
@@ -2643,7 +2643,7 @@ function filterOrdersGrid(searchText) {
 // Auxiliares para buscar y procesar productos por ID desde la caché local
 window.viewProductById = function (id) {
         if (!window.allAdminProducts) {
-        console.warn('No hay productos cargados en memoria. Intentando cargar...');
+        
         loadProducts().then(() => {
             const product = window.allAdminProducts.find(p => p.id == id);
             if (product) window.viewProductDetail(product);
@@ -2654,13 +2654,13 @@ window.viewProductById = function (id) {
         if (product) {
         window.viewProductDetail(product);
     } else {
-        console.error('Producto no encontrado id:', id);
+        
     }
 };
 
 window.editProductById = function (id) {
         if (!window.allAdminProducts) {
-        console.warn('No hay productos cargados en memoria. Intentando cargar...');
+        
         loadProducts().then(() => {
             const product = window.allAdminProducts.find(p => p.id == id);
             if (product) window.editProduct(product);
@@ -2671,13 +2671,13 @@ window.editProductById = function (id) {
         if (product) {
         window.editProduct(product);
     } else {
-        console.error('Producto no encontrado para edición id:', id);
+        
     }
 };
 
 window.viewOrderById = function (id) {
         if (!window.allAdminOrders) {
-        console.warn('No hay pedidos cargados en memoria. Intentando cargar...');
+        
         loadOrders().then(() => {
             const order = window.allAdminOrders.find(o => o.id == id);
             if (order) window.viewOrder(order);
@@ -2688,7 +2688,7 @@ window.viewOrderById = function (id) {
         if (order) {
         window.viewOrder(order);
     } else {
-        console.error('Pedido no encontrado id:', id);
+        
     }
 };
 
@@ -2705,7 +2705,7 @@ window.loadOfferSettings = async function () {
             .single();
 
         if (error) {
-            console.error('Error fetching settings:', error);
+            
             return;
         }
 
@@ -2736,7 +2736,7 @@ window.loadOfferSettings = async function () {
             }
         }
     } catch (err) {
-        console.error('Error loading offer settings:', err);
+        
     }
 };
 
@@ -2797,14 +2797,14 @@ window.saveOfferSettings = async function () {
                 width: '600px'
             });
 
-            console.error('Error saving offer settings:', error);
+            
             return;
         }
 
         Swal.fire('Guardado', 'La configuración de ofertas ha sido actualizada.', 'success');
 
     } catch (err) {
-        console.error('Error saving settings:', err);
+        
         Swal.fire({
             icon: 'error',
             title: 'Error Crítico',
@@ -2861,7 +2861,7 @@ window.loadAlertSettings = async function () {
         updateAlertPreview();
 
     } catch (err) {
-        console.error('Error loading alert settings:', err);
+        
         Swal.fire('Error', 'No se pudieron cargar las configuraciones: ' + err.message, 'error');
     }
 };
@@ -2969,7 +2969,7 @@ window.saveAlertSettings = async function () {
         Swal.fire('Guardado', 'La configuración de alertas ha sido actualizada.', 'success');
 
     } catch (err) {
-        console.error('Error saving alert settings:', err);
+        
         Swal.fire({
             icon: 'error',
             title: 'Error Crítico',

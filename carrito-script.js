@@ -43,13 +43,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Extender el CartManager con funcionalidad específica del carrito
-    console.log('Verificando CartManager:', window.cartManager);
-    console.log('Carrito actual:', window.cartManager ? window.cartManager.cart : 'No disponible');
+    
+    
 
     if (window.cartManager) {
         // Agregar método para actualizar la visualización del carrito - Nuevo diseño e-commerce
         window.cartManager.updateCartDisplay = function () {
-            console.log('updateCartDisplay llamado, carrito:', this.cart);
+            
             const cartEmpty = document.getElementById('cart-empty');
             const cartItems = document.getElementById('cart-items');
             const cartContainer = document.getElementById('cart-items-container');
@@ -57,11 +57,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const cartItemCount = document.getElementById('cart-item-count');
 
             if (!cartEmpty || !cartItems || !cartContainer || !checkoutBtn) {
-                console.error('Elementos del carrito no encontrados');
+                
                 return;
             }
 
-            console.log('Cantidad de items en el carrito:', this.cart.length);
+            
 
             // Actualizar contador
             if (cartItemCount) {
@@ -70,12 +70,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (this.cart.length === 0) {
-                console.log('Mostrando carrito vacío');
+                
                 cartEmpty.classList.remove('hidden');
                 cartItems.classList.add('hidden');
                 checkoutBtn.disabled = true;
             } else {
-                console.log('Mostrando items del carrito:', this.cart);
+                
                 cartEmpty.classList.add('hidden');
                 cartItems.classList.remove('hidden');
                 checkoutBtn.disabled = false;
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Double check if client is valid (has .from method)
                     if (!client || typeof client.from !== 'function') {
-                        console.warn("Supabase client not ready. Attempting to re-initialize...");
+                        
                         if (typeof initSupabase === 'function') {
                             initSupabase();
                             client = window.supabaseClient;
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         .select(); // Return data to get ID
 
                     if (error) {
-                        console.error('Supabase Error:', error);
+                        
                         throw new Error("Error guardando el pedido: " + error.message);
                     }
 
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         orderId = data[0].id; // Real DB ID
                     }
 
-                    console.log('Order created with ID:', orderId);
+                    
 
                     // 2. Prepare WhatsApp Message
 
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     Swal.fire('¡Pedido Iniciado!', `Tu pedido #${orderId} ha sido registrado. Completa el pago en WhatsApp.`, 'success');
 
                 } catch (err) {
-                    console.error('Error processing order:', err);
+                    
                     Swal.fire('Error', 'Hubo un problema al registrar el pedido.', 'error');
                 } finally {
                     checkoutBtn.disabled = false;
@@ -348,10 +348,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Configurar eventos de imágenes de productos
         setupProductImageModal();
     } else {
-        console.error('CartManager no está disponible en la página del carrito');
+        
     }
 
-    console.log('Página del carrito cargada exitosamente! 🛒');
+    
 });
 
 // Product Image Modal Functions

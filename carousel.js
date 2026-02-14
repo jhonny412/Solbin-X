@@ -25,7 +25,7 @@
     }
     
     function initCarousel() {
-        console.log('[Carousel] Iniciando...');
+        
         
         // Limpiar intervalo anterior si existe
         if (intervalId) {
@@ -35,7 +35,7 @@
         
         const track = document.getElementById('carousel-track');
         if (!track) {
-            console.error('[Carousel] No se encontró el track');
+            
             return;
         }
         
@@ -43,10 +43,10 @@
         slides = Array.from(track.querySelectorAll('.carousel-slide:not(.carousel-skeleton)'));
         dots = Array.from(document.querySelectorAll('.carousel-dot'));
         
-        console.log('[Carousel] Total slides:', slides.length);
+        
         
         if (slides.length === 0) {
-            console.warn('[Carousel] No hay slides aún, esperando carga...');
+            
             // Reintentar en 100ms si no hay slides
             if (!isInitialized) {
                 setTimeout(initCarousel, 100);
@@ -58,7 +58,7 @@
         slides.forEach((slide, index) => {
             const img = slide.querySelector('img');
             if (img) {
-                console.log(`[Carousel] Slide ${index}: ${img.src.split('/').pop()}`);
+                .pop()}`);
                 // Asegurar que la imagen tenga opacidad correcta
                 if (slide.classList.contains('active')) {
                     img.style.opacity = '1';
@@ -175,12 +175,12 @@
             isInitialized = true;
         }
         
-        console.log('[Carousel] Listo con', slides.length, 'slides!');
+        
     }
     
     // Función global para reiniciar el carrusel (llamada desde loader.js después de cargar imágenes)
     window.restartCarousel = function() {
-        console.log('[Carousel] Reiniciando con nuevas imágenes...');
+        
         initCarousel();
     };
 })();

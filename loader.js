@@ -47,7 +47,7 @@ async function loadAndRenderProducts() {
         applyFilters();
 
     } catch (err) {
-        console.error('Loader Error:', err);
+        
         grid.innerHTML = `<div class="col-span-4 text-center text-red-500">Error al cargar: ${err.message}</div>`;
     }
 }
@@ -290,7 +290,7 @@ window.addToCartSimple = function (name, price, productData = null) {
         window.cartManager.addToCart(name, price, 1, productData);
         return true;
     } else {
-        console.error('CartManager missing');
+        
         return false;
     }
 };
@@ -770,7 +770,7 @@ function preloadImages(imageUrls) {
 // Función para enviar imágenes al Service Worker para cacheo
 function sendCarouselImagesToSW(imageUrls) {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        console.log('[Carousel Loader] Sending images to SW for caching...');
+        
         navigator.serviceWorker.controller.postMessage({
             type: 'PRECACHE_CAROUSEL',
             urls: imageUrls
@@ -828,7 +828,7 @@ async function loadAndRenderCarousel() {
         const currentSrcs = Array.from(track.querySelectorAll('img')).map(img => img.src);
         const newSrcs = images.map(img => img.image_url);
         if (JSON.stringify(currentSrcs) === JSON.stringify(newSrcs)) {
-            console.log('[Carousel Loader] Imágenes actualizadas, skipiando render.');
+            
             return;
         }
 
@@ -884,7 +884,7 @@ async function loadAndRenderCarousel() {
         let imagesFromCache = null;
 
         if (cachedCarousel) {
-            console.log('[Carousel Loader] Cargando desde caché local...');
+            
             imagesFromCache = JSON.parse(cachedCarousel);
             // Renderizar inmediatamente desde caché
             await renderImages(imagesFromCache);
@@ -907,16 +907,16 @@ async function loadAndRenderCarousel() {
                 JSON.stringify(imagesFromCache.map(img => img.image_url));
 
             if (cacheChanged) {
-                console.log('[Carousel Loader] Detectadas nuevas imágenes, actualizando...');
+                
                 localStorage.setItem('carousel_cache', JSON.stringify(images));
                 await renderImages(images);
             } else {
-                console.log('[Carousel Loader] Sin cambios en las imágenes');
+                
             }
         }
 
     } catch (err) {
-        console.error('Error cargando carrusel dinámico:', err);
+        
         // Si no hay caché y falló la red, mostrar error
         if (!localStorage.getItem('carousel_cache')) {
             track.innerHTML = `
@@ -1004,7 +1004,7 @@ function generateProductSchema(products) {
     script.textContent = JSON.stringify(productSchemas.length === 1 ? productSchemas[0] : productSchemas);
     document.head.appendChild(script);
 
-    console.log('[SEO] Datos estructurados de productos generados:', productSchemas.length);
+    
 }
 
 // INIT
@@ -1059,27 +1059,27 @@ applyFilters = function () {
             if (client && typeof client.rpc === 'function') {
                 if (!sessionStorage.getItem('visit_tracked')) {
                     try {
-                        console.log('[Visitas] Incrementando contador...');
+                        
                         const { data, error } = await client.rpc('increment_visit_count');
 
                         if (error) {
-                            console.error('[Visitas] Error al incrementar:', error);
+                            
                         } else {
-                            console.log('[Visitas] Contador incrementado exitosamente:', data);
+                            
                             sessionStorage.setItem('visit_tracked', 'true');
                         }
                     } catch (rpcError) {
-                        console.error('[Visitas] Error en RPC:', rpcError);
+                        
                     }
                 } else {
-                    console.log('[Visitas] Visita ya registrada en esta sesión');
+                    
                 }
             } else {
-                console.warn('[Visitas] Cliente Supabase no disponible');
+                
             }
         }, 1000);
     } catch (e) {
-        console.error('[Visitas] Error general:', e);
+        
     }
 })();
 

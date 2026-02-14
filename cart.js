@@ -36,7 +36,7 @@ class CartManager {
                 this.cart = [];
             }
         } catch (e) {
-            console.error('CartManager: Error al cargar el carrito:', e);
+            
             this.cart = [];
         }
         return this.cart;
@@ -47,7 +47,7 @@ class CartManager {
         try {
             localStorage.setItem('cart', JSON.stringify(this.cart));
         } catch (e) {
-            console.error('Error al guardar el carrito:', e);
+            
         }
     }
 

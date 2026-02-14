@@ -9,7 +9,7 @@ function initSupabase() {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         window.supabaseClient = supabaseClient;
         window.supabase = supabaseClient; // Compatibilidad
-        console.log('Supabase Check: Initialized from sync load.');
+        
         return true;
     }
     return false;
@@ -27,7 +27,7 @@ if (!initSupabase()) {
                 console.error('Supabase library missing after timeout.');
             }
         } else {
-            console.log('Supabase Check: Initialized after delay.');
+            
         }
     }, 500);
 }
