@@ -554,7 +554,7 @@ function initOrdersGridJS() {
                 formatter: (cell) => g.html(cell)
             },
             { 
-                name: 'Cliente',
+                name: 'Canal',
                 formatter: (cell) => g.html(cell)
             },
             { 
@@ -602,7 +602,16 @@ function renderOrdersToGridJS(orders) {
         };
         const statusClass = statusColors[o.status?.toLowerCase()] || 'bg-slate-100 text-slate-600 border-slate-200';
 
-        const customerHtml = o.customer_name || o.customer_email || 'Cliente no identificado';
+        const channelHtml = `
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 border border-emerald-100">
+                    <i class="fab fa-whatsapp text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-medium text-slate-400 block">Canal</span>
+                    <span class="text-[11px] font-semibold text-slate-600">WhatsApp</span>
+                </div>
+            </div>`;
         
         const statusHtml = `<span class="px-2 py-1 text-[9px] font-semibold rounded-lg ${statusClass} uppercase tracking-wide border">${o.status || 'Desconocido'}</span>`;
         
@@ -617,7 +626,7 @@ function renderOrdersToGridJS(orders) {
         return [
             `<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`,
             o.created_at ? new Date(o.created_at).toLocaleDateString('es-PE') : '-',
-            customerHtml,
+            channelHtml,
             `<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`,
             statusHtml,
             actionsHtml
