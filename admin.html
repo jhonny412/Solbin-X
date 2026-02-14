@@ -57,10 +57,14 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
-    <!-- jqGrid CSS and JS -->
+    <!-- jqGrid CSS and JS (legacy) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/css/ui.jqgrid.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/jquery.jqgrid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/i18n/grid.locale-es.js"></script>
+
+    <!-- GridJS -->
+    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.production.min.js"></script>
     <style>
         body {
             background-color: #f8fafc;
@@ -949,6 +953,87 @@
             display: inline-block !important;
             vertical-align: middle !important;
         }
+
+        /* GridJS Custom Styles */
+        .gridjs-container {
+            width: 100% !important;
+            font-family: inherit !important;
+        }
+
+        .gridjs-table {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+
+        .gridjs-thead {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        }
+
+        .gridjs-th {
+            padding: 14px 16px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            color: #475569 !important;
+            background: transparent !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+            text-align: center !important;
+        }
+
+        .gridjs-td {
+            padding: 12px 8px !important;
+            font-size: 13px !important;
+            color: #334155 !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            vertical-align: middle !important;
+        }
+
+        .gridjs-tr:hover .gridjs-td {
+            background-color: #f8fafc !important;
+        }
+
+        .gridjs-pagination {
+            margin-top: 16px !important;
+            justify-content: center !important;
+        }
+
+        .gridjs-pagination button {
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s !important;
+        }
+
+        .gridjs-pagination button:hover {
+            background-color: #0d9488 !important;
+            color: white !important;
+        }
+
+        .gridjs-pagination button:disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+        }
+
+        .gridjs-search {
+            margin-bottom: 12px !important;
+        }
+
+        .gridjs-search-input {
+            border-radius: 10px !important;
+            padding: 10px 14px !important;
+            border: 1px solid #e2e8f0 !important;
+            font-size: 13px !important;
+            width: 280px !important;
+        }
+
+        .gridjs-search-input:focus {
+            border-color: #0d9488 !important;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1) !important;
+            outline: none !important;
+        }
     </style>
 </head>
 
@@ -1352,10 +1437,7 @@
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <div class="min-w-full">
-                            <table id="productsGrid"></table>
-                            <div id="productsPager"></div>
-                        </div>
+                        <div class="min-w-full" id="productsGrid"></div>
                     </div>
                 </div>
 
@@ -1413,10 +1495,7 @@
                             </div>
                         </div>
                         <div class="overflow-x-auto">
-                            <div class="min-w-full">
-                                <table id="ordersGrid"></table>
-                                <div id="ordersPager"></div>
-                            </div>
+                            <div class="min-w-full" id="ordersGrid"></div>
                         </div>
                     </div>
                 </div>

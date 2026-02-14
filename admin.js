@@ -118,17 +118,19 @@ window.switchAdminTab = function (tab) {
 
 
 
-// jqGrid instances
+// GridJS instances
 let productsGrid = null;
 let ordersGrid = null;
+let productsGridInstance = null;
+let ordersGridInstance = null;
 
-// Resize jqGrid when window is resized
+// Resize GridJS when window is resized
 window.addEventListener('resize', function () {
-    if (jQuery('#productsGrid').length > 0 && !jQuery('#productsGrid').closest('#productsSection').hasClass('hidden')) {
-        jQuery('#productsGrid').jqGrid('setGridWidth', jQuery('#productsGrid').closest('.overflow-x-auto').width());
+    if (productsGridInstance && document.getElementById('productsGrid')) {
+        productsGridInstance.forceRender();
     }
-    if (jQuery('#ordersGrid').length > 0 && !jQuery('#ordersGrid').closest('#ordersSection').hasClass('hidden')) {
-        jQuery('#ordersGrid').jqGrid('setGridWidth', jQuery('#ordersGrid').closest('.overflow-x-auto').width());
+    if (ordersGridInstance && document.getElementById('ordersGrid')) {
+        ordersGridInstance.forceRender();
     }
 });
 
@@ -341,6 +343,245 @@ function initOrdersGrid() {
     ordersGrid = true;
 }
 
+// GridJS Functions for Products
+function initProductsGridJS() {
+    console.log('Inicializando GridJS para productos...');
+    
+    if (productsGridInstance) {
+        productsGridInstance.destroy();
+    }
+    
+    const gridContainer = document.getElementById('productsGrid');
+    if (!gridContainer) return;
+    
+    gridContainer.innerHTML = '';
+    
+    productsGridInstance = new gridjs.Grid({
+        columns: [
+            { 
+                id: 'id',
+                name: 'REF.',
+                width: '80px',
+                formatter: (cell) => gridjs.html(`<span class="text-[11px] font-bold text-slate-400">#${cell}</span>`)
+            },
+            { 
+                id: 'name',
+                name: 'Especificación',
+                width: '350px'
+            },
+            { 
+                id: 'category',
+                name: 'Categoría',
+                width: '120px'
+            },
+            { 
+                id: 'stock',
+                name: 'Stock',
+                width: '100px'
+            },
+            { 
+                id: 'price',
+                name: 'Valorización',
+                width: '120px'
+            },
+            { 
+                id: 'actions',
+                name: 'Operaciones',
+                width: '120px'
+            }
+        ],
+        data: [],
+        pagination: {
+            limit: 10,
+            summary: true
+        },
+        search: true,
+        sort: true,
+        resizable: true,
+        className: {
+            container: 'gridjs-container',
+            table: 'gridjs-table',
+            thead: 'gridjs-thead',
+            tbody: 'gridjs-tbody',
+            tr: 'gridjs-tr',
+            th: 'gridjs-th',
+            td: 'gridjs-td'
+        },
+        style: {
+            table: {
+                'white-space': 'nowrap'
+            }
+        }
+    }).render(gridContainer);
+    
+    productsGrid = true;
+    console.log('GridJS de productos inicializado');
+}
+
+function renderProductsToGridJS(products) {
+    console.log('renderProductsToGridJS llamado con', products.length, 'productos');
+    
+    if (!productsGridInstance) {
+        initProductsGridJS();
+    }
+    
+    const gridData = products.map(p => {
+        let catClasses = 'bg-slate-100 text-slate-600 border-slate-200';
+        if (p.category === 'laptops') catClasses = 'bg-brand-50 text-brand-600 border-brand-200';
+        if (p.category === 'smartphones') catClasses = 'bg-sky-50 text-sky-600 border-sky-200';
+        if (p.category === 'tablets') catClasses = 'bg-purple-50 text-purple-600 border-purple-200';
+        if (p.category === 'accesorios') catClasses = 'bg-amber-50 text-amber-600 border-amber-200';
+
+        let stockHtml = '';
+        if (p.stock <= 5) {
+            stockHtml = `<span class="px-2 py-1 rounded-md bg-rose-50 text-rose-600 border border-rose-200 text-[9px] font-semibold uppercase">Crítico: ${p.stock}</span>`;
+        } else if (p.stock <= 15) {
+            stockHtml = `<span class="px-2 py-1 rounded-md bg-amber-50 text-amber-600 border border-amber-200 text-[9px] font-semibold uppercase">Bajo: ${p.stock}</span>`;
+        } else {
+            stockHtml = `<span class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-semibold uppercase">Óptimo: ${p.stock}</span>`;
+        }
+
+        const mainImage = (p.images && Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : (p.image_url || '');
+        const imageCount = (p.images && Array.isArray(p.images)) ? p.images.length : (p.image_url ? 1 : 0);
+
+        const nameHtml = `
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden">
+                    <img src="${mainImage}" class="w-full h-full object-contain p-0.5">
+                    ${imageCount > 1 ? `<span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full">+${imageCount - 1}</span>` : ''}
+                </div>
+                <div>
+                    <span class="block text-[12px] font-semibold text-slate-700 leading-tight">${p.name}</span>
+                    <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wide">SKU-${p.id.toString().padStart(5, '0')}</span>
+                </div>
+            </div>`;
+
+        const categoryHtml = `<span class="px-2 py-1 text-[9px] font-semibold rounded-lg ${catClasses} uppercase tracking-wide border">${p.category}</span>`;
+
+        const priceHtml = `
+            <div class="flex flex-col items-center">
+                <div class="bg-slate-50 border border-slate-100 px-3 py-1 rounded-md">
+                    <span class="text-[13px] font-semibold text-slate-700">
+                        <span class="text-brand-500 mr-0.5">S/.</span>${parseFloat(p.price).toFixed(2)}
+                    </span>
+                </div>
+            </div>`;
+
+        const actionsHtml = `
+            <div class="flex items-center justify-center space-x-1">
+                <button onclick="viewProductById('${p.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-brand-500 hover:text-white transition-colors">
+                    <i class="fas fa-eye text-[11px]"></i>
+                </button>
+                <button onclick="editProductById('${p.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition-colors">
+                    <i class="fas fa-pen text-[11px]"></i>
+                </button>
+                <button onclick="deleteProduct('${p.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition-colors">
+                    <i class="fas fa-trash text-[11px]"></i>
+                </button>
+            </div>`;
+
+        return [
+            p.id,
+            gridjs.html(nameHtml),
+            gridjs.html(categoryHtml),
+            gridjs.html(stockHtml),
+            gridjs.html(priceHtml),
+            gridjs.html(actionsHtml)
+        ];
+    });
+
+    productsGridInstance.updateConfig({
+        data: gridData
+    }).forceRender();
+    
+    updateProductStats(products);
+    console.log('Productos renderizados con GridJS:', gridData.length);
+}
+
+// GridJS Functions for Orders
+function initOrdersGridJS() {
+    console.log('Inicializando GridJS para pedidos...');
+    
+    if (ordersGridInstance) {
+        ordersGridInstance.destroy();
+    }
+    
+    const gridContainer = document.getElementById('ordersGrid');
+    if (!gridContainer) return;
+    
+    gridContainer.innerHTML = '';
+    
+    ordersGridInstance = new gridjs.Grid({
+        columns: [
+            { id: 'id', name: 'Ref.', width: '100px' },
+            { id: 'date', name: 'Fecha', width: '150px' },
+            { id: 'customer', name: 'Cliente', width: '200px' },
+            { id: 'total', name: 'Total', width: '120px' },
+            { id: 'status', name: 'Estado', width: '120px' },
+            { id: 'actions', name: 'Operaciones', width: '120px' }
+        ],
+        data: [],
+        pagination: {
+            limit: 10,
+            summary: true
+        },
+        search: true,
+        sort: true,
+        resizable: true,
+        className: {
+            container: 'gridjs-container',
+            table: 'gridjs-table'
+        }
+    }).render(gridContainer);
+    
+    ordersGrid = true;
+    console.log('GridJS de pedidos inicializado');
+}
+
+function renderOrdersToGridJS(orders) {
+    console.log('renderOrdersToGridJS llamado con', orders.length, 'pedidos');
+    
+    if (!ordersGridInstance) {
+        initOrdersGridJS();
+    }
+    
+    const gridData = orders.map(o => {
+        const statusColors = {
+            'pendiente': 'bg-amber-50 text-amber-600 border-amber-200',
+            'procesando': 'bg-blue-50 text-blue-600 border-blue-200',
+            'completado': 'bg-emerald-50 text-emerald-600 border-emerald-200',
+            'cancelado': 'bg-rose-50 text-rose-600 border-rose-200'
+        };
+        const statusClass = statusColors[o.status?.toLowerCase()] || 'bg-slate-100 text-slate-600 border-slate-200';
+
+        const customerHtml = o.customer_name || o.customer_email || 'Cliente no identificado';
+        
+        const statusHtml = `<span class="px-2 py-1 text-[9px] font-semibold rounded-lg ${statusClass} uppercase tracking-wide border">${o.status || 'Desconocido'}</span>`;
+        
+        const actionsHtml = `
+            <div class="flex items-center justify-center space-x-1">
+                <button onclick="viewOrderById('${o.id}')" class="w-7 h-7 flex items-center justify-center rounded-md bg-slate-100 text-slate-500 hover:bg-brand-500 hover:text-white transition-colors">
+                    <i class="fas fa-eye text-[11px]"></i>
+                </button>
+            </div>`;
+
+        return [
+            gridjs.html(`<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`),
+            o.created_at ? new Date(o.created_at).toLocaleDateString('es-PE') : '-',
+            gridjs.html(customerHtml),
+            gridjs.html(`<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`),
+            gridjs.html(statusHtml),
+            gridjs.html(actionsHtml)
+        ];
+    });
+
+    ordersGridInstance.updateConfig({
+        data: gridData
+    }).forceRender();
+    
+    console.log('Pedidos renderizados con GridJS:', gridData.length);
+}
+
 
 // Cargar estadísticas de visitas
 window.loadVisitStats = async function (retryCount = 0) {
@@ -443,13 +684,13 @@ window.loadProducts = async function () {
 
         // Initialize grid if not done
         if (!productsGrid) {
-            console.log('Inicializando jqGrid para productos...');
-            initProductsGrid();
+            console.log('Inicializando GridJS para productos...');
+            initProductsGridJS();
         }
 
-        // Render with jqGrid
+        // Render with GridJS
         console.log('Renderizando productos...');
-        renderProductsToGrid(products);
+        renderProductsToGridJS(products);
 
         // Ocultar loading
         hideProductsLoading();
@@ -645,13 +886,13 @@ window.loadOrders = async function () {
 
         // Initialize grid if not done
         if (!ordersGrid) {
-            console.log('Inicializando jqGrid para pedidos...');
-            initOrdersGrid();
+            console.log('Inicializando GridJS para pedidos...');
+            initOrdersGridJS();
         }
 
-        // Render with jqGrid
+        // Render with GridJS
         console.log('Renderizando pedidos...');
-        renderOrdersToGrid(orders);
+        renderOrdersToGridJS(orders);
 
         // Ocultar loading
         hideOrdersLoading();
@@ -2758,8 +2999,7 @@ function filterProductsGrid(searchText) {
     });
 
     // Limpiar y recargar grid con datos filtrados
-    jQuery('#productsGrid').jqGrid('clearGridData');
-    renderProductsToGrid(filteredData);
+    renderProductsToGridJS(filteredData);
 }
 
 // Filtrar grid de ventas
@@ -2772,8 +3012,7 @@ function filterOrdersGrid(searchText) {
     });
 
     // Limpiar y recargar grid con datos filtrados
-    jQuery('#ordersGrid').jqGrid('clearGridData');
-    renderOrdersToGrid(filteredData);
+    renderOrdersToGridJS(filteredData);
 }
 
 // Auxiliares para buscar y procesar productos por ID desde la caché local
