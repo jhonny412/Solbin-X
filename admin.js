@@ -4,7 +4,7 @@
 console.log('=== ADMIN.JS CARGADO ===');
 
 // Verificar que GridJS esté cargado
-if (typeof gridjs === 'undefined') {
+if (!getGridJS()) {
     console.warn('GridJS no está cargado. Esperando...');
 }
 
@@ -14,12 +14,18 @@ window.onerror = function (msg, url, lineNo, columnNo, error) {
     return false;
 };
 
+// Función para obtener GridJS (maneja diferentes formas de carga)
+function getGridJS() {
+    return window.gridjs || (typeof gridjs !== 'undefined' ? gridjs : null);
+}
+
 // Función para esperar a que GridJS esté disponible
 function waitForGridJS(callback, maxAttempts = 10) {
     let attempts = 0;
     const checkInterval = setInterval(() => {
         attempts++;
-        if (typeof gridjs !== 'undefined') {
+        const g = getGridJS();
+        if (g) {
             clearInterval(checkInterval);
             console.log('GridJS disponible después de', attempts, 'intentos');
             callback();
@@ -369,7 +375,8 @@ function initProductsGridJS() {
     console.log('Inicializando GridJS para productos...');
     
     // Verificar que GridJS esté cargado
-    if (typeof gridjs === 'undefined') {
+    const g = getGridJS();
+    if (!g) {
         console.error('GridJS no está cargado. Intentando cargar...');
         waitForGridJS(() => initProductsGridJS());
         return;
@@ -384,13 +391,13 @@ function initProductsGridJS() {
     
     gridContainer.innerHTML = '';
     
-    productsGridInstance = new gridjs.Grid({
+    productsGridInstance = new g.Grid({
         columns: [
             { 
                 id: 'id',
                 name: 'REF.',
                 width: '80px',
-                formatter: (cell) => gridjs.html(`<span class="text-[11px] font-bold text-slate-400">#${cell}</span>`)
+                formatter: (cell) => getGridJS().html(`<span class="text-[11px] font-bold text-slate-400">#${cell}</span>`)
             },
             { 
                 id: 'name',
@@ -450,7 +457,8 @@ function renderProductsToGridJS(products) {
     console.log('renderProductsToGridJS llamado con', products.length, 'productos');
     
     // Verificar que GridJS esté cargado
-    if (typeof gridjs === 'undefined') {
+    const g = getGridJS();
+    if (!g) {
         console.error('GridJS no está cargado. Esperando...');
         waitForGridJS(() => renderProductsToGridJS(products));
         return;
@@ -516,13 +524,14 @@ function renderProductsToGridJS(products) {
                 </button>
             </div>`;
 
+        const g = getGridJS();
         return [
             p.id,
-            gridjs.html(nameHtml),
-            gridjs.html(categoryHtml),
-            gridjs.html(stockHtml),
-            gridjs.html(priceHtml),
-            gridjs.html(actionsHtml)
+            g.html(nameHtml),
+            g.html(categoryHtml),
+            g.html(stockHtml),
+            g.html(priceHtml),
+            g.html(actionsHtml)
         ];
     });
 
@@ -539,7 +548,8 @@ function initOrdersGridJS() {
     console.log('Inicializando GridJS para pedidos...');
     
     // Verificar que GridJS esté cargado
-    if (typeof gridjs === 'undefined') {
+    const g = getGridJS();
+    if (!g) {
         console.error('GridJS no está cargado. Intentando cargar...');
         waitForGridJS(() => initOrdersGridJS());
         return;
@@ -554,7 +564,7 @@ function initOrdersGridJS() {
     
     gridContainer.innerHTML = '';
     
-    ordersGridInstance = new gridjs.Grid({
+    ordersGridInstance = new g.Grid({
         columns: [
             { id: 'id', name: 'Ref.', width: '100px' },
             { id: 'date', name: 'Fecha', width: '150px' },
@@ -585,7 +595,8 @@ function renderOrdersToGridJS(orders) {
     console.log('renderOrdersToGridJS llamado con', orders.length, 'pedidos');
     
     // Verificar que GridJS esté cargado
-    if (typeof gridjs === 'undefined') {
+    const g = getGridJS();
+    if (!g) {
         console.error('GridJS no está cargado. Esperando...');
         waitForGridJS(() => renderOrdersToGridJS(orders));
         return;
@@ -617,12 +628,12 @@ function renderOrdersToGridJS(orders) {
             </div>`;
 
         return [
-            gridjs.html(`<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`),
+            g.html(`<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`),
             o.created_at ? new Date(o.created_at).toLocaleDateString('es-PE') : '-',
-            gridjs.html(customerHtml),
-            gridjs.html(`<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`),
-            gridjs.html(statusHtml),
-            gridjs.html(actionsHtml)
+            g.html(customerHtml),
+            g.html(`<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`),
+            g.html(statusHtml),
+            g.html(actionsHtml)
         ];
     });
 
