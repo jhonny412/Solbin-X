@@ -3,6 +3,9 @@
 
 console.log('=== ADMIN.JS CARGADO ===');
 
+// Asegurar que las funciones estén disponibles globalmente
+window.switchAdminTab = window.switchAdminTab || null;
+
 // Global error handler
 window.onerror = function (msg, url, lineNo, columnNo, error) {
     console.error('Error en admin.js:', msg, 'en', url, 'línea', lineNo);
@@ -133,6 +136,7 @@ window.switchAdminTab = function (tab) {
     }
 };
 
+console.log('switchAdminTab definida:', typeof window.switchAdminTab);
 
 
 
