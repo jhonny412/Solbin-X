@@ -426,19 +426,20 @@ function initProductsGridJS() {
             }
         ],
         data: [],
-        pagination: {
-            enabled: true,
-            limit: 10,
-            summary: true
-        },
-        search: {
-            enabled: true,
-            placeholder: 'Buscar productos...'
-        },
-        sort: {
-            enabled: true
-        },
-        language: 'es'
+        pagination: true,
+        search: true,
+        sort: true,
+        language: {
+            search: {
+                placeholder: 'Buscar productos...'
+            },
+            pagination: {
+                previous: 'Anterior',
+                next: 'Siguiente',
+                showing: 'Mostrando',
+                results: () => 'registros'
+            }
+        }
     }).render(gridContainer);
     
     productsGrid = true;
@@ -592,19 +593,20 @@ function initOrdersGridJS() {
             }
         ],
         data: [],
-        pagination: {
-            enabled: true,
-            limit: 10,
-            summary: true
-        },
-        search: {
-            enabled: true,
-            placeholder: 'Buscar pedidos...'
-        },
-        sort: {
-            enabled: true
-        },
-        language: 'es'
+        pagination: true,
+        search: true,
+        sort: true,
+        language: {
+            search: {
+                placeholder: 'Buscar pedidos...'
+            },
+            pagination: {
+                previous: 'Anterior',
+                next: 'Siguiente',
+                showing: 'Mostrando',
+                results: () => 'registros'
+            }
+        }
     }).render(gridContainer);
     
     ordersGrid = true;
