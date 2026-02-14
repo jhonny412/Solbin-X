@@ -16,7 +16,14 @@ window.onerror = function (msg, url, lineNo, columnNo, error) {
 
 // Función para obtener GridJS (maneja diferentes formas de carga)
 function getGridJS() {
-    return window.gridjs || (typeof gridjs !== 'undefined' ? gridjs : null);
+    // GridJS 6.x expone gridjs global con Grid y html
+    if (typeof window !== 'undefined' && window.gridjs) {
+        return window.gridjs;
+    }
+    if (typeof gridjs !== 'undefined') {
+        return gridjs;
+    }
+    return null;
 }
 
 // Función para esperar a que GridJS esté disponible
@@ -392,41 +399,8 @@ function initProductsGridJS() {
     gridContainer.innerHTML = '';
     
     productsGridInstance = new g.Grid({
-        columns: [
-            { 
-                id: 'id',
-                name: 'REF.'
-            },
-            { 
-                id: 'name',
-                name: 'Especificación'
-            },
-            { 
-                id: 'category',
-                name: 'Categoría'
-            },
-            { 
-                id: 'stock',
-                name: 'Stock'
-            },
-            { 
-                id: 'price',
-                name: 'Valorización'
-            },
-            { 
-                id: 'actions',
-                name: 'Operaciones'
-            }
-        ],
-        data: [],
-        pagination: {
-            enabled: true,
-            limit: 10
-        },
-        search: {
-            enabled: true
-        },
-        sort: true
+        columns: ['REF.', 'Especificación', 'Categoría', 'Stock', 'Valorización', 'Operaciones'],
+        data: []
     }).render(gridContainer);
     
     productsGrid = true;
@@ -504,14 +478,14 @@ function renderProductsToGridJS(products) {
                 </button>
             </div>`;
 
-        const Grid = getGridJS();
+        // GridJS interpreta strings HTML directamente
         return [
-            Grid.html(`<span class="text-[11px] font-bold text-slate-400">#${p.id}</span>`),
-            Grid.html(nameHtml),
-            Grid.html(categoryHtml),
-            Grid.html(stockHtml),
-            Grid.html(priceHtml),
-            Grid.html(actionsHtml)
+            `<span class="text-[11px] font-bold text-slate-400">#${p.id}</span>`,
+            nameHtml,
+            categoryHtml,
+            stockHtml,
+            priceHtml,
+            actionsHtml
         ];
     });
 
@@ -545,23 +519,8 @@ function initOrdersGridJS() {
     gridContainer.innerHTML = '';
     
     ordersGridInstance = new g.Grid({
-        columns: [
-            { id: 'id', name: 'Ref.' },
-            { id: 'date', name: 'Fecha' },
-            { id: 'customer', name: 'Cliente' },
-            { id: 'total', name: 'Total' },
-            { id: 'status', name: 'Estado' },
-            { id: 'actions', name: 'Operaciones' }
-        ],
-        data: [],
-        pagination: {
-            enabled: true,
-            limit: 10
-        },
-        search: {
-            enabled: true
-        },
-        sort: true
+        columns: ['Ref.', 'Fecha', 'Cliente', 'Total', 'Estado', 'Operaciones'],
+        data: []
     }).render(gridContainer);
     
     ordersGrid = true;
@@ -604,14 +563,14 @@ function renderOrdersToGridJS(orders) {
                 </button>
             </div>`;
 
-        const Grid = getGridJS();
+        // GridJS interpreta strings HTML directamente
         return [
-            Grid.html(`<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`),
+            `<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`,
             o.created_at ? new Date(o.created_at).toLocaleDateString('es-PE') : '-',
-            Grid.html(customerHtml),
-            Grid.html(`<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`),
-            Grid.html(statusHtml),
-            Grid.html(actionsHtml)
+            customerHtml,
+            `<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`,
+            statusHtml,
+            actionsHtml
         ];
     });
 
