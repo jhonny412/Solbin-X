@@ -395,58 +395,38 @@ function initProductsGridJS() {
         columns: [
             { 
                 id: 'id',
-                name: 'REF.',
-                width: '80px',
-                formatter: (cell) => getGridJS().html(`<span class="text-[11px] font-bold text-slate-400">#${cell}</span>`)
+                name: 'REF.'
             },
             { 
                 id: 'name',
-                name: 'Especificación',
-                width: '350px'
+                name: 'Especificación'
             },
             { 
                 id: 'category',
-                name: 'Categoría',
-                width: '120px'
+                name: 'Categoría'
             },
             { 
                 id: 'stock',
-                name: 'Stock',
-                width: '100px'
+                name: 'Stock'
             },
             { 
                 id: 'price',
-                name: 'Valorización',
-                width: '120px'
+                name: 'Valorización'
             },
             { 
                 id: 'actions',
-                name: 'Operaciones',
-                width: '120px'
+                name: 'Operaciones'
             }
         ],
         data: [],
         pagination: {
-            limit: 10,
-            summary: true
+            enabled: true,
+            limit: 10
         },
-        search: true,
-        sort: true,
-        resizable: true,
-        className: {
-            container: 'gridjs-container',
-            table: 'gridjs-table',
-            thead: 'gridjs-thead',
-            tbody: 'gridjs-tbody',
-            tr: 'gridjs-tr',
-            th: 'gridjs-th',
-            td: 'gridjs-td'
+        search: {
+            enabled: true
         },
-        style: {
-            table: {
-                'white-space': 'nowrap'
-            }
-        }
+        sort: true
     }).render(gridContainer);
     
     productsGrid = true;
@@ -524,14 +504,14 @@ function renderProductsToGridJS(products) {
                 </button>
             </div>`;
 
-        const g = getGridJS();
+        const Grid = getGridJS();
         return [
-            p.id,
-            g.html(nameHtml),
-            g.html(categoryHtml),
-            g.html(stockHtml),
-            g.html(priceHtml),
-            g.html(actionsHtml)
+            Grid.html(`<span class="text-[11px] font-bold text-slate-400">#${p.id}</span>`),
+            Grid.html(nameHtml),
+            Grid.html(categoryHtml),
+            Grid.html(stockHtml),
+            Grid.html(priceHtml),
+            Grid.html(actionsHtml)
         ];
     });
 
@@ -566,25 +546,22 @@ function initOrdersGridJS() {
     
     ordersGridInstance = new g.Grid({
         columns: [
-            { id: 'id', name: 'Ref.', width: '100px' },
-            { id: 'date', name: 'Fecha', width: '150px' },
-            { id: 'customer', name: 'Cliente', width: '200px' },
-            { id: 'total', name: 'Total', width: '120px' },
-            { id: 'status', name: 'Estado', width: '120px' },
-            { id: 'actions', name: 'Operaciones', width: '120px' }
+            { id: 'id', name: 'Ref.' },
+            { id: 'date', name: 'Fecha' },
+            { id: 'customer', name: 'Cliente' },
+            { id: 'total', name: 'Total' },
+            { id: 'status', name: 'Estado' },
+            { id: 'actions', name: 'Operaciones' }
         ],
         data: [],
         pagination: {
-            limit: 10,
-            summary: true
+            enabled: true,
+            limit: 10
         },
-        search: true,
-        sort: true,
-        resizable: true,
-        className: {
-            container: 'gridjs-container',
-            table: 'gridjs-table'
-        }
+        search: {
+            enabled: true
+        },
+        sort: true
     }).render(gridContainer);
     
     ordersGrid = true;
@@ -627,13 +604,14 @@ function renderOrdersToGridJS(orders) {
                 </button>
             </div>`;
 
+        const Grid = getGridJS();
         return [
-            g.html(`<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`),
+            Grid.html(`<span class="text-[11px] font-bold text-slate-400">#${o.id}</span>`),
             o.created_at ? new Date(o.created_at).toLocaleDateString('es-PE') : '-',
-            g.html(customerHtml),
-            g.html(`<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`),
-            g.html(statusHtml),
-            g.html(actionsHtml)
+            Grid.html(customerHtml),
+            Grid.html(`<span class="font-semibold text-slate-700">S/. ${parseFloat(o.total || 0).toFixed(2)}</span>`),
+            Grid.html(statusHtml),
+            Grid.html(actionsHtml)
         ];
     });
 
