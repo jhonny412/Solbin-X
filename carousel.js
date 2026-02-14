@@ -58,7 +58,6 @@
         slides.forEach((slide, index) => {
             const img = slide.querySelector('img');
             if (img) {
-                .pop()}`);
                 // Asegurar que la imagen tenga opacidad correcta
                 if (slide.classList.contains('active')) {
                     img.style.opacity = '1';

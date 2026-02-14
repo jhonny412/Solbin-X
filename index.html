@@ -285,10 +285,12 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Tailwind config for dark mode -->
+    <!-- Tailwind config for dark mode (only if Tailwind CDN is loaded) -->
     <script>
-        tailwind.config = {
-            darkMode: 'class'
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'class'
+            }
         }
     </script>
 
@@ -1291,7 +1293,7 @@
 
         <!-- Banner de Oferta Especial con Countdown -->
         <section id="offer-banner-section"
-            class="py-12 bg-gradient-to-r from-red-600 via-red-500 to-pink-500 relative overflow-hidden">
+            class="hidden py-12 bg-gradient-to-r from-red-600 via-red-500 to-pink-500 relative overflow-hidden">
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute inset-0"
                     style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px);">
@@ -1639,8 +1641,9 @@
                         </div>
                     </div>
                     <div class="relative">
-                        <video src="Video/Generar_video_de_segundos.mp4" class="rounded-2xl shadow-2xl w-full"
-                            playsinline controls preload="metadata"></video>
+                        <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80" 
+                             alt="Solbin-X Tienda Tecnológica" 
+                             class="rounded-2xl shadow-2xl w-full object-cover">
                         <div class="absolute -bottom-6 -left-6 bg-[#0D9488] text-white p-6 rounded-xl shadow-xl">
                             <p class="text-3xl font-bold">8+</p>
                             <p class="text-sm">Años de Experiencia</p>
@@ -2879,16 +2882,11 @@
                     const computedStyle = window.getComputedStyle(slide);
 
                     
-                    );
-                    
-                    
-                    
-                    
+
+                    const display = computedStyle.display;
 
                     if (img) {
-                        
-                        
-                        .display);
+                        console.log('Image display:', display);
                     }
                 });
 

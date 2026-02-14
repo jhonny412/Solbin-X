@@ -629,7 +629,6 @@ document.addEventListener('DOMContentLoaded', function () {
             
 
             if (closedAlerts.includes(alertKey)) {
-                ');
                 return;
             }
 
@@ -733,52 +732,72 @@ document.addEventListener('DOMContentLoaded', function () {
     // Countdown Timer para Banner de Ofertas
     // Countdown Timer para Banner de Ofertas
     async function initCountdownTimer() {
+        const offerBanner = document.getElementById('offer-banner-section');
+        
+        if (!offerBanner) {
+            return;
+        }
+
+        // Default Config - oculto por defecto hasta obtener configuración
+        let config = {
+            isActive: false,
+            endDate: new Date(new Date().getTime() + (72 * 60 * 60 * 1000)).toISOString()
+        };
+
+        // Esperar a que Supabase esté disponible (máximo 5 intentos)
+        let attempts = 0;
+        const maxAttempts = 5;
+        
+        while (attempts < maxAttempts) {
+            const client = window.supabaseClient || window.supabase;
+            if (client && client.from) {
+                try {
+                    const { data, error } = await client
+                        .from('site_settings')
+                        .select('value')
+                        .eq('key', 'offer_banner')
+                        .maybeSingle();
+
+                    if (error) {
+                        console.error('Error fetching offer banner config:', error);
+                    } else if (data && data.value) {
+                        config = data.value;
+                        console.log('Offer banner config loaded:', config);
+                    } else {
+                        console.log('No offer banner config found, using defaults');
+                    }
+                    break; // Éxito, salir del bucle
+                } catch (e) {
+                    console.error('Exception fetching offer banner config:', e);
+                    break;
+                }
+            }
+            
+            // Esperar antes del siguiente intento
+            await new Promise(resolve => setTimeout(resolve, 300));
+            attempts++;
+        }
+        
+        if (attempts >= maxAttempts) {
+            console.warn('Supabase client not available after maximum attempts');
+        }
+
+        // Apply Visibility based on isActive setting
+        if (config.isActive) {
+            offerBanner.classList.remove('hidden');
+        } else {
+            offerBanner.classList.add('hidden');
+            return; // Don't start timer if hidden
+        }
+
+        // Get countdown elements after showing banner
         const daysEl = document.getElementById('countdown-days');
         const hoursEl = document.getElementById('countdown-hours');
         const minutesEl = document.getElementById('countdown-minutes');
         const secondsEl = document.getElementById('countdown-seconds');
-        const offerBanner = document.getElementById('offer-banner-section');
 
         if (!daysEl || !hoursEl || !minutesEl || !secondsEl) {
-            // If countdown elements don't exist, hide banner if it exists
-            if (offerBanner) {
-                offerBanner.classList.add('hidden');
-            }
             return;
-        }
-
-        // Default Config
-        let config = {
-            isActive: true,
-            endDate: new Date(new Date().getTime() + (72 * 60 * 60 * 1000)).toISOString()
-        };
-
-        // Fetch from Supabase
-        try {
-            const client = window.supabaseClient || window.supabase;
-            if (client) {
-                const { data, error } = await client
-                    .from('site_settings')
-                    .select('value')
-                    .eq('key', 'offer_banner')
-                    .single();
-
-                if (data && data.value) {
-                    config = data.value;
-                }
-            }
-        } catch (e) {
-            
-        }
-
-        // Apply Visibility
-        if (offerBanner) {
-            if (!config.isActive) {
-                offerBanner.classList.add('hidden');
-                return; // No need to run timer if hidden
-            } else {
-                offerBanner.classList.remove('hidden');
-            }
         }
 
         const endDate = new Date(config.endDate);
