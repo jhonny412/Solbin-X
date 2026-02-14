@@ -48,14 +48,18 @@ function waitForGridJS(callback, maxAttempts = 10) {
 
 // Tabs Logic
 window.switchAdminTab = function (tab) {
-    console.log('=== switchAdminTab llamado con:', tab, '===');
+    console.log('=== switchAdminTab llamado con: ' + tab + ' ===');
 
     try {
-        var dashboardSection = document.getElementById('dashboardSection');
-        var productsSection = document.getElementById('productsSection');
-        var ordersSection = document.getElementById('ordersSection');
+        var sections = {
+            dashboard: document.getElementById('dashboardSection'),
+            products: document.getElementById('productsSection'),
+            orders: document.getElementById('ordersSection'),
+            carousel: document.getElementById('carouselSection'),
+            offers: document.getElementById('offersSection'),
+            alerts: document.getElementById('alertsSection')
+        };
 
-        // Sidebar buttons
         var navButtons = {
             dashboard: document.getElementById('sideBtnDashboard'),
             products: document.getElementById('sideBtnProducts'),
@@ -65,74 +69,61 @@ window.switchAdminTab = function (tab) {
             alerts: document.getElementById('sideBtnAlerts')
         };
 
-        // Hide all
-        if (dashboardSection) dashboardSection.classList.add('hidden');
-        if (productsSection) productsSection.classList.add('hidden');
-        if (ordersSection) ordersSection.classList.add('hidden');
-        var carouselSection = document.getElementById('carouselSection');
-        if (carouselSection) carouselSection.classList.add('hidden');
-        var offersSection = document.getElementById('offersSection');
-        if (offersSection) offersSection.classList.add('hidden');
-        var alertsSection = document.getElementById('alertsSection');
-        if (alertsSection) alertsSection.classList.add('hidden');
+        // Hide all sections
+        for (var key in sections) {
+            if (sections[key]) sections[key].classList.add('hidden');
+        }
 
-        // Reset buttons
-        Object.values(navButtons).forEach(function(btn) {
-            if (btn) btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-        });
+        // Reset all buttons
+        for (var key in navButtons) {
+            var btn = navButtons[key];
+            if (btn) {
+                btn.classList.remove('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white', 'bg-blue-50/50');
+            }
+        }
 
-        // Show selected
+        // Show selected section
+        var currentSection = sections[tab];
+        if (currentSection) {
+            currentSection.classList.remove('hidden');
+        } else {
+            console.warn('No se encontró la sección para el tab: ' + tab);
+        }
+
+        // Highlight selected button
+        var currentBtn = navButtons[tab];
+        if (currentBtn) {
+            currentBtn.classList.add('active');
+            // We use 'active' class defined in CSS for the premium look
+            // Adding these for extra visual feedback but being careful with text color
+            currentBtn.classList.add('bg-blue-50/50');
+        }
+
+        // Tab-specific logic
         if (tab === 'dashboard') {
-            if (dashboardSection) dashboardSection.classList.remove('hidden');
-            if (navButtons.dashboard) navButtons.dashboard.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-            // Cargar estadísticas de visitas
-            if (typeof loadVisitStats === 'function') {
-                loadVisitStats();
-            }
+            if (typeof loadVisitStats === 'function') loadVisitStats();
         } else if (tab === 'products') {
-            if (productsSection) productsSection.classList.remove('hidden');
-            if (navButtons.products) navButtons.products.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-            // Load products
-            if (typeof loadProducts === 'function') {
-                loadProducts();
-            }
-            // Resize grid after showing section
-            setTimeout(function() {
-                if (productsGridInstance) {
-                    productsGridInstance.forceRender();
+            if (typeof loadProducts === 'function') loadProducts();
+            // Safer forceRender
+            setTimeout(function () {
+                if (productsGridInstance && productsGridInstance.config && productsGridInstance.config.container) {
+                    try { productsGridInstance.forceRender(); } catch (e) { console.error('Error forceRendering productsGrid:', e); }
                 }
-            }, 200);
+            }, 300);
         } else if (tab === 'orders') {
-            if (ordersSection) ordersSection.classList.remove('hidden');
-            if (navButtons.orders) navButtons.orders.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-            // Load orders
-            if (typeof loadOrders === 'function') {
-                loadOrders();
-            }
-            // Resize grid after showing section
-            setTimeout(function() {
-                if (ordersGridInstance) {
-                    ordersGridInstance.forceRender();
+            if (typeof loadOrders === 'function') loadOrders();
+            // Safer forceRender
+            setTimeout(function () {
+                if (ordersGridInstance && ordersGridInstance.config && ordersGridInstance.config.container) {
+                    try { ordersGridInstance.forceRender(); } catch (e) { console.error('Error forceRendering ordersGrid:', e); }
                 }
-            }, 200);
+            }, 300);
         } else if (tab === 'carousel') {
-            if (carouselSection) carouselSection.classList.remove('hidden');
-            if (navButtons.carousel) navButtons.carousel.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-            if (typeof loadCarouselImages === 'function') {
-                loadCarouselImages();
-            }
+            if (typeof loadCarouselImages === 'function') loadCarouselImages();
         } else if (tab === 'offers') {
-            if (offersSection) offersSection.classList.remove('hidden');
-            if (navButtons.offers) navButtons.offers.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-            if (typeof loadOfferSettings === 'function') {
-                loadOfferSettings();
-            }
+            if (typeof loadOfferSettings === 'function') loadOfferSettings();
         } else if (tab === 'alerts') {
-            if (alertsSection) alertsSection.classList.remove('hidden');
-            if (navButtons.alerts) navButtons.alerts.classList.add('active', 'bg-white/10', 'border-l-4', 'border-blue-500', 'text-white');
-            if (typeof loadAlertSettings === 'function') {
-                loadAlertSettings();
-            }
+            if (typeof loadAlertSettings === 'function') loadAlertSettings();
         }
     } catch (err) {
         console.error('Error en switchAdminTab:', err);
@@ -152,10 +143,10 @@ let ordersGridInstance = null;
 // Resize GridJS when window is resized
 window.addEventListener('resize', function () {
     if (productsGridInstance && document.getElementById('productsGrid')) {
-        productsGridInstance.forceRender();
+        try { productsGridInstance.forceRender(); } catch (e) { }
     }
     if (ordersGridInstance && document.getElementById('ordersGrid')) {
-        ordersGridInstance.forceRender();
+        try { ordersGridInstance.forceRender(); } catch (e) { }
     }
 });
 
@@ -168,9 +159,9 @@ window.testMenuNavigation = function () {
     const productsSection = document.getElementById('productsSection');
     const ordersSection = document.getElementById('ordersSection');
 
-        console.log('  Dashboard:', !!dashboardSection, '- Estado:', dashboardSection && dashboardSection.classList.contains('hidden') ? 'oculta' : 'visible');
-        console.log('  Products:', !!productsSection, '- Estado:', productsSection && productsSection.classList.contains('hidden') ? 'oculta' : 'visible');
-        console.log('  Orders:', !!ordersSection, '- Estado:', ordersSection && ordersSection.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Dashboard:', !!dashboardSection, '- Estado:', dashboardSection && dashboardSection.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Products:', !!productsSection, '- Estado:', productsSection && productsSection.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Orders:', !!ordersSection, '- Estado:', ordersSection && ordersSection.classList.contains('hidden') ? 'oculta' : 'visible');
 
     console.log('2. Verificando botones:');
     const sideBtnDashboard = document.getElementById('sideBtnDashboard');
@@ -371,7 +362,7 @@ function initOrdersGrid() {
 // GridJS Functions for Products
 function initProductsGridJS() {
     console.log('Inicializando GridJS para productos...');
-    
+
     // Verificar que GridJS esté cargado
     const g = getGridJS();
     if (!g) {
@@ -379,39 +370,39 @@ function initProductsGridJS() {
         waitForGridJS(() => initProductsGridJS());
         return;
     }
-    
+
     if (productsGridInstance) {
         productsGridInstance.destroy();
     }
-    
+
     const gridContainer = document.getElementById('productsGrid');
     if (!gridContainer) return;
-    
+
     gridContainer.innerHTML = '';
-    
+
     productsGridInstance = new g.Grid({
         columns: [
-            { 
+            {
                 name: 'REF.',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Especificación',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Categoría',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Stock',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Valorización',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Operaciones',
                 formatter: (cell) => g.html(cell)
             }
@@ -420,6 +411,8 @@ function initProductsGridJS() {
         pagination: true,
         search: true,
         sort: true,
+        resizable: true,
+        fixedHeader: true,
         language: {
             search: {
                 placeholder: 'Buscar productos...'
@@ -432,14 +425,14 @@ function initProductsGridJS() {
             }
         }
     }).render(gridContainer);
-    
+
     productsGrid = true;
     console.log('GridJS de productos inicializado');
 }
 
 function renderProductsToGridJS(products) {
     console.log('renderProductsToGridJS llamado con', products.length, 'productos');
-    
+
     // Verificar que GridJS esté cargado
     const g = getGridJS();
     if (!g) {
@@ -447,12 +440,14 @@ function renderProductsToGridJS(products) {
         waitForGridJS(() => renderProductsToGridJS(products));
         return;
     }
-    
+
     if (!productsGridInstance) {
         initProductsGridJS();
-        return; // initProductsGridJS llamará a esta función nuevamente cuando esté listo
+        // Esperar más tiempo a que se inicialice antes de intentar renderizar datos
+        setTimeout(function () { renderProductsToGridJS(products); }, 500);
+        return;
     }
-    
+
     const gridData = products.map(p => {
         let catClasses = 'bg-slate-100 text-slate-600 border-slate-200';
         if (p.category === 'laptops') catClasses = 'bg-brand-50 text-brand-600 border-brand-200';
@@ -516,7 +511,7 @@ function renderProductsToGridJS(products) {
                 </div>
                 <span class="font-semibold text-slate-600 text-sm">ID-${p.id}</span>
             </div>`;
-        
+
         return [
             idDisplayHtml,
             nameHtml,
@@ -530,7 +525,7 @@ function renderProductsToGridJS(products) {
     productsGridInstance.updateConfig({
         data: gridData
     }).forceRender();
-    
+
     updateProductStats(products);
     console.log('Productos renderizados con GridJS:', gridData.length);
 }
@@ -538,7 +533,7 @@ function renderProductsToGridJS(products) {
 // GridJS Functions for Orders
 function initOrdersGridJS() {
     console.log('Inicializando GridJS para pedidos...');
-    
+
     // Verificar que GridJS esté cargado
     const g = getGridJS();
     if (!g) {
@@ -546,39 +541,39 @@ function initOrdersGridJS() {
         waitForGridJS(() => initOrdersGridJS());
         return;
     }
-    
+
     if (ordersGridInstance) {
         ordersGridInstance.destroy();
     }
-    
+
     const gridContainer = document.getElementById('ordersGrid');
     if (!gridContainer) return;
-    
+
     gridContainer.innerHTML = '';
-    
+
     ordersGridInstance = new g.Grid({
         columns: [
-            { 
+            {
                 name: 'Ref.',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Fecha',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Canal',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Total',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Estado',
                 formatter: (cell) => g.html(cell)
             },
-            { 
+            {
                 name: 'Operaciones',
                 formatter: (cell) => g.html(cell)
             }
@@ -587,6 +582,8 @@ function initOrdersGridJS() {
         pagination: true,
         search: true,
         sort: true,
+        resizable: true,
+        fixedHeader: true,
         language: {
             search: {
                 placeholder: 'Buscar pedidos...'
@@ -599,14 +596,14 @@ function initOrdersGridJS() {
             }
         }
     }).render(gridContainer);
-    
+
     ordersGrid = true;
     console.log('GridJS de pedidos inicializado');
 }
 
 function renderOrdersToGridJS(orders) {
     console.log('renderOrdersToGridJS llamado con', orders.length, 'pedidos');
-    
+
     // Verificar que GridJS esté cargado
     const g = getGridJS();
     if (!g) {
@@ -614,12 +611,14 @@ function renderOrdersToGridJS(orders) {
         waitForGridJS(() => renderOrdersToGridJS(orders));
         return;
     }
-    
+
     if (!ordersGridInstance) {
         initOrdersGridJS();
-        return; // initOrdersGridJS llamará a esta función nuevamente cuando esté listo
+        // Esperar más tiempo a que se inicialice antes de intentar renderizar datos
+        setTimeout(function () { renderOrdersToGridJS(orders); }, 500);
+        return;
     }
-    
+
     const gridData = orders.map(o => {
         // Status Badge Pro (Premium Tech Colors) - igual a versión original
         let statusClasses = '';
@@ -713,7 +712,7 @@ function renderOrdersToGridJS(orders) {
     ordersGridInstance.updateConfig({
         data: gridData
     }).forceRender();
-    
+
     console.log('Pedidos renderizados con GridJS:', gridData.length);
 }
 
@@ -1197,7 +1196,7 @@ window.viewOrder = function (order) {
     console.log('[Order] Abriendo orden ID:', order.id);
     console.log('[Order] Estado actual:', order.status);
     console.log('[Order] Items en orden:', order.items);
-    console.log('[Order] Productos disponibles:', window.allAdminProducts?.length || 0);
+    console.log('[Order] Productos disponibles:', window.allAdminProducts.length || 0);
 
     document.getElementById('orderModalId').textContent = '#' + order.id;
 
@@ -1334,7 +1333,7 @@ window.updateOrderStatus = async function () {
     if (!currentOrderId) return;
 
     const newStatus = document.getElementById('orderStatusSelect').value;
-        var previousStatus = window.currentFullOrder ? window.currentFullOrder.status : undefined;
+    var previousStatus = window.currentFullOrder ? window.currentFullOrder.status : undefined;
     const client = window.supabaseClient || window.supabase;
 
     // Validar que no se esté intentando cambiar al mismo estado
@@ -1363,8 +1362,8 @@ window.updateOrderStatus = async function () {
         // Caso 1: Cambio a "terminado" (ÉXITO) - DESCONTAR stock
         if (newStatus === 'terminado' && previousStatus !== 'terminado') {
             console.log('[Stock] Iniciando descuento de stock para venta exitosa');
-            console.log('[Stock] Productos cargados:', window.allAdminProducts?.length || 0);
-            console.log('[Stock] Items en orden:', window.currentFullOrder?.items);
+            console.log('[Stock] Productos cargados:', window.allAdminProducts.length || 0);
+            console.log('[Stock] Items en orden:', window.currentFullOrder.items);
 
             try {
                 let items = window.currentFullOrder.items;
@@ -1700,8 +1699,8 @@ window.printOrder = function () {
                             </div>
                         </div>
                         <div class="info">
-                            <p><strong>Cliente:</strong> ${order.customer_info?.name || 'Cliente'}</p>
-                            <p><strong>WhatsApp:</strong> ${order.customer_info?.phone || 'N/A'}</p>
+                            <p><strong>Cliente:</strong> ${order.customer_info.name || 'Cliente'}</p>
+                            <p><strong>WhatsApp:</strong> ${order.customer_info.phone || 'N/A'}</p>
                             <p><strong>Estado:</strong> ${order.status.toUpperCase()}</p>
                         </div>
                         <table>
@@ -2329,8 +2328,8 @@ window.viewProductDetail = function (product) {
                 specsData = specsField.split('\n').filter(line => line.trim()).map(line => {
                     const parts = line.split(':');
                     return {
-                        key: parts[0]?.trim() || 'Especificación',
-                        value: parts[1]?.trim() || line.trim()
+                        key: parts[0].trim() || 'Especificación',
+                        value: parts[1].trim() || line.trim()
                     };
                 });
             }
@@ -2861,7 +2860,7 @@ window.printProductDetail = function () {
                     } catch (e) {
                         specsData = specsField.split('\\n').filter(line => line.trim()).map(line => {
                             const parts = line.split(':');
-                            return { key: parts[0]?.trim() || 'Especificación', value: parts[1]?.trim() || line.trim() };
+                            return { key: parts[0].trim() || 'Especificación', value: parts[1].trim() || line.trim() };
                         });
                     }
                 } else if (Array.isArray(specsField)) {
@@ -2967,11 +2966,11 @@ function renderCarouselImages(images) {
 
     if (!images || images.length === 0) {
         grid.innerHTML = '';
-        noImages?.classList.remove('hidden');
+        noImages.classList.remove('hidden');
         return;
     }
 
-    noImages?.classList.add('hidden');
+    noImages.classList.add('hidden');
     grid.innerHTML = '';
 
     images.forEach((img) => {
@@ -3037,7 +3036,7 @@ window.uploadCarouselImages = async function (input) {
                 .from('carousel_images')
                 .insert([{
                     image_url: publicUrl,
-                    order_index: (window.allCarouselImages?.length || 0) + successCount
+                    order_index: (window.allCarouselImages.length || 0) + successCount
                 }]);
 
             if (dbError) throw dbError;
@@ -3397,14 +3396,14 @@ window.saveAlertSettings = async function () {
             return;
         }
 
-        if (toggle?.checked && !message) {
+        if (toggle.checked && !message) {
             Swal.fire('Error', 'Debes escribir un mensaje para activar la alerta.', 'warning');
             return;
         }
 
         const config = {
-            isActive: toggle?.checked || false,
-            type: typeSelect?.value || 'info',
+            isActive: toggle.checked || false,
+            type: typeSelect.value || 'info',
             message: message
         };
 
@@ -3513,9 +3512,9 @@ function updateAlertPreview() {
 
     if (!preview) return;
 
-    const message = messageTextarea?.value?.trim() || '';
-    const type = typeSelect?.value || 'info';
-    const isActive = toggle?.checked || false;
+    const message = messageTextarea.value.trim() || '';
+    const type = typeSelect.value || 'info';
+    const isActive = toggle.checked || false;
 
     if (!message || !isActive) {
         preview.innerHTML = `

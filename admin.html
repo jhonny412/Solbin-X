@@ -67,7 +67,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gridjs@6.2.0/dist/gridjs.umd.min.js"></script>
     <script>
         // Verificar que GridJS esté cargado inmediatamente
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             console.log('GridJS status check:', typeof gridjs !== 'undefined' ? 'CARGADO' : 'NO CARGADO');
             if (typeof gridjs === 'undefined' && typeof window.gridjs !== 'undefined') {
                 window.gridjs = window.gridjs;
@@ -1718,7 +1718,8 @@
                             </button>
                         </div>
                     </div>
-                </div>
+                </div> <!-- ID: alertsSection -->
+            </div> <!-- ID: ordersContainer -->
         </main>
     </div>
 
