@@ -425,7 +425,20 @@ function initProductsGridJS() {
                 formatter: (cell) => g.html(cell)
             }
         ],
-        data: []
+        data: [],
+        pagination: {
+            enabled: true,
+            limit: 10,
+            summary: true
+        },
+        search: {
+            enabled: true,
+            placeholder: 'Buscar productos...'
+        },
+        sort: {
+            enabled: true
+        },
+        language: 'es'
     }).render(gridContainer);
     
     productsGrid = true;
@@ -578,7 +591,20 @@ function initOrdersGridJS() {
                 formatter: (cell) => g.html(cell)
             }
         ],
-        data: []
+        data: [],
+        pagination: {
+            enabled: true,
+            limit: 10,
+            summary: true
+        },
+        search: {
+            enabled: true,
+            placeholder: 'Buscar pedidos...'
+        },
+        sort: {
+            enabled: true
+        },
+        language: 'es'
     }).render(gridContainer);
     
     ordersGrid = true;
