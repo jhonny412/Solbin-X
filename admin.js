@@ -3,11 +3,32 @@
 
 console.log('=== ADMIN.JS CARGADO ===');
 
+// Verificar que GridJS esté cargado
+if (typeof gridjs === 'undefined') {
+    console.warn('GridJS no está cargado. Esperando...');
+}
+
 // Global error handler
 window.onerror = function (msg, url, lineNo, columnNo, error) {
     console.error('Error en admin.js:', msg, 'en', url, 'línea', lineNo);
     return false;
 };
+
+// Función para esperar a que GridJS esté disponible
+function waitForGridJS(callback, maxAttempts = 10) {
+    let attempts = 0;
+    const checkInterval = setInterval(() => {
+        attempts++;
+        if (typeof gridjs !== 'undefined') {
+            clearInterval(checkInterval);
+            console.log('GridJS disponible después de', attempts, 'intentos');
+            callback();
+        } else if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            console.error('GridJS no se cargó después de', maxAttempts, 'intentos');
+        }
+    }, 200);
+}
 
 // Tabs Logic
 window.switchAdminTab = function (tab) {
@@ -347,6 +368,13 @@ function initOrdersGrid() {
 function initProductsGridJS() {
     console.log('Inicializando GridJS para productos...');
     
+    // Verificar que GridJS esté cargado
+    if (typeof gridjs === 'undefined') {
+        console.error('GridJS no está cargado. Intentando cargar...');
+        waitForGridJS(() => initProductsGridJS());
+        return;
+    }
+    
     if (productsGridInstance) {
         productsGridInstance.destroy();
     }
@@ -421,8 +449,16 @@ function initProductsGridJS() {
 function renderProductsToGridJS(products) {
     console.log('renderProductsToGridJS llamado con', products.length, 'productos');
     
+    // Verificar que GridJS esté cargado
+    if (typeof gridjs === 'undefined') {
+        console.error('GridJS no está cargado. Esperando...');
+        waitForGridJS(() => renderProductsToGridJS(products));
+        return;
+    }
+    
     if (!productsGridInstance) {
         initProductsGridJS();
+        return; // initProductsGridJS llamará a esta función nuevamente cuando esté listo
     }
     
     const gridData = products.map(p => {
@@ -502,6 +538,13 @@ function renderProductsToGridJS(products) {
 function initOrdersGridJS() {
     console.log('Inicializando GridJS para pedidos...');
     
+    // Verificar que GridJS esté cargado
+    if (typeof gridjs === 'undefined') {
+        console.error('GridJS no está cargado. Intentando cargar...');
+        waitForGridJS(() => initOrdersGridJS());
+        return;
+    }
+    
     if (ordersGridInstance) {
         ordersGridInstance.destroy();
     }
@@ -541,8 +584,16 @@ function initOrdersGridJS() {
 function renderOrdersToGridJS(orders) {
     console.log('renderOrdersToGridJS llamado con', orders.length, 'pedidos');
     
+    // Verificar que GridJS esté cargado
+    if (typeof gridjs === 'undefined') {
+        console.error('GridJS no está cargado. Esperando...');
+        waitForGridJS(() => renderOrdersToGridJS(orders));
+        return;
+    }
+    
     if (!ordersGridInstance) {
         initOrdersGridJS();
+        return; // initOrdersGridJS llamará a esta función nuevamente cuando esté listo
     }
     
     const gridData = orders.map(o => {
