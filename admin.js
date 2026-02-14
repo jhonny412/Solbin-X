@@ -3,11 +3,6 @@
 
 console.log('=== ADMIN.JS CARGADO ===');
 
-// Verificar que GridJS esté cargado
-if (!getGridJS()) {
-    console.warn('GridJS no está cargado. Esperando...');
-}
-
 // Global error handler
 window.onerror = function (msg, url, lineNo, columnNo, error) {
     console.error('Error en admin.js:', msg, 'en', url, 'línea', lineNo);
@@ -24,6 +19,11 @@ function getGridJS() {
         return gridjs;
     }
     return null;
+}
+
+// Verificar que GridJS esté cargado después de definir la función
+if (!getGridJS()) {
+    console.warn('GridJS no está cargado. Esperando...');
 }
 
 // Función para esperar a que GridJS esté disponible
@@ -92,16 +92,8 @@ window.switchAdminTab = function (tab) {
             }
             // Resize grid after showing section
             setTimeout(() => {
-                if (jQuery && jQuery('#productsGrid').length > 0) {
-                    const gridWidth = jQuery('#productsGrid').closest('.overflow-x-auto').width();
-                    if (gridWidth > 0) {
-                        try {
-                            jQuery('#productsGrid').jqGrid('setGridWidth', gridWidth);
-                            jQuery('#productsGrid').trigger('reloadGrid');
-                        } catch (e) {
-                            console.log('Grid not yet ready for resize');
-                        }
-                    }
+                if (productsGridInstance) {
+                    productsGridInstance.forceRender();
                 }
             }, 200);
         } else if (tab === 'orders') {
@@ -113,16 +105,8 @@ window.switchAdminTab = function (tab) {
             }
             // Resize grid after showing section
             setTimeout(() => {
-                if (jQuery && jQuery('#ordersGrid').length > 0) {
-                    const gridWidth = jQuery('#ordersGrid').closest('.overflow-x-auto').width();
-                    if (gridWidth > 0) {
-                        try {
-                            jQuery('#ordersGrid').jqGrid('setGridWidth', gridWidth);
-                            jQuery('#ordersGrid').trigger('reloadGrid');
-                        } catch (e) {
-                            console.log('Grid not yet ready for resize');
-                        }
-                    }
+                if (ordersGridInstance) {
+                    ordersGridInstance.forceRender();
                 }
             }, 200);
         } else if (tab === 'carousel') {
