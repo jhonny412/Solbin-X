@@ -1,9 +1,56 @@
 User-agent: *
 Allow: /
+Allow: /carrito.html
+Allow: /gracias.html
+Allow: /reclamos.html
+
+# Bloquear acceso a archivos administrativos y de configuración
 Disallow: /admin.html
 Disallow: /admin.js
+Disallow: /admin_clean.js
+Disallow: /admin-export.js
 Disallow: /login.html
 Disallow: /supabase-config.js
 Disallow: /security-utils.js
+Disallow: /scripts/
+Disallow: /src/
+Disallow: /node_modules/
+Disallow: /dist/
 
+# Bloquear archivos de desarrollo
+Disallow: /.git/
+Disallow: /.gitignore
+Disallow: /package.json
+Disallow: /package-lock.json
+Disallow: /tailwind.config.js
+Disallow: /postcss.config.js
+Disallow: /vite.config.*
+Disallow: /BUILD.md
+
+# Rendimiento - evitar crawling de recursos
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /*.json$
+
+# Archivos multimedia grandes (opcional, si hay problemas de crawl budget)
+Disallow: /Video/
+
+# Sitemap
 Sitemap: https://solbin-x.com/sitemap.xml
+
+# Reglas adicionales paraGooglebot
+User-agent: Googlebot
+Allow: /
+Allow: /*.js$
+Allow: /*.css$
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /Imagenes/
+
+User-agent: Googlebot-Video
+Allow: /
+Allow: /Video/
+
+# Crawl-delay para evitar sobrecarga (opcional)
+Crawl-delay: 1

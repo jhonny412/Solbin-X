@@ -1,17 +1,17 @@
 
 // Lógica del Panel de Administración
 
-
+console.log('=== ADMIN.JS CARGADO ===');
 
 // Global error handler
 window.onerror = function (msg, url, lineNo, columnNo, error) {
-    
+    console.error('Error en admin.js:', msg, 'en', url, 'línea', lineNo);
     return false;
 };
 
 // Tabs Logic
 window.switchAdminTab = function (tab) {
-    
+    console.log('=== switchAdminTab llamado con:', tab, '===');
 
     try {
         const dashboardSection = document.getElementById('dashboardSection');
@@ -65,7 +65,7 @@ window.switchAdminTab = function (tab) {
                             jQuery('#productsGrid').jqGrid('setGridWidth', gridWidth);
                             jQuery('#productsGrid').trigger('reloadGrid');
                         } catch (e) {
-                            
+                            console.log('Grid not yet ready for resize');
                         }
                     }
                 }
@@ -86,7 +86,7 @@ window.switchAdminTab = function (tab) {
                             jQuery('#ordersGrid').jqGrid('setGridWidth', gridWidth);
                             jQuery('#ordersGrid').trigger('reloadGrid');
                         } catch (e) {
-                            
+                            console.log('Grid not yet ready for resize');
                         }
                     }
                 }
@@ -111,7 +111,7 @@ window.switchAdminTab = function (tab) {
             }
         }
     } catch (err) {
-        
+        console.error('Error en switchAdminTab:', err);
     }
 };
 
@@ -134,51 +134,51 @@ window.addEventListener('resize', function () {
 
 // Función de prueba para verificar el estado de la aplicación
 window.testMenuNavigation = function () {
-    
+    console.log('=== TEST MENÚ NAVEGACIÓN ===');
 
-    
+    console.log('1. Verificando secciones:');
     const dashboardSection = document.getElementById('dashboardSection');
     const productsSection = document.getElementById('productsSection');
     const ordersSection = document.getElementById('ordersSection');
 
-     ? 'oculta' : 'visible');
-     ? 'oculta' : 'visible');
-     ? 'oculta' : 'visible');
+    console.log('  Dashboard:', !!dashboardSection, '- Estado:', dashboardSection?.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Products:', !!productsSection, '- Estado:', productsSection?.classList.contains('hidden') ? 'oculta' : 'visible');
+    console.log('  Orders:', !!ordersSection, '- Estado:', ordersSection?.classList.contains('hidden') ? 'oculta' : 'visible');
 
-    
+    console.log('2. Verificando botones:');
     const sideBtnDashboard = document.getElementById('sideBtnDashboard');
     const sideBtnProducts = document.getElementById('sideBtnProducts');
     const sideBtnOrders = document.getElementById('sideBtnOrders');
 
-    
-    
-    
+    console.log('  Dashboard Button:', !!sideBtnDashboard);
+    console.log('  Products Button:', !!sideBtnProducts);
+    console.log('  Orders Button:', !!sideBtnOrders);
 
-    
-    
+    console.log('3. Verificando función switchAdminTab:');
+    console.log('  Función definida:', typeof window.switchAdminTab);
 
-    
-    
-    
-    .length > 0 ? 'existe' : 'no existe');
-    .length > 0 ? 'existe' : 'no existe');
+    console.log('4. Verificando jqGrids:');
+    console.log('  productsGrid:', !!productsGrid);
+    console.log('  ordersGrid:', !!ordersGrid);
+    console.log('  productsGrid element:', jQuery('#productsGrid').length > 0 ? 'existe' : 'no existe');
+    console.log('  ordersGrid element:', jQuery('#ordersGrid').length > 0 ? 'existe' : 'no existe');
 
-    
-    
-    
+    console.log('5. Verificando jQuery:');
+    console.log('  jQuery cargado:', typeof jQuery !== 'undefined');
+    console.log('  jqGrid cargado:', typeof jQuery.fn.jqGrid !== 'undefined');
 
-    
+    console.log('=== FIN TEST ===');
 }
 
 // Ejecutar test al inicio
 setTimeout(() => {
-    
+    console.log('Ejecutando test inicial de navegación...');
     window.testMenuNavigation();
 }, 1000);
 
 // Initialize jqGrid for Products
 function initProductsGrid() {
-    
+    console.log('Inicializando jqGrid para productos...');
 
     jQuery('#productsGrid').jqGrid({
         datatype: 'local',
@@ -251,17 +251,17 @@ function initProductsGrid() {
         recordpos: 'left',
         pagerpos: 'center',
         loadComplete: function () {
-            
+            console.log('jqGrid de productos cargado correctamente');
         }
     });
 
-    
+    console.log('jqGrid de productos inicializado');
     productsGrid = true;
 }
 
 // Initialize jqGrid for Orders
 function initOrdersGrid() {
-    
+    console.log('Inicializando jqGrid para pedidos...');
 
     jQuery('#ordersGrid').jqGrid({
         datatype: 'local',
@@ -333,11 +333,11 @@ function initOrdersGrid() {
         recordpos: 'left',
         pagerpos: 'center',
         loadComplete: function () {
-            
+            console.log('jqGrid de pedidos cargado correctamente');
         }
     });
 
-    
+    console.log('jqGrid de pedidos inicializado');
     ordersGrid = true;
 }
 
@@ -345,19 +345,19 @@ function initOrdersGrid() {
 // Cargar estadísticas de visitas
 window.loadVisitStats = async function (retryCount = 0) {
     try {
-        
+        console.log('[Visitas] Cargando estadísticas...');
 
         let client = window.supabaseClient || window.supabase;
 
         // Si el cliente no está listo, reintentar un par de veces
         if (!client && retryCount < 5) {
-            `);
+            console.log(`[Visitas] Cliente no listo, reintentando en 500ms... (${retryCount + 1}/5)`);
             setTimeout(() => window.loadVisitStats(retryCount + 1), 500);
             return;
         }
 
         if (!client) {
-            
+            console.error('[Visitas] Cliente Supabase no disponible después de varios intentos');
             updateVisitCounter('Error');
             return;
         }
@@ -367,14 +367,14 @@ window.loadVisitStats = async function (retryCount = 0) {
             const { data: rpcData, error: rpcError } = await client.rpc('get_visit_count');
 
             if (!rpcError && rpcData !== null) {
-                
+                console.log('[Visitas] Contador cargado via RPC:', rpcData);
                 updateVisitCounter(rpcData);
                 return;
             } else if (rpcError) {
-                
+                console.warn('[Visitas] Error en RPC get_visit_count:', rpcError);
             }
         } catch (rpcErr) {
-            
+            console.log('[Visitas] Función RPC no disponible, intentando consulta directa...');
         }
 
         // Si RPC falla, intentar consulta directa a la tabla
@@ -385,21 +385,21 @@ window.loadVisitStats = async function (retryCount = 0) {
             .single();
 
         if (error) {
-            
+            console.error('[Visitas] Error al cargar estadísticas desde tabla:', error);
             // Si hay error, mostrar lo que había
             return;
         }
 
         if (data && data.visit_count !== undefined) {
-            
+            console.log('[Visitas] Contador cargado desde tabla:', data.visit_count);
             updateVisitCounter(data.visit_count);
         } else {
-            
+            console.log('[Visitas] No hay datos de visitas en la tabla');
             updateVisitCounter(0);
         }
 
     } catch (e) {
-        
+        console.error('[Visitas] Error general en loadVisitStats:', e);
     }
 };
 
@@ -408,16 +408,16 @@ function updateVisitCounter(count) {
     const visitCounter = document.getElementById('visitCounter');
     if (visitCounter) {
         visitCounter.textContent = count.toLocaleString('es-PE');
-        
+        console.log('[Visitas] Contador actualizado en UI:', count);
     } else {
-        
+        console.error('[Visitas] Elemento visitCounter no encontrado');
     }
 }
 
 // Cargar productos
 window.loadProducts = async function () {
     try {
-        
+        console.log('=== INICIANDO CARGA DE PRODUCTOS ===');
 
         // Mostrar loading
         showProductsLoading();
@@ -430,10 +430,10 @@ window.loadProducts = async function () {
 
         if (error) throw error;
 
-        
-        .padStart(5, '0') })));
-        .map(p => p.id));
-        .map(p => p.id));
+        console.log('Productos cargados de Supabase:', products.length);
+        console.log('Productos ordenados desde Supabase:', products.map(p => ({ id: p.id, sku: 'SKU-' + p.id.toString().padStart(5, '0') })));
+        console.log('Primeros 5 IDs:', products.slice(0, 5).map(p => p.id));
+        console.log('Últimos 5 IDs:', products.slice(-5).map(p => p.id));
 
         window.allAdminProducts = products;
 
@@ -443,21 +443,21 @@ window.loadProducts = async function () {
 
         // Initialize grid if not done
         if (!productsGrid) {
-            
+            console.log('Inicializando jqGrid para productos...');
             initProductsGrid();
         }
 
         // Render with jqGrid
-        
+        console.log('Renderizando productos...');
         renderProductsToGrid(products);
 
         // Ocultar loading
         hideProductsLoading();
 
-        
+        console.log('=== CARGA DE PRODUCTOS COMPLETADA ===');
 
     } catch (err) {
-        
+        console.error('Error cargando productos:', err);
         hideProductsLoading();
         Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
     }
@@ -498,7 +498,7 @@ function hideProductsLoading() {
 
 // Render products using jqGrid
 function renderProductsToGrid(products) {
-    
+    console.log('renderProductsToGrid llamado con', products.length, 'productos');
 
     // Clear existing data
     jQuery('#productsGrid').jqGrid('clearGridData');
@@ -571,18 +571,18 @@ function renderProductsToGrid(products) {
         };
     });
 
-    
+    console.log('Ítems procesados:', gridData.length);
     if (gridData.length > 0) {
-        
+        console.log('Primer ítem de ejemplo:', gridData[0]);
     }
-    );
+    console.log('GridData orden:', gridData.map(g => g.id));
 
     // Add data to jqGrid usando el ID real del producto
     for (let i = 0; i < gridData.length; i++) {
         jQuery('#productsGrid').jqGrid('addRowData', gridData[i].id, gridData[i]);
     }
 
-    .jqGrid('getGridParam', 'data').map(row => row.id));
+    console.log('Filas en grid después de agregar:', jQuery('#productsGrid').jqGrid('getGridParam', 'data').map(row => row.id));
 
     // Trigger resize to ensure grid fits properly
     setTimeout(() => {
@@ -594,7 +594,7 @@ function renderProductsToGrid(products) {
     }, 100);
 
     updateProductStats(products);
-    
+    console.log('Productos renderizados con jqGrid:', gridData.length);
 }
 
 // Update inventory stats
@@ -620,7 +620,7 @@ function updateProductStats(products) {
 
 window.loadOrders = async function () {
     try {
-        
+        console.log('=== INICIANDO CARGA DE PEDIDOS ===');
 
         // Mostrar loading
         showOrdersLoading();
@@ -633,8 +633,8 @@ window.loadOrders = async function () {
 
         if (error) throw error;
 
-        
-        );
+        console.log('Pedidos cargados de Supabase:', orders.length);
+        console.log('Datos de ejemplo:', orders.slice(0, 2));
 
         // Save for export
         window.allAdminOrders = orders;
@@ -645,21 +645,21 @@ window.loadOrders = async function () {
 
         // Initialize grid if not done
         if (!ordersGrid) {
-            
+            console.log('Inicializando jqGrid para pedidos...');
             initOrdersGrid();
         }
 
         // Render with jqGrid
-        
+        console.log('Renderizando pedidos...');
         renderOrdersToGrid(orders);
 
         // Ocultar loading
         hideOrdersLoading();
 
-        
+        console.log('=== CARGA DE PEDIDOS COMPLETADA ===');
 
     } catch (err) {
-        
+        console.error('Error cargando ventas:', err);
         hideOrdersLoading();
         Swal.fire('Error', 'No se pudieron cargar las ventas.', 'error');
     }
@@ -700,7 +700,7 @@ function hideOrdersLoading() {
 
 // Render orders using jqGrid
 function renderOrdersToGrid(orders) {
-    
+    console.log('renderOrdersToGrid llamado con', orders.length, 'pedidos');
 
     // Clear existing data
     jQuery('#ordersGrid').jqGrid('clearGridData');
@@ -788,9 +788,9 @@ function renderOrdersToGrid(orders) {
         };
     });
 
-    
+    console.log('Ítems de pedidos procesados:', gridData.length);
     if (gridData.length > 0) {
-        
+        console.log('Primer ítem de pedidos:', gridData[0]);
     }
 
     // Add data to jqGrid usando el ID real de la orden
@@ -807,7 +807,7 @@ function renderOrdersToGrid(orders) {
         jQuery('#ordersGrid').trigger('reloadGrid');
     }, 100);
 
-    
+    console.log('Pedidos renderizados con jqGrid:', gridData.length);
 }
 
 
@@ -818,10 +818,10 @@ window.viewOrder = function (order) {
     currentOrderId = order.id;
     window.currentFullOrder = order; // Save full object
 
-    
-    
-    
-    
+    console.log('[Order] Abriendo orden ID:', order.id);
+    console.log('[Order] Estado actual:', order.status);
+    console.log('[Order] Items en orden:', order.items);
+    console.log('[Order] Productos disponibles:', window.allAdminProducts?.length || 0);
 
     document.getElementById('orderModalId').textContent = '#' + order.id;
 
@@ -851,7 +851,7 @@ window.viewOrder = function (order) {
 
         // Robust parsing
         if (typeof info === 'string') {
-            try { info = JSON.parse(info); } catch (e) {  }
+            try { info = JSON.parse(info); } catch (e) { console.error('Error parsing customer_info:', e); }
         }
 
         if (info) {
@@ -970,7 +970,7 @@ window.updateOrderStatus = async function () {
     // Verificar que los productos estén cargados antes de procesar cambios de stock
     if (newStatus === 'terminado' || (previousStatus === 'terminado' && newStatus === 'cancelado')) {
         if (!window.allAdminProducts || window.allAdminProducts.length === 0) {
-            
+            console.error('[Stock] Productos no cargados al intentar actualizar stock');
             Swal.fire({
                 title: 'Error',
                 text: 'No se pueden actualizar los stocks porque la lista de productos no está cargada. Por favor, recarga la página e intenta nuevamente.',
@@ -986,28 +986,28 @@ window.updateOrderStatus = async function () {
 
         // Caso 1: Cambio a "terminado" (ÉXITO) - DESCONTAR stock
         if (newStatus === 'terminado' && previousStatus !== 'terminado') {
-            
-            
-            
+            console.log('[Stock] Iniciando descuento de stock para venta exitosa');
+            console.log('[Stock] Productos cargados:', window.allAdminProducts?.length || 0);
+            console.log('[Stock] Items en orden:', window.currentFullOrder?.items);
 
             try {
                 let items = window.currentFullOrder.items;
                 if (typeof items === 'string') items = JSON.parse(items);
 
-                
+                console.log('[Stock] Items parseados:', items);
 
                 if (!Array.isArray(items)) {
-                    
+                    console.error('[Stock] Items no es un array:', items);
                     stockErrors.push('Error: Formato de items inválido');
                 } else if (!window.allAdminProducts || window.allAdminProducts.length === 0) {
-                    
+                    console.error('[Stock] No hay productos cargados en allAdminProducts');
                     stockErrors.push('Error: Lista de productos no disponible. Recarga la página.');
                 } else {
                     for (const item of items) {
-                        
+                        console.log('[Stock] Procesando item:', item);
 
                         if (!item.name) {
-                            
+                            console.error('[Stock] Item sin nombre:', item);
                             stockErrors.push('Item sin nombre identificado');
                             continue;
                         }
@@ -1016,7 +1016,7 @@ window.updateOrderStatus = async function () {
                         let product = null;
                         if (item.id) {
                             product = window.allAdminProducts.find(p => p.id === item.id);
-                            
+                            console.log(`[Stock] Buscando por ID ${item.id}:`, product ? 'SÍ' : 'NO');
                         }
 
                         // Si no se encuentra por ID, buscar por nombre (comparación normalizada)
@@ -1026,18 +1026,18 @@ window.updateOrderStatus = async function () {
                                 const normalizedProductName = (p.name || '').trim().toLowerCase();
                                 return normalizedProductName === normalizedItemName;
                             });
-                            
+                            console.log(`[Stock] Buscando por nombre "${item.name}" - Encontrado:`, product ? 'SÍ' : 'NO');
                         }
 
                         if (!product) {
-                            `);
-                            .map(p => ({ id: p.id, name: p.name })));
+                            console.error(`[Stock] Producto no encontrado: "${item.name}" (ID: ${item.id || 'N/A'})`);
+                            console.log('[Stock] Productos disponibles:', window.allAdminProducts.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
                             stockErrors.push(`${item.name}: Producto no encontrado en el catálogo`);
                             continue;
                         }
 
                         if (!product.id) {
-                            
+                            console.error(`[Stock] Producto sin ID:`, product);
                             stockErrors.push(`${item.name}: Producto sin ID válido`);
                             continue;
                         }
@@ -1050,7 +1050,7 @@ window.updateOrderStatus = async function () {
                         }
 
                         const newStock = product.stock - quantity;
-                        : ${product.stock} -> ${newStock}`);
+                        console.log(`[Stock] Actualizando ${product.name} (ID: ${product.id}): ${product.stock} -> ${newStock}`);
 
                         const { error: updateError } = await client
                             .from('products')
@@ -1058,10 +1058,10 @@ window.updateOrderStatus = async function () {
                             .eq('id', product.id);
 
                         if (updateError) {
-                            
+                            console.error(`[Stock] Error actualizando ${product.name}:`, updateError);
                             stockErrors.push(`${product.name}: ${updateError.message}`);
                         } else {
-                            
+                            console.log(`[Stock] Éxito: ${product.name} actualizado`);
                             stockUpdates.push(`${product.name}: -${quantity} unidades`);
 
                             // Actualizar el stock en memoria para futuras operaciones
@@ -1070,21 +1070,21 @@ window.updateOrderStatus = async function () {
                     }
 
                     if (stockUpdates.length > 0) {
-                        
+                        console.log('[Stock] Resumen de descuentos:', stockUpdates);
                     }
                     if (stockErrors.length > 0) {
-                        
+                        console.log('[Stock] Errores encontrados:', stockErrors);
                     }
                 }
             } catch (err) {
-                
+                console.error('Error descontando stock:', err);
                 stockErrors.push('Error general al actualizar stock: ' + err.message);
             }
         }
 
         // Caso 2: Cambio desde "terminado" a "cancelado" - RESTAURAR stock
         if (previousStatus === 'terminado' && newStatus === 'cancelado') {
-            
+            console.log('[Stock] Iniciando restauración de stock por cancelación');
 
             try {
                 let items = window.currentFullOrder.items;
@@ -1110,7 +1110,7 @@ window.updateOrderStatus = async function () {
                         if (product) {
                             const quantity = parseInt(item.quantity) || 0;
                             const newStock = product.stock + quantity;
-                            
+                            console.log(`[Stock] Restaurando ${product.name}: ${product.stock} -> ${newStock}`);
 
                             const { error: updateError } = await client
                                 .from('products')
@@ -1125,17 +1125,17 @@ window.updateOrderStatus = async function () {
                                 product.stock = newStock;
                             }
                         } else {
-                            
+                            console.error(`[Stock] Producto no encontrado para restaurar: "${item.name}"`);
                             stockErrors.push(`${item.name}: No se pudo restaurar - producto no encontrado`);
                         }
                     }
 
                     if (stockUpdates.length > 0) {
-                        
+                        console.log('[Stock] Restaurado por cancelación:', stockUpdates);
                     }
                 }
             } catch (err) {
-                
+                console.error('Error restaurando stock:', err);
                 stockErrors.push('Error general al restaurar stock: ' + err.message);
             }
         }
@@ -1174,7 +1174,7 @@ window.updateOrderStatus = async function () {
         loadProducts();
 
     } catch (e) {
-        
+        console.error('Error en updateOrderStatus:', e);
         Swal.fire('Error', 'No se pudo actualizar el estado: ' + e.message, 'error');
     }
 }
@@ -1517,7 +1517,7 @@ window.handleGalleryFileUpload = async function (input) {
                 .upload(filePath, file);
 
             if (uploadError) {
-                
+                console.error('Error uploading image:', uploadError);
                 continue;
             }
 
@@ -1534,7 +1534,7 @@ window.handleGalleryFileUpload = async function (input) {
             });
 
         } catch (err) {
-            
+            console.error('Error uploading file:', err);
         }
     }
 
@@ -1618,7 +1618,7 @@ window.importSpecsFromExcel = function (input) {
     const file = input.files[0];
     if (!file) return;
 
-    
+    console.log('Importando especificaciones desde:', file.name);
 
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -1630,7 +1630,7 @@ window.importSpecsFromExcel = function (input) {
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-            
+            console.log('Datos importados:', jsonData);
 
             if (jsonData.length < 2) {
                 Swal.fire('Error', 'El archivo Excel está vacío o no tiene el formato correcto. Debe tener al menos una fila de encabezado y una fila de datos.', 'error');
@@ -1671,7 +1671,7 @@ window.importSpecsFromExcel = function (input) {
             }
 
         } catch (error) {
-            
+            console.error('Error al importar Excel:', error);
             Swal.fire('Error', 'No se pudo leer el archivo Excel. Verifica que sea un archivo válido.', 'error');
         }
     };
@@ -1818,7 +1818,7 @@ form.addEventListener('submit', async (e) => {
         loadProducts();
 
     } catch (err) {
-        
+        console.error(err);
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -1866,31 +1866,31 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 
 // Init
 async function checkAuth() {
-    
+    console.log('Verificando autenticación...');
     try {
         const client = window.supabaseClient || window.supabase;
         if (!client) {
-            
+            console.error('Supabase client no inicializado');
             return;
         }
         const { data: { session } } = await client.auth.getSession();
         if (!session) {
-            
+            console.warn('Sin sesión activada, redirigiendo a login...');
             window.location.href = 'login.html';
         } else {
-            
+            console.log('Sesión activa:', session.user.email);
             const userEmailEl = document.getElementById('userEmail');
             if (userEmailEl) userEmailEl.textContent = session.user.email;
         }
     } catch (err) {
-        
+        console.error('Error en checkAuth:', err);
     }
 }
 document.addEventListener('DOMContentLoaded', checkAuth);
 
 // Ver detalle de producto
 window.viewProductDetail = function (product) {
-    
+    console.log('Abriendo detalle de producto:', product);
 
     // Guardar referencia al producto actual
     window.currentProductDetail = product;
@@ -1931,24 +1931,24 @@ window.viewProductDetail = function (product) {
     specsContainer.innerHTML = ''; // Limpiar especificaciones anteriores
 
     // Debug: Ver todas las propiedades del producto
-    );
-    
-    
+    console.log('Todas las propiedades del producto:', Object.keys(product));
+    console.log('Contenido de product.specs:', product.specs);
+    console.log('Tipo de specs:', typeof product.specs);
 
     let specsData = [];
 
     // Intentar encontrar las especificaciones en cualquier campo posible
     let specsField = product.specs || product.specifications || product.especificaciones || product.caracteristicas;
-    
+    console.log('Campo de specs encontrado:', specsField);
 
     // Procesar especificaciones según el formato
     if (specsField) {
         if (typeof specsField === 'string') {
             try {
                 specsData = JSON.parse(specsField);
-                
+                console.log('Specs parseados desde string:', specsData);
             } catch (e) {
-                
+                console.error('Error parsing specs:', e);
                 // Si no se puede parsear, intentar dividir por líneas
                 specsData = specsField.split('\n').filter(line => line.trim()).map(line => {
                     const parts = line.split(':');
@@ -1960,22 +1960,22 @@ window.viewProductDetail = function (product) {
             }
         } else if (Array.isArray(specsField)) {
             specsData = specsField;
-            
+            console.log('Specs como array:', specsData);
         } else if (typeof specsField === 'object') {
             // Convertir objeto a array de pares clave-valor
             specsData = Object.entries(specsField).map(([key, value]) => ({ key, value }));
-            
+            console.log('Specs convertidos desde objeto:', specsData);
         }
     } else {
-        
+        console.log('No se encontraron especificaciones en ningún campo conocido');
     }
 
-    
+    console.log('Procesando especificaciones:', specsData);
 
     if (specsData && specsData.length > 0) {
         // Mostrar especificaciones
         specsData.forEach((spec, index) => {
-            );
+            console.log('Procesando spec:', spec, 'Tipo:', typeof spec, 'Es array:', Array.isArray(spec));
 
 
             let title, value;
@@ -2012,7 +2012,7 @@ window.viewProductDetail = function (product) {
                 value = '-';
             }
 
-            
+            console.log('Título final:', title, 'Valor final:', value);
 
             // Solo agregar si tenemos un título válido
             if (title && title !== 'undefined' && title !== 'null') {
@@ -2560,7 +2560,7 @@ window.printProductDetail = function () {
 // --- CAROUSEL MANAGEMENT ---
 
 window.loadCarouselImages = async function () {
-    
+    console.log('Cargando imágenes del carrusel...');
     const grid = document.getElementById('carouselImagesGrid');
     const noImages = document.getElementById('noCarouselImages');
 
@@ -2578,7 +2578,7 @@ window.loadCarouselImages = async function () {
         window.allCarouselImages = data || [];
         renderCarouselImages(window.allCarouselImages);
     } catch (err) {
-        
+        console.error('Error al cargar carrusel:', err);
         if (grid) grid.innerHTML = `<p class="col-span-full text-center text-rose-500">Error: ${err.message}</p>`;
     }
 }
@@ -2669,7 +2669,7 @@ window.uploadCarouselImages = async function (input) {
             successCount++;
             Swal.getHtmlContainer().querySelector('b').textContent = successCount;
         } catch (err) {
-            
+            console.error(`Error subiendo ${file.name}:`, err);
             errorCount++;
         }
     }
@@ -2719,7 +2719,7 @@ window.deleteCarouselImage = async function (id, imageUrl) {
             Swal.fire('Eliminado', 'La imagen ha sido quitada del carrusel.', 'success');
             loadCarouselImages();
         } catch (err) {
-            
+            console.error('Error al eliminar:', err);
             Swal.fire('Error', 'No se pudo eliminar la imagen: ' + err.message, 'error');
         }
     }
@@ -2778,9 +2778,9 @@ function filterOrdersGrid(searchText) {
 
 // Auxiliares para buscar y procesar productos por ID desde la caché local
 window.viewProductById = function (id) {
-    
+    console.log('viewProductById llamado con id:', id);
     if (!window.allAdminProducts) {
-        
+        console.warn('No hay productos cargados en memoria. Intentando cargar...');
         loadProducts().then(() => {
             const product = window.allAdminProducts.find(p => p.id == id);
             if (product) window.viewProductDetail(product);
@@ -2788,18 +2788,18 @@ window.viewProductById = function (id) {
         return;
     }
     const product = window.allAdminProducts.find(p => p.id == id);
-    
+    console.log('Producto encontrado:', product);
     if (product) {
         window.viewProductDetail(product);
     } else {
-        
+        console.error('Producto no encontrado id:', id);
     }
 };
 
 window.editProductById = function (id) {
-    
+    console.log('editProductById llamado con id:', id);
     if (!window.allAdminProducts) {
-        
+        console.warn('No hay productos cargados en memoria. Intentando cargar...');
         loadProducts().then(() => {
             const product = window.allAdminProducts.find(p => p.id == id);
             if (product) window.editProduct(product);
@@ -2807,18 +2807,18 @@ window.editProductById = function (id) {
         return;
     }
     const product = window.allAdminProducts.find(p => p.id == id);
-    
+    console.log('Producto encontrado para edición:', product);
     if (product) {
         window.editProduct(product);
     } else {
-        
+        console.error('Producto no encontrado para edición id:', id);
     }
 };
 
 window.viewOrderById = function (id) {
-    
+    console.log('viewOrderById llamado con id:', id);
     if (!window.allAdminOrders) {
-        
+        console.warn('No hay pedidos cargados en memoria. Intentando cargar...');
         loadOrders().then(() => {
             const order = window.allAdminOrders.find(o => o.id == id);
             if (order) window.viewOrder(order);
@@ -2826,11 +2826,11 @@ window.viewOrderById = function (id) {
         return;
     }
     const order = window.allAdminOrders.find(o => o.id == id);
-    
+    console.log('Pedido encontrado:', order);
     if (order) {
         window.viewOrder(order);
     } else {
-        
+        console.error('Pedido no encontrado id:', id);
     }
 };
 
@@ -2838,7 +2838,7 @@ window.viewOrderById = function (id) {
 // --- OFFERS LOGIC ---
 
 window.loadOfferSettings = async function () {
-    
+    console.log("Cargando configuración de ofertas...");
     try {
         const client = window.supabaseClient || window.supabase;
         const { data, error } = await client
@@ -2848,7 +2848,7 @@ window.loadOfferSettings = async function () {
             .single();
 
         if (error) {
-            
+            console.error('Error fetching settings:', error);
             return;
         }
 
@@ -2879,7 +2879,7 @@ window.loadOfferSettings = async function () {
             }
         }
     } catch (err) {
-        
+        console.error('Error loading offer settings:', err);
     }
 };
 
@@ -2940,14 +2940,14 @@ window.saveOfferSettings = async function () {
                 width: '600px'
             });
 
-            
+            console.error('Error saving offer settings:', error);
             return;
         }
 
         Swal.fire('Guardado', 'La configuración de ofertas ha sido actualizada.', 'success');
 
     } catch (err) {
-        
+        console.error('Error saving settings:', err);
         Swal.fire({
             icon: 'error',
             title: 'Error Crítico',
@@ -3004,7 +3004,7 @@ window.loadAlertSettings = async function () {
         updateAlertPreview();
 
     } catch (err) {
-        
+        console.error('Error loading alert settings:', err);
         Swal.fire('Error', 'No se pudieron cargar las configuraciones: ' + err.message, 'error');
     }
 };
@@ -3112,7 +3112,7 @@ window.saveAlertSettings = async function () {
         Swal.fire('Guardado', 'La configuración de alertas ha sido actualizada.', 'success');
 
     } catch (err) {
-        
+        console.error('Error saving alert settings:', err);
         Swal.fire({
             icon: 'error',
             title: 'Error Crítico',
@@ -3227,7 +3227,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Cargar estadísticas de visitas al iniciar el panel
     setTimeout(() => {
         if (typeof loadVisitStats === 'function') {
-            
+            console.log('[Admin] Cargando estadísticas iniciales...');
             loadVisitStats();
         }
     }, 500);

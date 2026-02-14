@@ -7,13 +7,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <!-- Performance Optimizations -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <!-- Preconnect only to external services needed -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://afhjtkifntysqnlquuyk.supabase.co" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="https://afhjtkifntysqnlquuyk.supabase.co">
+
+    <!-- Local optimized CSS -->
+    <link rel="stylesheet" href="dist/styles.css">
 
     <!-- Preload Critical Assets -->
     <link rel="preload" href="Imagenes/Version_Web.svg" as="image" type="image/svg+xml">
@@ -202,23 +203,96 @@
     }
     </script>
 
-    <!-- Content Security Policy -->
+    <!-- Structured Data / Schema.org - FAQPage -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "¿Qué garantía ofrecen en sus productos?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Todos nuestros productos incluyen garantía de 1 año. Además, ofrecen garantía de satisfacción de 30 días para devoluciones."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "¿Realizan envíos a todo el Perú?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sí, realizamos envíos a todo el territorio nacional con delivery rápido y seguro."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "¿Qué métodos de pago aceptan?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Aceptamos efectivo, transferencia bancaria, Yape, Plin y tarjetas de crédito/débito."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <!-- Structured Data / Schema.org - HowTo (Proceso de compra) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Cómo comprar en Solbin-X",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "1. Explora nuestro catálogo",
+                "text": "Navega por nuestras categorías de laptops, componentes, accesorios y más."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "2. Agrega al carrito",
+                "text": "Selecciona los productos que deseas y agrégalos a tu carrito de compras."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "3. Finaliza tu compra",
+                "text": "Elige tu método de pago preferido y completa tu pedido."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "4. Recibe tu producto",
+                "text": "Recibe tu producto en la comodidad de tu hogar con envío gratis."
+            }
+        ]
+    }
+    </script>
+
+    <!-- Content Security Policy - Optimizada para producción local -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; img-src 'self' https: data:; font-src 'self' https://cdnjs.cloudflare.com; frame-src https://www.google.com; connect-src 'self' https:; media-src 'self' https://assets.mixkit.co;">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' https: data:; font-src 'self' https://cdnjs.cloudflare.com; frame-src https://www.google.com; connect-src 'self' https:; media-src 'self' https://assets.mixkit.co;">
 
-    <!-- Preconnect for Performance -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <!-- Preload Critical CSS -->
+    <link rel="preload" href="dist/styles.css" as="style">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome (external) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS (local, optimized) -->
+    <link rel="stylesheet" href="dist/styles.css">
+
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Tailwind config for dark mode -->
     <script>
         tailwind.config = {
             darkMode: 'class'
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles (minimal - extras not in Tailwind) -->
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -2587,16 +2661,16 @@
             </div>
         </div>
 
-        <!-- JavaScript -->
+        <!-- JavaScript - Optimizado con defer para mejorar rendimiento -->
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="security-utils.js"></script>
         <script src="supabase-config.js"></script>
         <script src="cart.js?v=20260114-1"></script>
-        <script src="script.js?v=20260114-1"></script>
-        <script src="carousel.js"></script>
-        <script src="chatbot-solbin.js?v=20260114-1"></script>
-        <script src="newsletter.js?v=20260114-1"></script>
-        <script src="loader.js?v=20260205-1"></script>
+        <script src="script.js?v=20260114-1" defer></script>
+        <script src="carousel.js" defer></script>
+        <script src="chatbot-solbin.js?v=20260114-1" defer></script>
+        <script src="newsletter.js?v=20260114-1" defer></script>
+        <script src="loader.js?v=20260205-1" defer></script>
 
         <!-- Funciones de Toast Notifications -->
         <script>
