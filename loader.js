@@ -8,6 +8,9 @@ let catalogState = {
         category: 'all',
         search: '',
         brands: [],
+        processor: [],
+        ram: [],
+        storage: [],
         priceMax: 10000,
         sort: 'default'
     }
@@ -47,8 +50,7 @@ async function loadAndRenderProducts() {
         applyFilters();
 
     } catch (err) {
-        
-        grid.innerHTML = `<div class="col-span-4 text-center text-red-500">Error al cargar: ${err.message}</div>`;
+        grid.innerHTML = `<div class="col-span-4 p-8 text-center text-red-500 text-lg border-2 border-red-500 rounded-xl bg-red-100 dark:bg-red-900 overflow-auto text-left whitespace-pre-wrap"><b>Error:</b> ${err.message}\n\n<b>Stack:</b>\n${err.stack}</div>`;
     }
 }
 
@@ -80,6 +82,17 @@ function applyFilters() {
             return filters.brands.some(brand => prodName.includes(brand.toLowerCase()));
         });
     }
+
+    // 3.5 Especificaciones técnicas
+    const specTypes = [{key: 'processor'}, {key: 'ram'}, {key: 'storage'}];
+    specTypes.forEach(tipo => {
+        if (filters[tipo.key] && filters[tipo.key].length > 0) {
+            filtered = filtered.filter(p => {
+                const textToSearch = (p.name + " " + (p.description || "")).toLowerCase();
+                return filters[tipo.key].some(val => textToSearch.includes(val.toLowerCase()));
+            });
+        }
+    });
 
     // 4. Precio
     if (filters.priceMax < 10000) {
@@ -188,13 +201,14 @@ function renderCurrentPage() {
             specsPreview = specs.map(([key, val]) => `<span class="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">${val}</span>`).join('');
         }
 
-        // Escapar comillas simples en el nombre para evitar romper el onclick
-        const safeName = p.name.replace(/'/g, "\\'");
+        // Escapar comillas simples y dobles para evitar romper el onclick y data-product
+        const safeName = p.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeImage = (mainImage || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
         card.innerHTML = `
             <!-- Imagen Container -->
-            <div class="relative h-56 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 cursor-pointer" onclick='openProductModal(${productJson})'>
-                <img src="${mainImage}" alt="${p.name}" class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110" loading="lazy">
+            <div class="relative h-56 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 cursor-pointer" onclick='window.location.href="producto.html?id=${p.id}"'>
+                <img src="${mainImage}" alt="${p.name.replace(/"/g, '&quot;')}" class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110" loading="lazy">
                 
                 ${badges}
                 
@@ -213,8 +227,8 @@ function renderCurrentPage() {
             </div>
             
             <!-- Botón de favorito -->
-            <button type="button" onclick="event.stopPropagation(); toggleWishlist('${safeName}', ${p.price}, '${mainImage}')" 
-                class="absolute top-3 right-3 ${p.old_price && parseFloat(p.old_price) > parseFloat(p.price) ? 'top-10' : ''} w-9 h-9 bg-white dark:bg-gray-700 rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300 z-20 wishlist-btn" data-product="${safeName}">
+            <button type="button" onclick="event.stopPropagation(); (function(){ toggleWishlist('${safeName}', ${p.price}, '${safeImage}'); })()" 
+                class="absolute top-3 right-3 ${p.old_price && parseFloat(p.old_price) > parseFloat(p.price) ? 'top-10' : ''} w-9 h-9 bg-white dark:bg-gray-700 rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300 z-20 wishlist-btn" data-product="${p.name.replace(/'/g, "\\'")}">
                 <i class="fas fa-heart"></i>
             </button>
 
@@ -232,7 +246,7 @@ function renderCurrentPage() {
                 </div>
                 
                 <!-- Nombre del producto -->
-                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-sky-600 transition leading-snug line-clamp-2 min-h-[2.5rem]" onclick='openProductModal(${productJson})'>
+                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-sky-600 transition leading-snug line-clamp-2 min-h-[2.5rem]" onclick='window.location.href="producto.html?id=${p.id}"'>
                     ${p.name}
                 </h3>
                 
@@ -258,7 +272,7 @@ function renderCurrentPage() {
                         <span class="text-xl font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
                     </div>
                     <button type="button" 
-                        class="add-to-cart-btn flex items-center gap-2 bg-${color}-600 text-white px-4 py-2.5 rounded-xl hover:bg-${color}-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium text-sm"
+                        class="add-to-cart-btn flex items-center gap-2 bg-[#0D9488] text-white px-4 py-2.5 rounded-xl hover:bg-[#0F766E] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium text-sm"
                         data-name="${safeName}" 
                         data-price="${p.price}"
                         data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'
@@ -411,6 +425,18 @@ window.filterBrand = function (checkbox) {
     applyFilters();
 }
 
+window.filterSpec = function (checkbox, type) {
+    const val = checkbox.value;
+    if (checkbox.checked) {
+        if (!catalogState.filters[type].includes(val)) {
+            catalogState.filters[type].push(val);
+        }
+    } else {
+        catalogState.filters[type] = catalogState.filters[type].filter(s => s !== val);
+    }
+    applyFilters();
+}
+
 window.filterPrice = function (val) {
     const num = parseInt(val);
     catalogState.filters.priceMax = num;
@@ -437,6 +463,9 @@ function resetCatalogFilters(triggerElement) {
         category: 'all',
         search: '',
         brands: [],
+        processor: [],
+        ram: [],
+        storage: [],
         priceMax: 10000,
         sort: 'default'
     };
@@ -447,8 +476,8 @@ function resetCatalogFilters(triggerElement) {
         if (input) input.value = '';
     });
 
-    // 3. Limpiar selección de marcas
-    document.querySelectorAll('.brand-checkbox').forEach(c => c.checked = false);
+    // 3. Limpiar selección de marcas y especificaciones
+    document.querySelectorAll('.brand-checkbox, .spec-checkbox').forEach(c => c.checked = false);
 
     // 4. Resetear rango de precios
     const priceRange = document.getElementById('priceRange');
@@ -470,198 +499,7 @@ function resetCatalogFilters(triggerElement) {
 // Exponer globalmente
 window.resetCatalogFilters = resetCatalogFilters;
 
-// --- MODAL LOGIC (Kept same) ---
-
-window.switchProductTab = function (tabName) {
-    const specsBtn = document.getElementById('btnSpecs');
-    const descBtn = document.getElementById('btnDesc');
-    const specsContent = document.getElementById('modalProdSpecs');
-    const descContent = document.getElementById('modalProdDescContent');
-
-    if (tabName === 'specs') {
-        specsBtn.classList.add('text-red-600', 'border-red-600');
-        specsBtn.classList.remove('text-gray-500', 'border-transparent');
-        descBtn.classList.remove('text-red-600', 'border-red-600');
-        descBtn.classList.add('text-gray-500', 'border-transparent');
-
-        specsContent.classList.remove('hidden');
-        descContent.classList.add('hidden');
-    } else {
-        descBtn.classList.add('text-red-600', 'border-red-600');
-        descBtn.classList.remove('text-gray-500', 'border-transparent');
-        specsBtn.classList.remove('text-red-600', 'border-red-600');
-        specsBtn.classList.add('text-gray-500', 'border-transparent');
-
-        descContent.classList.remove('hidden');
-        specsContent.classList.add('hidden');
-    }
-}
-
-window.openProductModal = function (product) {
-    const modal = document.getElementById('productDetailModal');
-    if (!modal) return;
-
-    // Get images array - support both old and new format
-    const images = (product.images && Array.isArray(product.images) && product.images.length > 0)
-        ? product.images
-        : (product.image_url ? [product.image_url] : []);
-    const mainImage = images[0] || '';
-
-    document.getElementById('modalProdImage').src = mainImage;
-    document.getElementById('modalProdTitle').textContent = product.name;
-    document.getElementById('modalProdPrice').textContent = parseFloat(product.price).toLocaleString();
-    document.getElementById('modalProdCategory').textContent = product.category;
-
-    // Setup image gallery in modal
-    setupModalImageGallery(images);
-
-    // Specs Logic
-    const specsContainer = document.getElementById('modalProdSpecs');
-    let specsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-
-    let hasJsonSpecs = product.specifications && Object.keys(product.specifications).length > 0;
-
-    if (hasJsonSpecs) {
-        Object.entries(product.specifications).forEach(([key, val]) => {
-            specsHtml += `
-            <div class="flex flex-row justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
-                <dt class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">${key}</dt>
-                <dd class="text-xs font-bold text-gray-900 dark:text-white truncate ml-2">${val}</dd>
-            </div>`;
-        });
-    } else {
-        const descText = product.description || '';
-        const lines = descText.split('\n').filter(line => line.trim() !== '');
-
-        if (lines.length > 0) {
-            lines.forEach(line => {
-                const parts = line.split(':');
-                if (parts.length > 1 && line.length < 100) {
-                    const key = parts[0].trim();
-                    const val = parts.slice(1).join(':').trim();
-                    specsHtml += `
-                    <div class="flex flex-row justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
-                        <dt class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">${key}</dt>
-                        <dd class="text-xs font-bold text-gray-900 dark:text-white truncate ml-2">${val}</dd>
-                    </div>`;
-                } else if (line.length < 40 && line.indexOf('.') === -1) {
-                    specsHtml += `
-                    <div class="flex flex-row justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
-                        <dt class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Detalle</dt>
-                        <dd class="text-xs font-bold text-gray-900 dark:text-white truncate ml-2">${line}</dd>
-                    </div>`;
-                }
-            });
-        }
-        if (specsHtml === '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">') {
-            specsHtml += '<div class="col-span-2 py-4 text-center text-gray-500 italic text-[10px] uppercase tracking-widest">Información técnica no disponible</div>';
-        }
-    }
-    specsHtml += '</div>';
-    specsContainer.innerHTML = specsHtml;
-    specsContainer.classList.remove('hidden');
-
-    // Description Logic
-    let descContainer = document.getElementById('modalProdDescContent');
-    if (!descContainer) {
-        descContainer = document.createElement('div');
-        descContainer.id = 'modalProdDescContent';
-        descContainer.className = 'py-4 text-gray-700 dark:text-gray-300 leading-relaxed hidden text-left';
-        specsContainer.parentNode.appendChild(descContainer);
-    }
-    descContainer.innerHTML = product.description ? `<p>${product.description.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500 italic">Sin descripción.</p>';
-    descContainer.classList.add('hidden');
-
-    // Default to specs
-    switchProductTab('specs');
-
-    // Reset Quantity
-    const qtyInput = document.getElementById('modalProdQuantity');
-    if (qtyInput) qtyInput.value = 1;
-
-    // Modal AddToCart
-    const addBtn = document.getElementById('modalAddToCartBtn');
-    const newBtn = addBtn.cloneNode(true);
-    addBtn.parentNode.replaceChild(newBtn, addBtn);
-
-    newBtn.onclick = function () {
-        if (window.cartManager) {
-            const qtyInput = document.getElementById('modalProdQuantity');
-            let quantity = parseInt(qtyInput ? qtyInput.value : 1);
-            if (isNaN(quantity) || quantity < 1) quantity = 1;
-
-            // Check stock if available
-            if (product.stock !== undefined && product.stock !== null && quantity > product.stock) {
-                Swal.fire('Stock Insuficiente', `Solo quedan ${product.stock} unidades.`, 'error');
-                return;
-            }
-
-            window.cartManager.addToCart(product.name, parseFloat(product.price), quantity, product);
-
-            newBtn.innerHTML = '<i class="fas fa-check"></i> Agregado';
-            setTimeout(() => {
-                newBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Agregar al Carrito';
-            }, 1000);
-        }
-    };
-
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-};
-
-// Setup image gallery in product modal
-function setupModalImageGallery(images) {
-    const mainImg = document.getElementById('modalProdImage');
-    const imageContainer = document.getElementById('modalImageContainer') || mainImg?.closest('.relative');
-    let galleryContainer = document.getElementById('modalImageGallery');
-
-    if (!mainImg || !imageContainer) return;
-
-    // Remove existing gallery if any
-    if (galleryContainer) {
-        galleryContainer.remove();
-    }
-
-    // Create gallery container
-    galleryContainer = document.createElement('div');
-    galleryContainer.id = 'modalImageGallery';
-    galleryContainer.className = 'flex flex-wrap gap-2 justify-center mt-6 w-full';
-
-    if (images.length > 1) {
-        images.forEach((imgUrl, idx) => {
-            const thumbBtn = document.createElement('button');
-            thumbBtn.className = `w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${idx === 0 ? 'border-sky-500 ring-2 ring-sky-200 shadow-sm' : 'border-gray-200 dark:border-gray-600 hover:border-sky-400'}`;
-            thumbBtn.innerHTML = `<img src="${imgUrl}" alt="Imagen ${idx + 1}" class="w-full h-full object-cover">`;
-            thumbBtn.onclick = () => {
-                mainImg.src = imgUrl;
-                galleryContainer.querySelectorAll('button').forEach((btn, i) => {
-                    btn.className = `w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${i === idx ? 'border-sky-500 ring-2 ring-sky-200 shadow-sm' : 'border-gray-200 dark:border-gray-600 hover:border-sky-400'}`;
-                });
-            };
-            galleryContainer.appendChild(thumbBtn);
-        });
-
-        // Append gallery to image container (will show below the image because of flex-col)
-        imageContainer.appendChild(galleryContainer);
-    }
-}
-
-window.updateModalQuantity = function (change) {
-    const input = document.getElementById('modalProdQuantity');
-    if (!input) return;
-    let val = parseInt(input.value) + change;
-    if (val < 1) val = 1;
-    if (val > 99) val = 99;
-    input.value = val;
-};
-
-window.closeProductModal = function () {
-    const modal = document.getElementById('productDetailModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-};
+// --- MODAL LOGIC REMOVED ---
 
 // Renderizar productos destacados
 function renderFeaturedProducts() {
@@ -719,13 +557,13 @@ function renderFeaturedProducts() {
         const safeName = p.name.replace(/'/g, "\\'");
 
         card.innerHTML = `
-            <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-50 dark:bg-gray-800" onclick='openProductModal(${productJson})'>
+            <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-50 dark:bg-gray-800 cursor-pointer" onclick='window.location.href="producto.html?id=${p.id}"'>
                 <img src="${mainImage}" alt="${p.name}" class="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110">
                 ${badge}
             </div>
             <div class="p-3 sm:p-4">
                 <span class="text-[9px] font-bold text-${color}-600 dark:text-${color}-400 uppercase">${p.category}</span>
-                <h3 class="text-sm font-bold text-gray-800 dark:text-white mt-1 line-clamp-2 min-h-[2.5rem] leading-tight" onclick='openProductModal(${productJson})'>${p.name}</h3>
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white mt-1 line-clamp-2 min-h-[2.5rem] leading-tight cursor-pointer hover:text-sky-600 transition" onclick='window.location.href="producto.html?id=${p.id}"'>${p.name}</h3>
                 <div class="flex items-center gap-1 mt-1">
                     <div class="flex text-yellow-400 text-xs">
                         <i class="fas fa-star"></i>
@@ -739,7 +577,7 @@ function renderFeaturedProducts() {
                         <span class="text-lg font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
                     </div>
                     <button type="button" 
-                        class="add-to-cart-btn w-8 h-8 bg-${color}-600 text-white rounded-lg hover:bg-${color}-700 transition flex items-center justify-center"
+                        class="add-to-cart-btn w-8 h-8 bg-[#0D9488] text-white rounded-lg hover:bg-[#0F766E] transition flex items-center justify-center"
                         data-name="${safeName}" 
                         data-price="${p.price}"
                         data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'

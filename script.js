@@ -218,17 +218,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
+                entry.target.classList.add('active');
+                // Support legacy inline animations
+                if (!entry.target.classList.contains('reveal')) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
             }
         });
     }, observerOptions);
 
-    // Observe elements for animation
-    document.querySelectorAll('.producto-card, .card-hover').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    // Observe elements for animation (Sections and cards)
+    document.querySelectorAll('.producto-card, .card-hover, .reveal').forEach(el => {
+        if (!el.classList.contains('reveal')) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        }
         observer.observe(el);
     });
 
@@ -446,12 +452,27 @@ document.addEventListener('DOMContentLoaded', function () {
     window.wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 
     window.toggleWishlist = function (name, price, image) {
-        const index = window.wishlist.findIndex(item => item.name === name);
-        if (index === -1) {
-            window.wishlist.push({ name, price, image, addedAt: new Date().toISOString() });
+        if (!name) return;
+        
+        // Intentar encontrar el producto con ambos tipos de nombres (escapado y no escapado)
+        let foundIndex = -1;
+        const normalizedName = name.replace(/\\'/g, "'");
+        
+        for (let i = 0; i < window.wishlist.length; i++) {
+            // Comparar con ambos formatos
+            if (window.wishlist[i].name === name || window.wishlist[i].name === normalizedName) {
+                foundIndex = i;
+                break;
+            }
+        }
+        
+        if (foundIndex === -1) {
+            // No encontrado, agregar (usar nombre sin escapar)
+            window.wishlist.push({ name: normalizedName, price: price, image: image, addedAt: new Date().toISOString() });
             showToast('Producto agregado a favoritos', 'success');
         } else {
-            window.wishlist.splice(index, 1);
+            // Encontrado, eliminar
+            window.wishlist.splice(foundIndex, 1);
             showToast('Producto eliminado de favoritos', 'info');
         }
         localStorage.setItem('wishlist', JSON.stringify(window.wishlist));
@@ -471,6 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update wishlist buttons
         document.querySelectorAll('.wishlist-btn').forEach(btn => {
             const productName = btn.getAttribute('data-product');
+            if (!productName) return;
             const isInWishlist = window.wishlist.some(item => item.name === productName);
             if (isInWishlist) {
                 btn.classList.add('text-red-500', 'bg-red-50');
@@ -488,16 +510,18 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        let html = '<div class="grid gap-4 max-h-[60vh] overflow-y-auto">';
-        window.wishlist.forEach(item => {
+        let html = '<div class="grid gap-4 max-h-[60vh] overflow-y-auto" id="wishlist-items">';
+        window.wishlist.forEach((item, idx) => {
+            const displayName = (item.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const displayImage = item.image || '';
             html += `
-                <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain rounded">
+                <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg wishlist-item" data-index="${idx}">
+                    <img src="${displayImage}" alt="${displayName}" class="w-16 h-16 object-contain rounded">
                     <div class="flex-1">
-                        <p class="font-medium text-gray-800 dark:text-white text-sm">${item.name}</p>
-                        <p class="text-sky-600 font-bold">S/. ${parseFloat(item.price).toLocaleString()}</p>
+                        <p class="font-medium text-gray-800 dark:text-white text-sm">${displayName}</p>
+                        <p class="text-sky-600 font-bold">S/. ${parseFloat(item.price || 0).toLocaleString()}</p>
                     </div>
-                    <button onclick="toggleWishlist('${item.name}', ${item.price}, '${item.image}')" class="text-red-500 hover:text-red-700 p-2">
+                    <button class="text-red-500 hover:text-red-700 p-2 wishlist-remove-btn">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -511,6 +535,21 @@ document.addEventListener('DOMContentLoaded', function () {
             showCloseButton: true,
             showConfirmButton: false,
             width: '500px'
+        });
+
+        // Agregar event listeners a los botones de eliminar
+        document.querySelectorAll('.wishlist-remove-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const item = this.closest('.wishlist-item');
+                const idx = parseInt(item.getAttribute('data-index'));
+                const wishlistItem = window.wishlist[idx];
+                if (wishlistItem) {
+                    window.toggleWishlist(wishlistItem.name, wishlistItem.price, wishlistItem.image);
+                    // Cerrar y reopen el modal para actualizar
+                    Swal.close();
+                    setTimeout(() => window.showWishlist(), 100);
+                }
+            });
         });
     };
 
