@@ -203,20 +203,50 @@ async function loadRelatedProducts(product) {
                     ${badgeHtml}
                     <img src="${img}" alt="${p.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy">
                 </div>
-                <h3 class="text-sm font-bold text-gray-800 dark:text-white line-clamp-2 mb-2 flex-grow group-hover:text-sky-600 transition-colors">
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white line-clamp-2 mb-2 flex-grow group-hover:text-[#0D9488] transition-colors">
                     ${p.name}
                 </h3>
-                <div class="flex items-center justify-between mt-auto">
-                    <div>
-                        ${hasDiscount ? `<span class="text-xs text-gray-400 line-through">S/. ${parseFloat(p.old_price).toLocaleString()}</span>` : ''}
-                        <span class="text-lg font-black text-gray-900 dark:text-white block">S/. ${parseFloat(p.price).toLocaleString()}</span>
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            ${hasDiscount ? `<span class="text-xs text-gray-400 line-through">S/. ${parseFloat(p.old_price).toLocaleString()}</span>` : ''}
+                            <span class="text-lg font-black text-gray-900 dark:text-white block">S/. ${parseFloat(p.price).toLocaleString()}</span>
+                        </div>
                     </div>
-                    <div class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                    <button
+                        class="related-add-cart-btn w-full flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-[#0F766E] text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
+                        data-product-id="${p.id}"
+                        data-product-name="${p.name}"
+                        data-product-price="${p.price}"
+                        onclick="event.stopPropagation()">
+                        <i class="fas fa-cart-plus text-sm"></i>
+                        <span>Agregar al Carrito</span>
+                    </button>
                 </div>
             `;
             grid.appendChild(card);
+
+            // Activar botón de agregar al carrito de la tarjeta relacionada
+            const addBtn = card.querySelector('.related-add-cart-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (window.cartManager) {
+                        window.cartManager.addToCart(p.name, parseFloat(p.price), 1, p);
+                        addBtn.innerHTML = `<i class="fas fa-check-circle text-sm"></i><span>¡Agregado!</span>`;
+                        addBtn.classList.add('bg-emerald-500');
+                        addBtn.classList.remove('bg-[#0D9488]');
+                        setTimeout(() => {
+                            addBtn.innerHTML = `<i class="fas fa-cart-plus text-sm"></i><span>Agregar al Carrito</span>`;
+                            addBtn.classList.remove('bg-emerald-500');
+                            addBtn.classList.add('bg-[#0D9488]');
+                        }, 2000);
+                        if (window.updateCartBadge) window.updateCartBadge();
+                    } else {
+                        window.location.href = `producto.html?id=${p.id}`;
+                    }
+                });
+            }
         });
 
         section.classList.remove('hidden');
