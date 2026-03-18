@@ -358,11 +358,103 @@
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
             z-index: 100;
             transition: all 0.3s ease;
+            animation: whatsapp-pulse 2s infinite, whatsapp-glow 2s ease-in-out infinite;
         }
 
         .whatsapp-float:hover {
             transform: scale(1.1);
             box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.4);
+            animation: none;
+        }
+
+        @keyframes whatsapp-pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+
+        @keyframes whatsapp-glow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(37, 211, 102, 0.8), 0 0 50px rgba(37, 211, 102, 0.4);
+            }
+        }
+
+        /* Chatbot Danna Animation */
+        #solbin-chatbot-open {
+            animation: danna-bounce 2s ease-in-out infinite;
+        }
+
+        #solbin-chatbot-open:hover {
+            animation: none;
+            transform: scale(1.05);
+        }
+
+        @keyframes danna-bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            10% {
+                transform: translateY(-5px);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+            70% {
+                transform: translateY(-3px);
+            }
+        }
+
+        #solbin-chatbot-open::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 30px;
+            border: 2px solid #0D9488;
+            animation: danna-ring 2s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes danna-ring {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.2;
+            }
+        }
+
+        .danna-icon {
+            position: relative;
+            animation: danna-spin 3s linear infinite;
+        }
+
+        @keyframes danna-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .nav-link {
@@ -791,6 +883,152 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* Custom Cursor Effect */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #0D9488;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+            mix-blend-mode: difference;
+        }
+
+        .custom-cursor.hover {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(13, 148, 136, 0.2);
+            border-color: #0D9488;
+        }
+
+        .custom-cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background-color: #0D9488;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s ease;
+        }
+
+        @media (pointer: coarse) {
+            .custom-cursor, .custom-cursor-dot {
+                display: none;
+            }
+        }
+
+        /* Smooth Transitions for Elements */
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .transition-smooth-fast {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+
+        .hover-glow {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
+        }
+
+        .btn-transition {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-transition::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-transition:hover::before {
+            left: 100%;
+        }
+
+        .card-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-transition:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .img-zoom {
+            overflow: hidden;
+        }
+
+        .img-zoom img {
+            transition: transform 0.5s ease;
+        }
+
+        .img-zoom:hover img {
+            transform: scale(1.1);
+        }
+
+        .nav-animate {
+            position: relative;
+        }
+
+        .nav-animate::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #0D9488;
+            transition: width 0.3s ease;
+        }
+
+        .nav-animate:hover::after {
+            width: 100%;
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
     </style>
 </head>
 
@@ -799,6 +1037,10 @@
 
     <!-- Skip to main content para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <!-- Custom Cursor Elements -->
+    <div class="custom-cursor" id="customCursor"></div>
+    <div class="custom-cursor-dot" id="customCursorDot"></div>
 
     <!-- Toast Container para notificaciones -->
     <div id="toast-container" class="toast-container"></div>
@@ -1261,7 +1503,7 @@
 
         <!-- Sección de Productos Destacados - NUEVA -->
         <section id="destacados"
-            class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+            class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 fade-in-up">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-end mb-10">
                     <div>
@@ -1273,9 +1515,9 @@
                         <p class="text-gray-600 dark:text-gray-400 mt-2">Los más populares de esta semana</p>
                     </div>
                     <a href="#catalogo"
-                        class="mt-4 md:mt-0 inline-flex items-center text-[#0D9488] hover:text-[#0F766E] font-medium transition group">
+                        class="mt-4 md:mt-0 inline-flex items-center text-[#0D9488] hover:text-[#0F766E] font-medium transition-smooth group">
                         Ver todo el catálogo
-                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition"></i>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-smooth"></i>
                     </a>
                 </div>
 
@@ -1348,7 +1590,7 @@
         </section>
 
         <!-- Catálogo -->
-        <section id="catalogo" class="py-20 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <section id="catalogo" class="py-20 bg-white dark:bg-gray-900 transition-colors duration-300 fade-in-up">
             <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
                     <span class="text-[#0D9488] font-semibold text-sm uppercase tracking-wider">Explora</span>
@@ -1602,7 +1844,7 @@
                     </div>
         </section>
         <!-- Sección Nosotros -->
-        <section id="nosotros" class="py-20 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+        <section id="nosotros" class="py-20 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 fade-in-up">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">Sobre Nosotros</h2>
@@ -1636,9 +1878,12 @@
                         </div>
                     </div>
                     <div class="relative">
-                        <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80" 
-                             alt="Solbin-X Tienda Tecnológica" 
-                             class="rounded-2xl shadow-2xl w-full object-cover">
+                        <video id="nosotros-video" 
+                            src="Video/Video_public.mp4"
+                            class="rounded-2xl shadow-2xl w-full object-cover cursor-pointer"
+                            style="max-height: 500px;"
+                            onclick="toggleVideo(this)">
+                        </video>
                         <div class="absolute -bottom-6 -left-6 bg-[#0D9488] text-white p-6 rounded-xl shadow-xl">
                             <p class="text-3xl font-bold">8+</p>
                             <p class="text-sm">Años de Experiencia</p>
@@ -1674,7 +1919,7 @@
 
         <!-- Sección de Valores - Mejorada -->
         <section
-            class="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+            class="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 fade-in-up">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Encabezado -->
                 <div class="text-center mb-20">
@@ -2501,7 +2746,7 @@
             <button id="solbin-chatbot-open" type="button"
                 class="flex items-center gap-3 bg-gray-900 dark:bg-black text-white px-4 py-3 rounded-full shadow-lg hover:opacity-90 transition">
                 <span class="w-9 h-9 rounded-full bg-[#0D9488] flex items-center justify-center font-bold">
-                    <i class="fas fa-robot text-white text-lg"></i>
+                    <i class="fas fa-robot text-white text-lg danna-icon"></i>
                 </span>
                 <span class="font-semibold">Danna</span>
                 <span class="text-xs opacity-80">Chat</span>
@@ -2894,6 +3139,69 @@
 
                 
             }, 3000);
+        </script>
+
+        <!-- Video toggle function -->
+        <script>
+            function toggleVideo(video) {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        </script>
+
+        <!-- Custom Cursor Script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const cursor = document.getElementById('customCursor');
+                const cursorDot = document.getElementById('customCursorDot');
+                
+                if (window.matchMedia('(pointer: fine)').matches) {
+                    let mouseX = 0, mouseY = 0;
+                    let cursorX = 0, cursorY = 0;
+                    
+                    document.addEventListener('mousemove', function(e) {
+                        mouseX = e.clientX;
+                        mouseY = e.clientY;
+                    });
+                    
+                    function animateCursor() {
+                        cursorX += (mouseX - cursorX) * 0.15;
+                        cursorY += (mouseY - cursorY) * 0.15;
+                        
+                        cursor.style.left = cursorX + 'px';
+                        cursor.style.top = cursorY + 'px';
+                        cursorDot.style.left = mouseX + 'px';
+                        cursorDot.style.top = mouseY + 'px';
+                        
+                        requestAnimationFrame(animateCursor);
+                    }
+                    animateCursor();
+                    
+                    const interactiveElements = document.querySelectorAll('a, button, input, .filter-btn, .card-hover, .hover-lift, .hover-scale, .hover-glow');
+                    interactiveElements.forEach(el => {
+                        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                    });
+                }
+            });
+
+            // Fade in up animation on scroll
+            document.addEventListener('DOMContentLoaded', function() {
+                const fadeElements = document.querySelectorAll('.fade-in-up');
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.1 });
+                
+                fadeElements.forEach(el => observer.observe(el));
+            });
         </script>
 </body>
 
