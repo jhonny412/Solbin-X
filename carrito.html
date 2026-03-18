@@ -157,6 +157,87 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* WhatsApp Float Animation */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
+            animation: whatsapp-pulse 2s infinite, whatsapp-glow 2s ease-in-out infinite;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.4);
+            animation: none;
+        }
+
+        @keyframes whatsapp-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
+        @keyframes whatsapp-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(37, 211, 102, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(37, 211, 102, 0.8), 0 0 50px rgba(37, 211, 102, 0.4); }
+        }
+
+        /* Chatbot Danna Animation */
+        #solbin-chatbot-open {
+            animation: danna-bounce 2s ease-in-out infinite;
+        }
+
+        #solbin-chatbot-open:hover {
+            animation: none;
+            transform: scale(1.05);
+        }
+
+        @keyframes danna-bounce {
+            0%, 100% { transform: translateY(0); }
+            10% { transform: translateY(-5px); }
+            30% { transform: translateY(-8px); }
+            50% { transform: translateY(-5px); }
+            70% { transform: translateY(-3px); }
+        }
+
+        #solbin-chatbot-open::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 30px;
+            border: 2px solid #0D9488;
+            animation: danna-ring 2s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes danna-ring {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 0.2; }
+        }
+
+        .danna-icon {
+            position: relative;
+            animation: danna-spin 3s linear infinite;
+        }
+
+        @keyframes danna-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -189,10 +270,11 @@
     <nav class="bg-white dark:bg-gray-900 shadow-lg fixed w-full top-8 z-40 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
+                <!-- Logo más compacto -->
                 <div class="flex items-center flex-shrink-0">
-                    <a href="index.html" class="flex items-center">
-                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X"
+                    <a href="index.html" class="flex items-center" aria-label="Solbin-X - Inicio">
+                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X Logo - Tienda de Tecnología en Perú"
+                            width="300" height="90" loading="eager" fetchpriority="high"
                             class="h-[90px] w-auto dark:brightness-0 dark:invert transition-all duration-300 hover:scale-105">
                     </a>
                 </div>
@@ -641,13 +723,21 @@
         </div>
     </footer>
 
-    <!-- Chatbot Solbin -->
+    <!-- Botón flotante de WhatsApp -->
+    <a href="https://wa.me/51945297289?text=Hola%2C%20estoy%20interesado%20en%20sus%20productos" target="_blank"
+        rel="noopener noreferrer" class="whatsapp-float">
+        <i class="fab fa-whatsapp" style="margin-top: 16px;"></i>
+    </a>
+
+    <!-- Chatbot Danna -->
     <div id="solbin-chatbot-root" class="fixed bottom-6 left-6 z-[9999]">
         <!-- Botón flotante -->
         <button id="solbin-chatbot-open" type="button"
             class="flex items-center gap-3 bg-gray-900 dark:bg-black text-white px-4 py-3 rounded-full shadow-lg hover:opacity-90 transition">
-            <span class="w-9 h-9 rounded-full bg-[#0D9488] flex items-center justify-center font-bold">S</span>
-            <span class="font-semibold">Solbin</span>
+            <span class="w-9 h-9 rounded-full bg-[#0D9488] flex items-center justify-center font-bold">
+                <i class="fas fa-robot text-white text-lg danna-icon"></i>
+            </span>
+            <span class="font-semibold">Danna</span>
             <span class="text-xs opacity-80">Chat</span>
         </button>
 
@@ -659,10 +749,11 @@
                 <div class="flex items-center gap-3">
                     <div
                         class="w-9 h-9 rounded-full bg-[#0D9488] flex items-center justify-center font-bold text-white">
-                        S</div>
+                        <i class="fas fa-robot text-white text-lg danna-icon"></i>
+                    </div>
                     <div>
-                        <div class="font-bold text-gray-800 dark:text-gray-100 leading-tight">Solbin</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 leading-tight">Asistente de Solbin-X</div>
+                        <div class="font-bold text-gray-800 dark:text-gray-100 leading-tight">Danna</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 leading-tight">Asistente Virtual</div>
                     </div>
                 </div>
                 <button id="solbin-chatbot-close" type="button"
