@@ -65,6 +65,9 @@
     <!-- GridJS -->
     <link href="https://cdn.jsdelivr.net/npm/gridjs@6.2.0/dist/theme/mermaid.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/gridjs@6.2.0/dist/gridjs.umd.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         // Verificar que GridJS esté cargado inmediatamente
         window.addEventListener('DOMContentLoaded', function () {
@@ -1109,9 +1112,9 @@
                 <span class="text-[10px] lg:text-[14px] font-semibold mt-1 lg:mt-0">Clientes</span>
             </button>
 
-            <button onclick="Swal.fire('Próximamente', 'Estamos trabajando en esta sección.', 'info')"
-                class="sidebar-item group w-full flex flex-col lg:flex-row items-center py-3 lg:px-5 rounded-2xl opacity-60">
-                <i class="fas fa-chart-line text-lg lg:mr-4"></i>
+            <button onclick="switchAdminTab('analytics')" id="sideBtnAnalytics"
+                class="sidebar-item group w-full flex flex-col lg:flex-row items-center py-3 lg:px-5 rounded-2xl">
+                <i class="fas fa-chart-line text-lg lg:mr-4 group-[.active]:text-emerald-400"></i>
                 <span class="text-[10px] lg:text-[14px] font-semibold mt-1 lg:mt-0">Analítica</span>
             </button>
         </nav>
@@ -1622,6 +1625,315 @@
                                 <i class="fas fa-save"></i>
                                 Guardar Cambios
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS SECTION -->
+                <div id="analyticsSection" class="hidden">
+                    <!-- Header -->
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+                        <div>
+                            <span class="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 uppercase tracking-[0.3em] mb-2 block">Data Intelligence</span>
+                            <h1 class="text-5xl font-black text-slate-900 tracking-tight">Panel Analítico</h1>
+                            <p class="text-slate-400 font-semibold mt-2 text-base">Resumen completo del rendimiento comercial y comportamiento de ventas.</p>
+                        </div>
+                        <div class="flex gap-3 mt-4 md:mt-0">
+                            <select id="analyticsPeriod" onchange="loadAnalytics()" class="px-5 py-3 rounded-2xl border-2 border-slate-200 font-semibold text-sm outline-none focus:border-indigo-500 bg-white">
+                                <option value="all">Todo el tiempo</option>
+                                <option value="30days">Últimos 30 días</option>
+                                <option value="90days">Últimos 90 días</option>
+                                <option value="180days">Últimos 6 meses</option>
+                                <option value="year">Este año</option>
+                            </select>
+                            <button onclick="exportAnalytics()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm hover:from-indigo-700 hover:to-purple-700 transition shadow-xl shadow-indigo-500/25 flex items-center gap-2">
+                                <i class="fas fa-file-export"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Row 1 -->
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><i class="fas fa-shopping-cart text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Pedidos</span>
+                            </div>
+                            <p id="kpiTotalOrders" class="text-2xl font-black text-slate-900">0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Total de pedidos</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center"><i class="fas fa-soles-signmaking text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Ingresos</span>
+                            </div>
+                            <p id="kpiTotalRevenue" class="text-2xl font-black text-slate-900">S/. 0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Ventas brutas</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center"><i class="fas fa-chart-line text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Ticket Prom.</span>
+                            </div>
+                            <p id="kpiAvgOrder" class="text-2xl font-black text-slate-900">S/. 0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Por pedido</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center"><i class="fas fa-boxes-stacked text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Unidades</span>
+                            </div>
+                            <p id="kpiTotalProducts" class="text-2xl font-black text-slate-900">0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Prod. vendidos</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center"><i class="fas fa-users text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Clientes</span>
+                            </div>
+                            <p id="kpiTotalCustomers" class="text-2xl font-black text-slate-900">0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Únicos</p>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Row 2 -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center"><i class="fas fa-tag text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Prod. Únicos</span>
+                            </div>
+                            <p id="kpiUniqueProducts" class="text-2xl font-black text-slate-900">0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Diferentes vendidos</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center"><i class="fas fa-chart-simple text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Ingreso/Unidad</span>
+                            </div>
+                            <p id="kpiRevenuePerUnit" class="text-2xl font-black text-slate-900">S/. 0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Promedio</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center"><i class="fas fa-basket-shopping text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Items/Pedido</span>
+                            </div>
+                            <p id="kpiItemsPerOrder" class="text-2xl font-black text-slate-900">0</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Promedio</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg shadow-slate-200/50">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center"><i class="fas fa-cancel text-base"></i></div>
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tasa Cancel.</span>
+                            </div>
+                            <p id="kpiCancelRate" class="text-2xl font-black text-slate-900">0%</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Pedidos cancelados</p>
+                        </div>
+                    </div>
+
+                    <!-- MAIN CHARTS ROW -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                        <!-- Revenue & Orders Chart (2 cols) -->
+                        <div class="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+                            <div class="p-7 pb-4 border-b border-slate-100">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <h3 class="text-xl font-black text-slate-800">Ventas & Ingresos</h3>
+                                        <p class="text-slate-400 text-sm mt-1">Análisis comparativo de pedidos e ingresos</p>
+                                    </div>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button onclick="setSalesPeriod('month')" id="btnSalesMonth" class="px-4 py-2 rounded-xl font-bold text-xs transition-all bg-indigo-500 text-white shadow shadow-indigo-500/30">Mes</button>
+                                        <button onclick="setSalesPeriod('week')" id="btnSalesWeek" class="px-4 py-2 rounded-xl font-bold text-xs transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Semana</button>
+                                        <button onclick="setSalesPeriod('day')" id="btnSalesDay" class="px-4 py-2 rounded-xl font-bold text-xs transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Día</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-7">
+                                <div class="relative" style="height: 320px;">
+                                    <canvas id="chartSales"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Status Pipeline -->
+                        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+                            <div class="p-7 pb-4 border-b border-slate-100">
+                                <h3 class="text-xl font-black text-slate-800">Pipeline de Pedidos</h3>
+                                <p class="text-slate-400 text-sm mt-1">Estado actual de todas las órdenes</p>
+                            </div>
+                            <div class="p-7">
+                                <div class="relative" style="height: 200px;">
+                                    <canvas id="chartStatus"></canvas>
+                                </div>
+                                <div id="statusLegend" class="mt-4 space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCTS SECTION -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Top Products Chart -->
+                        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+                            <div class="p-7 pb-4 border-b border-slate-100">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div>
+                                        <h3 class="text-xl font-black text-slate-800">Ranking de Productos</h3>
+                                        <p class="text-slate-400 text-sm mt-1">Desempeño por producto</p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="setProductsView('top')" id="btnProductsTop" class="px-4 py-2 rounded-xl font-bold text-xs transition-all bg-indigo-500 text-white shadow shadow-indigo-500/30">Top</button>
+                                        <button onclick="setProductsView('bottom')" id="btnProductsBottom" class="px-4 py-2 rounded-xl font-bold text-xs transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Low</button>
+                                        <button onclick="setProductsView('all')" id="btnProductsAll" class="px-4 py-2 rounded-xl font-bold text-xs transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Todos</button>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 mt-3">
+                                    <button onclick="setProductsMetric('quantity')" id="btnProdMetricQty" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-800 text-white">Cantidad</button>
+                                    <button onclick="setProductsMetric('revenue')" id="btnProdMetricRev" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Ingresos</button>
+                                </div>
+                            </div>
+                            <div class="p-7">
+                                <div class="relative" style="height: 380px;">
+                                    <canvas id="chartProducts"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Best Performing Time -->
+                        <div class="space-y-8">
+                            <!-- By Day of Week -->
+                            <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+                                <div class="p-7 pb-4 border-b border-slate-100">
+                                    <h3 class="text-xl font-black text-slate-800">Ventas por Día de Semana</h3>
+                                    <p class="text-slate-400 text-sm mt-1">Identifica los mejores días para vender</p>
+                                </div>
+                                <div class="p-7">
+                                    <div class="relative" style="height: 200px;">
+                                        <canvas id="chartDayOfWeek"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Best / Worst Month -->
+                            <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+                                <div class="p-7 pb-4 border-b border-slate-100">
+                                    <h3 class="text-xl font-black text-slate-800">Mejor / Peor Mes</h3>
+                                    <p class="text-slate-400 text-sm mt-1">Comparativa de rendimiento mensual</p>
+                                </div>
+                                <div class="p-7 space-y-4">
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/30"><i class="fas fa-trophy text-lg"></i></div>
+                                            <div>
+                                                <p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest">Mejor Mes</p>
+                                                <p id="bestMonthName" class="font-black text-slate-800 text-base">-</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="bestMonthCount" class="text-2xl font-black text-emerald-600">0</p>
+                                            <p id="bestMonthRevenue" class="text-xs text-emerald-500 font-semibold">S/. 0</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border border-red-100">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-500/30"><i class="fas fa-arrow-trend-down text-lg"></i></div>
+                                            <div>
+                                                <p class="text-[10px] font-extrabold text-red-600 uppercase tracking-widest">Peor Mes</p>
+                                                <p id="worstMonthName" class="font-black text-slate-800 text-base">-</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="worstMonthCount" class="text-2xl font-black text-red-600">0</p>
+                                            <p id="worstMonthRevenue" class="text-xs text-red-500 font-semibold">S/. 0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TREND COMPARISON -->
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 mb-8">
+                        <div class="p-7 pb-4 border-b border-slate-100">
+                            <h3 class="text-xl font-black text-slate-800">Comparativa de Periodos</h3>
+                            <p class="text-slate-400 text-sm mt-1">Este periodo vs anterior</p>
+                        </div>
+                        <div class="p-7">
+                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-6">
+                                <div class="text-center p-4 bg-slate-50 rounded-2xl">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Pedidos</p>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <p id="trendOrders" class="text-2xl font-black text-slate-900">0</p>
+                                        <span id="trendOrdersIcon" class="text-lg"></span>
+                                    </div>
+                                </div>
+                                <div class="text-center p-4 bg-slate-50 rounded-2xl">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Ingresos</p>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <p id="trendRevenue" class="text-2xl font-black text-slate-900">S/. 0</p>
+                                        <span id="trendRevenueIcon" class="text-lg"></span>
+                                    </div>
+                                </div>
+                                <div class="text-center p-4 bg-slate-50 rounded-2xl">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Ticket Prom.</p>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <p id="trendAvg" class="text-2xl font-black text-slate-900">S/. 0</p>
+                                        <span id="trendAvgIcon" class="text-lg"></span>
+                                    </div>
+                                </div>
+                                <div class="text-center p-4 bg-slate-50 rounded-2xl">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Unidades</p>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <p id="trendUnits" class="text-2xl font-black text-slate-900">0</p>
+                                        <span id="trendUnitsIcon" class="text-lg"></span>
+                                    </div>
+                                </div>
+                                <div class="text-center p-4 bg-slate-50 rounded-2xl">
+                                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Clientes</p>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <p id="trendCustomers" class="text-2xl font-black text-slate-900">0</p>
+                                        <span id="trendCustomersIcon" class="text-lg"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOP CUSTOMERS -->
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 mb-8">
+                        <div class="p-7 pb-4 border-b border-slate-100">
+                            <h3 class="text-xl font-black text-slate-800">Top Clientes</h3>
+                            <p class="text-slate-400 text-sm mt-1">Clientes con mayor volumen de compra</p>
+                        </div>
+                        <div class="p-7">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-100">
+                                            <th class="text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pb-3">#</th>
+                                            <th class="text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pb-3">Cliente</th>
+                                            <th class="text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pb-3">WhatsApp</th>
+                                            <th class="text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pb-3">Pedidos</th>
+                                            <th class="text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pb-3">Unidades</th>
+                                            <th class="text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pb-3">Total Gastado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topCustomersTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HOURLY HEATMAP -->
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+                        <div class="p-7 pb-4 border-b border-slate-100">
+                            <h3 class="text-xl font-black text-slate-800">Pedidos por Día del Mes</h3>
+                            <p class="text-slate-400 text-sm mt-1">Calendario de actividad de ventas del último periodo</p>
+                        </div>
+                        <div class="p-7">
+                            <div class="relative" style="height: 200px;">
+                                <canvas id="chartDailyActivity"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>

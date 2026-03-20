@@ -57,7 +57,8 @@ window.switchAdminTab = function (tab) {
             orders: document.getElementById('ordersSection'),
             carousel: document.getElementById('carouselSection'),
             offers: document.getElementById('offersSection'),
-            alerts: document.getElementById('alertsSection')
+            alerts: document.getElementById('alertsSection'),
+            analytics: document.getElementById('analyticsSection')
         };
 
         var navButtons = {
@@ -66,7 +67,8 @@ window.switchAdminTab = function (tab) {
             orders: document.getElementById('sideBtnOrders'),
             carousel: document.getElementById('sideBtnCarousel'),
             offers: document.getElementById('sideBtnOffers'),
-            alerts: document.getElementById('sideBtnAlerts')
+            alerts: document.getElementById('sideBtnAlerts'),
+            analytics: document.getElementById('sideBtnAnalytics')
         };
 
         // Hide all sections
@@ -124,6 +126,10 @@ window.switchAdminTab = function (tab) {
             if (typeof loadOfferSettings === 'function') loadOfferSettings();
         } else if (tab === 'alerts') {
             if (typeof loadAlertSettings === 'function') loadAlertSettings();
+        } else if (tab === 'analytics') {
+            if (typeof loadAnalytics === 'function') {
+                setTimeout(() => { loadAnalytics(); }, 150);
+            }
         }
     } catch (err) {
         console.error('Error en switchAdminTab:', err);
@@ -3605,3 +3611,520 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }, 500);
 });
+
+// =============================================
+// ANALYTICS DASHBOARD
+// =============================================
+
+let analyticsSalesChart = null;
+let analyticsProductsChart = null;
+let analyticsStatusChart = null;
+let analyticsDayOfWeekChart = null;
+let analyticsDailyActivityChart = null;
+let allOrdersData = [];
+
+let currentSalesPeriod = 'month';
+let currentProductsView = 'top';
+let currentProductsMetric = 'quantity';
+
+const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const FULL_MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+const PRODUCT_COLORS = [
+    'rgba(99, 102, 241, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(245, 158, 11, 0.85)',
+    'rgba(239, 68, 68, 0.85)', 'rgba(139, 92, 246, 0.85)', 'rgba(14, 165, 233, 0.85)',
+    'rgba(236, 72, 153, 0.85)', 'rgba(34, 197, 94, 0.85)', 'rgba(249, 115, 22, 0.85)',
+    'rgba(6, 182, 212, 0.85)', 'rgba(168, 85, 247, 0.85)', 'rgba(251, 146, 60, 0.85)',
+    'rgba(244, 63, 94, 0.85)', 'rgba(132, 204, 22, 0.85)', 'rgba(99, 102, 241, 0.85)'
+];
+
+const STATUS_CONFIG = {
+    'iniciado': { label: 'Iniciados', color: 'rgba(245, 158, 11, 0.9)' },
+    'confirmado': { label: 'Confirmados', color: 'rgba(14, 165, 233, 0.9)' },
+    'enviado': { label: 'Enviados', color: 'rgba(139, 92, 246, 0.9)' },
+    'entregado': { label: 'Entregados', color: 'rgba(16, 185, 129, 0.9)' },
+    'completado': { label: 'Completados', color: 'rgba(34, 197, 94, 0.9)' },
+    'cancelado': { label: 'Cancelados', color: 'rgba(239, 68, 68, 0.9)' },
+    'pendiente': { label: 'Pendientes', color: 'rgba(251, 191, 36, 0.9)' },
+    'pagado': { label: 'Pagados', color: 'rgba(16, 185, 129, 0.9)' }
+};
+
+async function loadAnalytics() {
+    try {
+        let client = window.supabaseClient || window.supabase;
+        if (!client || typeof client.from !== 'function') {
+            if (typeof initSupabase === 'function') initSupabase();
+            client = window.supabaseClient || window.supabase;
+        }
+        if (!client || typeof client.from !== 'function') { console.error('[Analytics] Supabase client not available'); return; }
+
+        const { data: orders, error } = await client.from('orders').select('*').order('created_at', { ascending: true });
+        if (error) { console.error('[Analytics] Error:', error); return; }
+
+        allOrdersData = orders || [];
+
+        if (allOrdersData.length === 0) {
+            updateKPIs([]);
+            renderEmptyState();
+            return;
+        }
+
+        updateKPIs(allOrdersData);
+        setTimeout(() => { renderSalesChart(); }, 50);
+        setTimeout(() => { renderProductsChart(); }, 100);
+        setTimeout(() => { renderStatusChart(); }, 150);
+        setTimeout(() => { renderDayOfWeekChart(); }, 200);
+        setTimeout(() => { renderBestWorstMonth(); }, 250);
+        setTimeout(() => { renderTrendComparison(); }, 300);
+        setTimeout(() => { renderTopCustomers(); }, 350);
+        setTimeout(() => { renderDailyActivityChart(); }, 400);
+    } catch (err) {
+        console.error('[Analytics] Error:', err);
+    }
+}
+
+function updateKPIs(orders) {
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+    let totalUnits = 0, totalItems = 0;
+    const uniqueProducts = new Set(), customerSet = new Set();
+
+    orders.forEach(o => {
+        if (o.customer_info?.name) customerSet.add(o.customer_info.name.toLowerCase().trim());
+        if (o.customer_info?.phone) customerSet.add(o.customer_info.phone.replace(/\D/g, ''));
+        if (Array.isArray(o.items)) o.items.forEach(item => {
+            totalUnits += (parseInt(item.quantity) || 0);
+            totalItems++;
+            if (item.name) uniqueProducts.add(item.name.toLowerCase().trim());
+        });
+    });
+
+    const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    const revenuePerUnit = totalUnits > 0 ? totalRevenue / totalUnits : 0;
+    const itemsPerOrder = totalOrders > 0 ? totalItems / totalOrders : 0;
+    const cancelRate = totalOrders > 0 ? (orders.filter(o => o.status === 'cancelado').length / totalOrders * 100) : 0;
+
+    const el = (id) => document.getElementById(id);
+    if (el('kpiTotalOrders')) el('kpiTotalOrders').textContent = totalOrders.toLocaleString('es-PE');
+    if (el('kpiTotalRevenue')) el('kpiTotalRevenue').textContent = 'S/. ' + totalRevenue.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    if (el('kpiAvgOrder')) el('kpiAvgOrder').textContent = 'S/. ' + avgOrder.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    if (el('kpiTotalProducts')) el('kpiTotalProducts').textContent = totalUnits.toLocaleString('es-PE');
+    if (el('kpiTotalCustomers')) el('kpiTotalCustomers').textContent = customerSet.size.toLocaleString('es-PE');
+    if (el('kpiUniqueProducts')) el('kpiUniqueProducts').textContent = uniqueProducts.size.toLocaleString('es-PE');
+    if (el('kpiRevenuePerUnit')) el('kpiRevenuePerUnit').textContent = 'S/. ' + revenuePerUnit.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    if (el('kpiItemsPerOrder')) el('kpiItemsPerOrder').textContent = itemsPerOrder.toFixed(1);
+    if (el('kpiCancelRate')) el('kpiCancelRate').textContent = cancelRate.toFixed(1) + '%';
+}
+
+function renderEmptyState() {
+    ['chartSales', 'chartProducts', 'chartStatus', 'chartDayOfWeek', 'chartDailyActivity'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.getContext) {
+            const ctx = el.getContext('2d');
+            if (ctx) { ctx.clearRect(0, 0, el.width, el.height); }
+        }
+    });
+}
+
+function truncateLabel(label, maxLen = 28) {
+    return label.length > maxLen ? label.substring(0, maxLen) + '...' : label;
+}
+
+function setSalesPeriod(period) {
+    currentSalesPeriod = period;
+    const btns = {
+        month: { btn: 'btnSalesMonth', active: 'bg-indigo-500 text-white shadow shadow-indigo-500/30', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+        week: { btn: 'btnSalesWeek', active: 'bg-indigo-500 text-white shadow shadow-indigo-500/30', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+        day: { btn: 'btnSalesDay', active: 'bg-indigo-500 text-white shadow shadow-indigo-500/30', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' }
+    };
+    Object.keys(btns).forEach(key => {
+        const el = document.getElementById(btns[key].btn);
+        if (el) el.className = 'px-4 py-2 rounded-xl font-bold text-xs transition-all ' + (key === period ? btns[key].active : btns[key].inactive);
+    });
+    renderSalesChart();
+}
+
+function setProductsView(view) {
+    currentProductsView = view;
+    const btns = {
+        top: { btn: 'btnProductsTop', active: 'bg-indigo-500 text-white shadow shadow-indigo-500/30', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+        bottom: { btn: 'btnProductsBottom', active: 'bg-indigo-500 text-white shadow shadow-indigo-500/30', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+        all: { btn: 'btnProductsAll', active: 'bg-indigo-500 text-white shadow shadow-indigo-500/30', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' }
+    };
+    Object.keys(btns).forEach(key => {
+        const el = document.getElementById(btns[key].btn);
+        if (el) el.className = 'px-4 py-2 rounded-xl font-bold text-xs transition-all ' + (key === view ? btns[key].active : btns[key].inactive);
+    });
+    renderProductsChart();
+}
+
+function setProductsMetric(metric) {
+    currentProductsMetric = metric;
+    const btns = {
+        quantity: { btn: 'btnProdMetricQty', active: 'bg-slate-800 text-white', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+        revenue: { btn: 'btnProdMetricRev', active: 'bg-slate-800 text-white', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' }
+    };
+    Object.keys(btns).forEach(key => {
+        const el = document.getElementById(btns[key].btn);
+        if (el) el.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ' + (key === metric ? btns[key].active : btns[key].inactive);
+    });
+    renderProductsChart();
+}
+
+function getProductStats() {
+    const productData = {};
+    allOrdersData.forEach(o => {
+        if (Array.isArray(o.items)) {
+            o.items.forEach(item => {
+                const name = item.name || 'Sin nombre';
+                if (!productData[name]) productData[name] = { quantity: 0, revenue: 0 };
+                productData[name].quantity += (parseInt(item.quantity) || 0);
+                productData[name].revenue += (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 0);
+            });
+        }
+    });
+    return productData;
+}
+
+function renderSalesChart() {
+    const canvas = document.getElementById('chartSales');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (container && container.offsetWidth > 0) canvas.width = container.offsetWidth;
+    if (container && container.offsetHeight > 0) canvas.height = container.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let labels = [], ordersData = [], revenueData = [], barColor = 'rgba(99, 102, 241, 0.75)';
+
+    if (currentSalesPeriod === 'month') {
+        const monthlyData = {};
+        allOrdersData.forEach(o => {
+            const d = new Date(o.created_at);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            if (!monthlyData[key]) monthlyData[key] = { label: `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`, count: 0, revenue: 0 };
+            monthlyData[key].count++;
+            monthlyData[key].revenue += parseFloat(o.total) || 0;
+        });
+        const sorted = Object.keys(monthlyData).sort();
+        labels = sorted.map(k => monthlyData[k].label);
+        ordersData = sorted.map(k => monthlyData[k].count);
+        revenueData = sorted.map(k => monthlyData[k].revenue);
+    } else if (currentSalesPeriod === 'week') {
+        const weeklyData = {};
+        const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        allOrdersData.forEach(o => {
+            const d = new Date(o.created_at);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() - d.getDay());
+            const key = d.toISOString().split('T')[0];
+            if (!weeklyData[key]) {
+                const endOfWeek = new Date(d);
+                endOfWeek.setDate(d.getDate() + 6);
+                weeklyData[key] = { 
+                    label: `${d.getDate()} ${monthNames[d.getMonth()]} - ${endOfWeek.getDate()} ${monthNames[endOfWeek.getMonth()]}`, 
+                    count: 0, 
+                    revenue: 0 
+                };
+            }
+            weeklyData[key].count++;
+            weeklyData[key].revenue += parseFloat(o.total) || 0;
+        });
+        const sorted = Object.keys(weeklyData).sort().slice(-12);
+        labels = sorted.map(k => weeklyData[k].label);
+        ordersData = sorted.map(k => weeklyData[k].count);
+        revenueData = sorted.map(k => weeklyData[k].revenue);
+        barColor = 'rgba(139, 92, 246, 0.75)';
+    } else if (currentSalesPeriod === 'day') {
+        const now = new Date();
+        const dailyData = {};
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            dailyData[key] = { label: `${d.getDate()}/${d.getMonth() + 1}`, count: 0, revenue: 0 };
+        }
+        allOrdersData.forEach(o => {
+            const d = new Date(o.created_at);
+            const key = d.toISOString().split('T')[0];
+            if (dailyData[key]) { dailyData[key].count++; dailyData[key].revenue += parseFloat(o.total) || 0; }
+        });
+        labels = Object.values(dailyData).map(d => d.label);
+        ordersData = Object.values(dailyData).map(d => d.count);
+        revenueData = Object.values(dailyData).map(d => d.revenue);
+        barColor = 'rgba(16, 185, 129, 0.75)';
+    }
+
+    if (analyticsSalesChart) analyticsSalesChart.destroy();
+    analyticsSalesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { label: 'Pedidos', data: ordersData, backgroundColor: barColor, borderColor: barColor.replace('0.75', '1'), borderWidth: 2, borderRadius: 8, yAxisID: 'y' },
+                { label: 'Ingresos (S/.)', data: revenueData, type: 'line', borderColor: 'rgba(245, 158, 11, 1)', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: 'rgba(245, 158, 11, 1)', pointRadius: labels.length > 15 ? 2 : 4, pointHoverRadius: 6, yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: true, position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '600' } } },
+                tooltip: {
+                    callbacks: {
+                        title: ctx => currentSalesPeriod === 'week' ? `📅 Semana: ${ctx[0].label}` : (currentSalesPeriod === 'month' ? `📅 ${ctx[0].label}` : `📅 ${ctx[0].label}`),
+                        label: ctx => ctx.dataset.label === 'Pedidos' ? ` 📦 Pedidos: ${ctx.parsed.y}` : ` 💰 Ingresos: S/. ${ctx.parsed.y.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { maxRotation: 45, minRotation: 0, font: { size: currentSalesPeriod === 'week' ? 10 : 11 } }, grid: { display: false } },
+                y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' }, title: { display: true, text: 'Pedidos', font: { size: 11, weight: '600' } } },
+                y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { font: { size: 11 }, callback: v => 'S/. ' + v.toLocaleString() }, title: { display: true, text: 'Ingresos', font: { size: 11, weight: '600' } } }
+            }
+        }
+    });
+}
+
+function renderProductsChart() {
+    const canvas = document.getElementById('chartProducts');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (container && container.offsetWidth > 0) canvas.width = container.offsetWidth;
+    if (container && container.offsetHeight > 0) canvas.height = container.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const productData = getProductStats();
+    let entries = Object.entries(productData).map(([name, d]) => ({ name, quantity: d.quantity, revenue: d.revenue }));
+    const sortVal = currentProductsMetric === 'quantity' ? 'quantity' : 'revenue';
+    if (currentProductsView === 'top') entries = entries.sort((a, b) => b[sortVal] - a[sortVal]).slice(0, 15);
+    else if (currentProductsView === 'bottom') entries = entries.sort((a, b) => a[sortVal] - b[sortVal]).slice(0, 15);
+    else entries = entries.sort((a, b) => b[sortVal] - a[sortVal]).slice(0, 15);
+
+    const labels = entries.map(p => truncateLabel(p.name));
+    const data = entries.map(p => p[sortVal]);
+    const metricLabel = currentProductsMetric === 'quantity' ? 'Unidades' : 'Ingresos (S/.)';
+
+    if (analyticsProductsChart) analyticsProductsChart.destroy();
+    analyticsProductsChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: metricLabel, data, backgroundColor: PRODUCT_COLORS, borderWidth: 0, borderRadius: 8 }] },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: ctx => entries[ctx[0].dataIndex] ? entries[ctx[0].dataIndex].name : ctx[0].label,
+                        label: ctx => currentProductsMetric === 'quantity' ? ` ${ctx.parsed.x} unidades` : ` S/. ${ctx.parsed.x.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    }
+                }
+            },
+            scales: {
+                x: { beginAtZero: true, ticks: { font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderStatusChart() {
+    const canvas = document.getElementById('chartStatus');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (container && container.offsetWidth > 0) canvas.width = container.offsetWidth;
+    if (container && container.offsetHeight > 0) canvas.height = container.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const statusCounts = {};
+    allOrdersData.forEach(o => { const s = o.status || 'iniciado'; statusCounts[s] = (statusCounts[s] || 0) + 1; });
+
+    const labels = [], data = [], bgColors = [];
+    Object.keys(statusCounts).forEach(s => {
+        const cfg = STATUS_CONFIG[s] || { label: s, color: 'rgba(156, 163, 175, 0.9)' };
+        labels.push(cfg.label); data.push(statusCounts[s]); bgColors.push(cfg.color);
+    });
+
+    const legendEl = document.getElementById('statusLegend');
+    if (legendEl) {
+        const total = data.reduce((a, b) => a + b, 0);
+        legendEl.innerHTML = Object.keys(statusCounts).map(s => {
+            const cfg = STATUS_CONFIG[s] || { label: s, color: 'rgba(156, 163, 175, 0.9)' };
+            const pct = total > 0 ? ((statusCounts[s] / total) * 100).toFixed(1) : 0;
+            return `<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50"><div class="w-3 h-3 rounded-full flex-shrink-0" style="background:${cfg.color}"></div><span class="text-xs font-semibold text-slate-600 flex-1">${cfg.label}</span><span class="text-xs font-black text-slate-800">${statusCounts[s]}</span><span class="text-[10px] text-slate-400">${pct}%</span></div>`;
+        }).join('');
+    }
+
+    if (analyticsStatusChart) analyticsStatusChart.destroy();
+    analyticsStatusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); return ` ${ctx.parsed} (${((ctx.parsed / total) * 100).toFixed(1)}%)`; } } } } }
+    });
+}
+
+function renderDayOfWeekChart() {
+    const canvas = document.getElementById('chartDayOfWeek');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (container && container.offsetWidth > 0) canvas.width = container.offsetWidth;
+    if (container && container.offsetHeight > 0) canvas.height = container.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dayData = [0, 0, 0, 0, 0, 0, 0];
+    allOrdersData.forEach(o => { const d = new Date(o.created_at); dayData[d.getDay()]++; });
+
+    const dayColors = ['rgba(239, 68, 68, 0.75)', 'rgba(99, 102, 241, 0.75)', 'rgba(99, 102, 241, 0.75)', 'rgba(16, 185, 129, 0.75)', 'rgba(16, 185, 129, 0.75)', 'rgba(245, 158, 11, 0.75)', 'rgba(239, 68, 68, 0.75)'];
+
+    if (analyticsDayOfWeekChart) analyticsDayOfWeekChart.destroy();
+    analyticsDayOfWeekChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: DAY_NAMES, datasets: [{ label: 'Pedidos', data: dayData, backgroundColor: dayColors, borderWidth: 0, borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} pedido${ctx.parsed.y !== 1 ? 's' : ''}` } } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false }, ticks: { font: { size: 11 } } } } }
+    });
+}
+
+function renderBestWorstMonth() {
+    const monthlyData = {};
+    allOrdersData.forEach(o => {
+        const d = new Date(o.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!monthlyData[key]) monthlyData[key] = { label: `${FULL_MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`, count: 0, revenue: 0 };
+        monthlyData[key].count++;
+        monthlyData[key].revenue += parseFloat(o.total) || 0;
+    });
+
+    const entries = Object.values(monthlyData);
+    if (entries.length === 0) return;
+    entries.sort((a, b) => b.count - a.count);
+    const best = entries[0], worst = entries[entries.length - 1];
+
+    const el = id => document.getElementById(id);
+    if (el('bestMonthName')) el('bestMonthName').textContent = best.label;
+    if (el('bestMonthCount')) el('bestMonthCount').textContent = best.count;
+    if (el('bestMonthRevenue')) el('bestMonthRevenue').textContent = 'S/. ' + best.revenue.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (el('worstMonthName')) el('worstMonthName').textContent = worst.label;
+    if (el('worstMonthCount')) el('worstMonthCount').textContent = worst.count;
+    if (el('worstMonthRevenue')) el('worstMonthRevenue').textContent = 'S/. ' + worst.revenue.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function renderTrendComparison() {
+    const el = (id) => document.getElementById(id);
+    if (el('trendOrders')) el('trendOrders').textContent = allOrdersData.length;
+    if (el('trendOrders')) el('trendOrders').className = 'text-2xl font-black text-slate-900';
+    if (el('trendRevenue')) el('trendRevenue').textContent = 'S/. ' + allOrdersData.reduce((s, o) => s + (parseFloat(o.total) || 0), 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    if (el('trendRevenue')) el('trendRevenue').className = 'text-2xl font-black text-slate-900';
+    if (el('trendAvg')) el('trendAvg').textContent = 'S/. ' + (allOrdersData.length > 0 ? (allOrdersData.reduce((s, o) => s + (parseFloat(o.total) || 0), 0) / allOrdersData.length) : 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    if (el('trendAvg')) el('trendAvg').className = 'text-2xl font-black text-slate-900';
+    if (el('trendUnits')) { let u = 0; allOrdersData.forEach(o => { if (Array.isArray(o.items)) o.items.forEach(i => { u += (parseInt(i.quantity) || 0); }); }); el('trendUnits').textContent = u; el('trendUnits').className = 'text-2xl font-black text-slate-900'; }
+    if (el('trendCustomers')) { const s = new Set(); allOrdersData.forEach(o => { if (o.customer_info?.name) s.add(o.customer_info.name.toLowerCase().trim()); if (o.customer_info?.phone) s.add(o.customer_info.phone.replace(/\D/g, '')); }); el('trendCustomers').textContent = s.size; el('trendCustomers').className = 'text-2xl font-black text-slate-900'; }
+    ['trendOrdersIcon', 'trendRevenueIcon', 'trendAvgIcon', 'trendUnitsIcon', 'trendCustomersIcon'].forEach(id => { const iconEl = document.getElementById(id); if (iconEl) iconEl.innerHTML = '<i class="fas fa-minus text-slate-300"></i>'; });
+}
+
+function renderTopCustomers() {
+    const table = document.getElementById('topCustomersTable');
+    if (!table) return;
+
+    const customerData = {};
+    allOrdersData.forEach(o => {
+        const name = o.customer_info?.name?.trim() || 'Cliente sin nombre';
+        const phone = o.customer_info?.phone || '-';
+        if (!customerData[name]) customerData[name] = { phone, orders: 0, units: 0, total: 0 };
+        customerData[name].orders++;
+        if (Array.isArray(o.items)) o.items.forEach(i => { customerData[name].units += (parseInt(i.quantity) || 0); });
+        customerData[name].total += parseFloat(o.total) || 0;
+    });
+
+    const top = Object.entries(customerData).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
+    if (top.length === 0) { table.innerHTML = '<tr><td colspan="6" class="text-center text-slate-400 py-8">No hay datos de clientes</td></tr>'; return; }
+
+    table.innerHTML = top.map(([name, data], i) => `
+        <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+            <td class="py-3"><div class="w-8 h-8 rounded-full bg-gradient-to-br ${i === 0 ? 'from-amber-400 to-amber-600' : i === 1 ? 'from-slate-300 to-slate-500' : i === 2 ? 'from-orange-400 to-orange-600' : 'from-indigo-400 to-purple-500'} flex items-center justify-center text-white font-black text-xs">${i + 1}</div></td>
+            <td class="py-3 pr-4"><p class="font-bold text-slate-800 text-sm">${name}</p></td>
+            <td class="py-3 pr-4"><p class="font-mono text-slate-600 text-xs">${data.phone}</p></td>
+            <td class="py-3 pr-4 text-right"><span class="font-bold text-slate-800">${data.orders}</span></td>
+            <td class="py-3 pr-4 text-right"><span class="font-bold text-slate-800">${data.units}</span></td>
+            <td class="py-3 text-right"><span class="font-black text-indigo-600">S/. ${data.total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
+        </tr>`).join('');
+}
+
+function renderDailyActivityChart() {
+    const canvas = document.getElementById('chartDailyActivity');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (container && container.offsetWidth > 0) canvas.width = container.offsetWidth;
+    if (container && container.offsetHeight > 0) canvas.height = container.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const now = new Date();
+    const dailyData = {};
+    for (let i = 89; i >= 0; i--) { const d = new Date(now); d.setDate(d.getDate() - i); const key = d.toISOString().split('T')[0]; dailyData[key] = { label: `${d.getDate()}/${d.getMonth() + 1}`, count: 0 }; }
+    allOrdersData.forEach(o => { const d = new Date(o.created_at); const key = d.toISOString().split('T')[0]; if (dailyData[key]) dailyData[key].count++; });
+
+    const labels = Object.values(dailyData).map(d => d.label);
+    const data = Object.values(dailyData).map(d => d.count);
+
+    if (analyticsDailyActivityChart) analyticsDailyActivityChart.destroy();
+    analyticsDailyActivityChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{ label: 'Pedidos', data, borderColor: 'rgba(99, 102, 241, 0.8)', backgroundColor: 'rgba(99, 102, 241, 0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: labels.length > 30 ? 1 : 3, pointHoverRadius: 6, pointBackgroundColor: 'rgba(99, 102, 241, 1)' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} pedido${ctx.parsed.y !== 1 ? 's' : ''}` } } }, scales: { x: { ticks: { maxRotation: 0, font: { size: 10 }, maxTicksLimit: 15 }, grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } } } }
+    });
+}
+
+function exportAnalytics() {
+    try {
+        if (!allOrdersData || allOrdersData.length === 0) { Swal.fire('Sin datos', 'No hay pedidos para exportar.', 'info'); return; }
+
+        const productData = getProductStats();
+        const monthlyData = {};
+        allOrdersData.forEach(o => {
+            const d = new Date(o.created_at);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            if (!monthlyData[key]) monthlyData[key] = { label: `${FULL_MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`, count: 0, revenue: 0 };
+            monthlyData[key].count++;
+            monthlyData[key].revenue += parseFloat(o.total) || 0;
+        });
+
+        const customerData = {};
+        allOrdersData.forEach(o => {
+            const name = o.customer_info?.name?.trim() || 'Cliente sin nombre';
+            if (!customerData[name]) customerData[name] = { phone: o.customer_info?.phone || '-', orders: 0, total: 0 };
+            customerData[name].orders++;
+            customerData[name].total += parseFloat(o.total) || 0;
+        });
+
+        const statusCounts = {};
+        allOrdersData.forEach(o => { const s = o.status || 'iniciado'; statusCounts[s] = (statusCounts[s] || 0) + 1; });
+        const totalRevenue = allOrdersData.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+
+        const wsData = [
+            ['=== SOLBIN-X | REPORTE ANALÍTICO ==='], ['Fecha:', new Date().toLocaleString('es-PE')], [],
+            ['--- RESUMEN GENERAL ---'], ['Total Pedidos', allOrdersData.length], ['Ingresos Totales (S/.)', totalRevenue.toFixed(2)],
+            ['Ticket Promedio (S/.)', (totalRevenue / allOrdersData.length).toFixed(2)],
+            ['Pedidos Confirmados', statusCounts['confirmado'] || 0], ['Pedidos Completados', statusCounts['completado'] || 0], ['Pedidos Cancelados', statusCounts['cancelado'] || 0], [],
+            ['--- VENTAS POR MES ---'], ['Mes', 'Pedidos', 'Ingresos (S/.)'],
+            ...Object.keys(monthlyData).sort().map(k => [monthlyData[k].label, monthlyData[k].count, monthlyData[k].revenue.toFixed(2)]), [],
+            ['--- PRODUCTOS (Top 30) ---'], ['Producto', 'Cantidad Vendida', 'Ingresos (S/.)'],
+            ...Object.entries(productData).sort((a, b) => b[1].quantity - a[1].quantity).slice(0, 30).map(([name, d]) => [name, d.quantity, d.revenue.toFixed(2)]), [],
+            ['--- PEDIDOS POR ESTADO ---'], ['Estado', 'Cantidad', '%'],
+            ...Object.entries(statusCounts).map(([k, v]) => [k, v, ((v / allOrdersData.length) * 100).toFixed(1) + '%']), [],
+            ['--- TOP 20 CLIENTES ---'], ['Cliente', 'Teléfono', 'Pedidos', 'Total (S/.)'],
+            ...Object.entries(customerData).sort((a, b) => b[1].total - a[1].total).slice(0, 20).map(([name, d]) => [name, d.phone, d.orders, d.total.toFixed(2)])
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 12 }, { wch: 15 }];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Analítica');
+        XLSX.writeFile(wb, 'solbinx_analitica_' + new Date().toISOString().split('T')[0] + '.xlsx');
+    } catch (err) {
+        console.error('Error exportando:', err);
+        Swal.fire('Error', 'No se pudo exportar el reporte.', 'error');
+    }
+}

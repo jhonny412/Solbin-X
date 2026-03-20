@@ -309,7 +309,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Optional: Clear cart after successful "order placement"? 
                     // Usually better to keep it until they actually pay, but for this flow:
-                    window.cartManager.clearCart(); // Auto-clear as requested
+                    window.cartManager.clearCart();
+                    if (nameInput) nameInput.value = '';
+                    if (phoneInput) phoneInput.value = '';
                     Swal.fire('¡Pedido Iniciado!', `Tu pedido #${orderId} ha sido registrado. Completa el pago en WhatsApp.`, 'success');
 
                 } catch (err) {
