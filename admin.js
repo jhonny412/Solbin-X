@@ -2238,35 +2238,402 @@ window.deleteProduct = async function (id) {
     }
 }
 
+// =============================================
+// SESSION MANAGER - SEGURIDAD AVANZADA
+// =============================================
+
+const SESSION_CONFIG = {
+    MAX_INACTIVITY_MS: 30 * 60 * 1000,
+    MAX_SESSION_MS: 8 * 60 * 60 * 1000,
+    CHECK_INTERVAL_MS: 30 * 1000,
+    STORAGE_KEY_SESSION_START: 'admin_session_start',
+    STORAGE_KEY_LAST_ACTIVITY: 'admin_last_activity',
+    STORAGE_KEY_SESSION_TOKEN: 'admin_session_token',
+    STORAGE_KEY_TAB_ID: 'admin_tab_id',
+    STORAGE_KEY_ACTIVE_TAB: 'admin_active_tab',
+    STORAGE_KEY_TAB_HEARTBEAT: 'admin_tab_heartbeat'
+};
+
+let sessionCheckInterval = null;
+let lastActivityTime = Date.now();
+let tabId = null;
+let isActiveTab = false;
+
+function generateTabId() {
+    return 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function clearSessionData() {
+    localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_SESSION_START);
+    localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_LAST_ACTIVITY);
+    localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_SESSION_TOKEN);
+    localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_TAB_ID);
+    localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_ACTIVE_TAB);
+    localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_TAB_HEARTBEAT);
+    sessionStorage.clear();
+}
+
+function getSessionStartTime() {
+    const stored = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_SESSION_START);
+    return stored ? parseInt(stored, 10) : null;
+}
+
+function setSessionStartTime(time) {
+    localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_SESSION_START, time.toString());
+}
+
+function getLastActivityTime() {
+    const stored = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_LAST_ACTIVITY);
+    return stored ? parseInt(stored, 10) : Date.now();
+}
+
+function updateActivityTime() {
+    lastActivityTime = Date.now();
+    localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_LAST_ACTIVITY, lastActivityTime.toString());
+}
+
+function isSessionExpired() {
+    const sessionStart = getSessionStartTime();
+    if (!sessionStart) return true;
+    
+    const now = Date.now();
+    const sessionDuration = now - sessionStart;
+    if (sessionDuration > SESSION_CONFIG.MAX_SESSION_MS) {
+        console.log('[Session] Sesión máxima excedida:', Math.round(sessionDuration / 60000), 'minutos');
+        return true;
+    }
+    
+    const lastActivity = getLastActivityTime();
+    const inactivityDuration = now - lastActivity;
+    if (inactivityDuration > SESSION_CONFIG.MAX_INACTIVITY_MS) {
+        console.log('[Session] Inactividad detectada:', Math.round(inactivityDuration / 60000), 'minutos sin actividad');
+        return true;
+    }
+    
+    return false;
+}
+
+function forceLogout(reason = 'Sesión expirada') {
+    console.log('[Session] Cerrando sesión:', reason);
+    clearSessionData();
+    
+    if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+        sessionCheckInterval = null;
+    }
+    
+    const showLogoutMessage = () => {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Sesión Finalizada',
+                text: reason,
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showCancelButton: false,
+                showCloseButton: false
+            }).then(() => {
+                window.location.href = 'login.html';
+            });
+        } else {
+            window.location.href = 'login.html';
+        }
+    };
+    
+    if (document.readyState === 'complete') {
+        showLogoutMessage();
+    } else {
+        window.addEventListener('load', showLogoutMessage);
+    }
+}
+
+function setupActivityListeners() {
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(event => {
+        document.addEventListener(event, () => {
+            updateActivityTime();
+            updateTabHeartbeat();
+        }, { passive: true });
+    });
+}
+
+async function verifySessionToken() {
+    const client = window.supabaseClient || window.supabase;
+    if (!client) return false;
+    
+    try {
+        const { data: { session }, error } = await client.auth.getSession();
+        
+        if (error || !session) {
+            return false;
+        }
+        
+        const storedToken = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_SESSION_TOKEN);
+        if (!storedToken || storedToken !== session.access_token) {
+            localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_SESSION_TOKEN, session.access_token);
+        }
+        
+        return true;
+    } catch (err) {
+        console.error('[Session] Error verificando token:', err);
+        return false;
+    }
+}
+
+// =============================================
+// SINGLE TAB ENFORCEMENT - Solo una pestaña activa
+// =============================================
+
+function updateTabHeartbeat() {
+    if (!isActiveTab) return;
+    
+    const heartbeat = {
+        tabId: tabId,
+        timestamp: Date.now(),
+        userAgent: navigator.userAgent.substring(0, 50)
+    };
+    localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_TAB_HEARTBEAT, JSON.stringify(heartbeat));
+}
+
+function claimActiveTab() {
+    const now = Date.now();
+    const activeTabData = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_ACTIVE_TAB);
+    
+    if (activeTabData) {
+        try {
+            const activeTab = JSON.parse(activeTabData);
+            const heartbeatData = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_TAB_HEARTBEAT);
+            
+            // Verificar si hay una pestaña activa reciente
+            if (heartbeatData) {
+                const heartbeat = JSON.parse(heartbeatData);
+                const heartbeatAge = now - heartbeat.timestamp;
+                
+                // Si el heartbeat es menor a 10 segundos, otra pestaña está activa
+                if (heartbeatAge < 10000 && heartbeat.tabId !== tabId) {
+                    return false;
+                }
+                
+                // Si el heartbeat es muy viejo (>10s), la otra pestaña está muerta
+                if (heartbeatAge > 10000) {
+                    console.log('[TabManager] Pestaña anterior detectada como inactiva');
+                }
+            }
+        } catch (e) {
+            console.warn('[TabManager] Error parseando datos de pestaña activa');
+        }
+    }
+    
+    // Registrar esta pestaña como activa
+    const tabData = {
+        tabId: tabId,
+        claimedAt: now,
+        url: window.location.href
+    };
+    localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_ACTIVE_TAB, JSON.stringify(tabData));
+    localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_TAB_ID, tabId);
+    updateTabHeartbeat();
+    
+    return true;
+}
+
+function releaseActiveTab() {
+    const currentActive = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_ACTIVE_TAB);
+    if (currentActive) {
+        try {
+            const activeTab = JSON.parse(currentActive);
+            if (activeTab.tabId === tabId) {
+                localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_ACTIVE_TAB);
+                localStorage.removeItem(SESSION_CONFIG.STORAGE_KEY_TAB_HEARTBEAT);
+                console.log('[TabManager] Pestaña liberada correctamente');
+            }
+        } catch (e) {}
+    }
+}
+
+function checkOtherTabs() {
+    const now = Date.now();
+    const heartbeatData = localStorage.getItem(SESSION_CONFIG.STORAGE_KEY_TAB_HEARTBEAT);
+    
+    if (!heartbeatData || !isActiveTab) return;
+    
+    try {
+        const heartbeat = JSON.parse(heartbeatData);
+        const heartbeatAge = now - heartbeat.timestamp;
+        
+        // Si el heartbeat de otra pestaña es muy reciente (<5s), somos obsoletos
+        if (heartbeatAge < 5000 && heartbeat.tabId !== tabId) {
+            console.log('[TabManager] Otra pestaña más reciente detectada, cerrando esta sesión');
+            forceLogout('Esta sesión ha sido abierta en otra pestaña.');
+        }
+    } catch (e) {}
+}
+
+let heartbeatInterval = null;
+
+function startTabMonitoring() {
+    updateTabHeartbeat();
+    
+    heartbeatInterval = setInterval(() => {
+        updateTabHeartbeat();
+        checkOtherTabs();
+    }, 3000);
+}
+
+function stopTabMonitoring() {
+    if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+    }
+}
+
+async function checkSession() {
+    if (!isActiveTab) {
+        forceLogout('Sesión desactivada por otra pestaña.');
+        return false;
+    }
+    
+    if (isSessionExpired()) {
+        forceLogout('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+        return false;
+    }
+    
+    const isValid = await verifySessionToken();
+    if (!isValid) {
+        forceLogout('Sesión inválida. Por favor, inicia sesión nuevamente.');
+        return false;
+    }
+    
+    return true;
+}
+
+async function startSessionCheck() {
+    setupActivityListeners();
+    updateActivityTime();
+    
+    sessionCheckInterval = setInterval(async () => {
+        const isValid = await checkSession();
+        if (!isValid) {
+            clearInterval(sessionCheckInterval);
+            stopTabMonitoring();
+        }
+    }, SESSION_CONFIG.CHECK_INTERVAL_MS);
+}
+
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+    releaseActiveTab();
+    clearSessionData();
+    
     const client = window.supabaseClient || window.supabase;
     await client.auth.signOut();
+    
+    if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+        sessionCheckInterval = null;
+    }
+    
+    stopTabMonitoring();
     window.location.href = 'login.html';
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    releaseActiveTab();
+    stopTabMonitoring();
+    
+    if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+        sessionCheckInterval = null;
+    }
+});
+
+window.addEventListener('unload', () => {
+    releaseActiveTab();
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        // La pestaña se ocultó, seguir enviando heartbeat pero reducir frecuencia
+    } else {
+        // La pestaña se mostró, verificar si seguimos siendo activos
+        if (isActiveTab) {
+            checkOtherTabs();
+        }
+    }
 });
 
 // Init
 async function checkAuth() {
     console.log('Verificando autenticación...');
+    
+    tabId = generateTabId();
+    localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_TAB_ID, tabId);
+    
     try {
         const client = window.supabaseClient || window.supabase;
         if (!client) {
             console.error('Supabase client no inicializado');
             return;
         }
-        const { data: { session } } = await client.auth.getSession();
-        if (!session) {
-            console.warn('Sin sesión activada, redirigiendo a login...');
-            window.location.href = 'login.html';
-        } else {
-            console.log('Sesión activa:', session.user.email);
-            const userEmailEl = document.getElementById('userEmail');
-            if (userEmailEl) userEmailEl.textContent = session.user.email;
+        
+        const { data: { session }, error } = await client.auth.getSession();
+        
+        if (error) {
+            console.error('Error obteniendo sesión:', error);
+            forceLogout('Error de autenticación.');
+            return;
         }
+        
+        if (!session) {
+            console.warn('Sin sesión activa, redirigiendo a login...');
+            clearSessionData();
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Verificar si hay una pestaña activa
+        if (!claimActiveTab()) {
+            console.warn('[Auth] Otra pestaña tiene la sesión activa');
+            Swal.fire({
+                title: 'Sesión Activa',
+                text: 'Ya tienes una sesión abierta en otra pestaña del navegador. Solo se permite una sesión activa a la vez.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showCancelButton: false,
+                showCloseButton: false
+            }).then(() => {
+                window.location.href = 'login.html';
+            });
+            return;
+        }
+        
+        isActiveTab = true;
+        
+        const existingSessionStart = getSessionStartTime();
+        if (!existingSessionStart) {
+            setSessionStartTime(Date.now());
+        }
+        
+        console.log('Sesión activa:', session.user.email, '| Tab ID:', tabId);
+        const userEmailEl = document.getElementById('userEmail');
+        if (userEmailEl) userEmailEl.textContent = session.user.email;
+        
+        localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_SESSION_TOKEN, session.access_token);
+        
+        startTabMonitoring();
+        await startSessionCheck();
+        
     } catch (err) {
         console.error('Error en checkAuth:', err);
+        clearSessionData();
+        window.location.href = 'login.html';
     }
 }
+
 document.addEventListener('DOMContentLoaded', checkAuth);
 
 // Ver detalle de producto

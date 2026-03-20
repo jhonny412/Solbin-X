@@ -1,6 +1,6 @@
 // Service Worker para Solbin-X - PWA
-const CACHE_NAME = 'solbin-v2';
-const CAROUSEL_CACHE_NAME = 'solbin-carousel-v1';
+const CACHE_NAME = 'solbin-v3';
+const CAROUSEL_CACHE_NAME = 'solbin-carousel-v2';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -68,6 +68,17 @@ self.addEventListener('activate', event => {
     );
 });
 
+// URLs que siempre deben obtenerse de la red primero (para evitar caché obsoleto)
+const NETWORK_FIRST_URLS = [
+    '/admin.html',
+    '/admin.js',
+    '/admin-export.js'
+];
+
+function shouldUseNetworkFirst(url) {
+    return NETWORK_FIRST_URLS.some(path => url.pathname.endsWith(path));
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
     const { request } = event;
@@ -89,27 +100,38 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    // Para admin.html y admin.js usar Network First para evitar problemas de caché
+    if (shouldUseNetworkFirst(url)) {
+        event.respondWith(
+            fetch(request)
+                .then(networkResponse => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME)
+                            .then(cache => cache.put(request, responseToCache));
+                    }
+                    return networkResponse;
+                })
+                .catch(() => caches.match(request))
+        );
+        return;
+    }
+
     event.respondWith(
         caches.match(request)
             .then(cachedResponse => {
                 if (cachedResponse) {
-                    // Return cached version
-                    
                     return cachedResponse;
                 }
 
-                // Fetch from network
                 return fetch(request)
                     .then(networkResponse => {
-                        // Check if valid response
                         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
                             return networkResponse;
                         }
 
-                        // Clone the response
                         const responseToCache = networkResponse.clone();
 
-                        // Cache the new resource
                         caches.open(CACHE_NAME)
                             .then(cache => {
                                 cache.put(request, responseToCache);
@@ -118,7 +140,6 @@ self.addEventListener('fetch', event => {
                         return networkResponse;
                     })
                     .catch(() => {
-                        // Return offline page for navigation requests
                         if (request.mode === 'navigate') {
                             return caches.match('/index.html');
                         }
