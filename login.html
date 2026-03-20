@@ -42,7 +42,7 @@
             overflow: hidden;
         }
 
-        /* Circuit Grid Animation */
+        /* Circuit Grid - Subtle */
         .circuit-grid {
             position: absolute;
             inset: 0;
@@ -50,100 +50,6 @@
                 linear-gradient(rgba(55, 168, 168, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(55, 168, 168, 0.03) 1px, transparent 1px);
             background-size: 60px 60px;
-            animation: grid-pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes grid-pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        /* Circuit Lines */
-        .circuit-lines {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-        }
-
-        .circuit-line {
-            position: absolute;
-            background: linear-gradient(90deg, transparent, rgba(55, 168, 168, 0.4), transparent);
-            height: 1px;
-            animation: line-move 8s linear infinite;
-        }
-
-        .circuit-line:nth-child(1) {
-            width: 40%;
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .circuit-line:nth-child(2) {
-            width: 30%;
-            top: 45%;
-            right: 5%;
-            animation-delay: -2s;
-            background: linear-gradient(90deg, transparent, rgba(229, 183, 58, 0.4), transparent);
-        }
-
-        .circuit-line:nth-child(3) {
-            width: 50%;
-            top: 70%;
-            left: 5%;
-            animation-delay: -4s;
-        }
-
-        .circuit-line:nth-child(4) {
-            width: 35%;
-            top: 85%;
-            right: 15%;
-            animation-delay: -6s;
-            background: linear-gradient(90deg, transparent, rgba(229, 183, 58, 0.3), transparent);
-        }
-
-        @keyframes line-move {
-            0% { transform: translateX(-100%); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateX(300%); opacity: 0; }
-        }
-
-        /* Vertical Circuit Lines */
-        .circuit-line-v {
-            position: absolute;
-            background: linear-gradient(180deg, transparent, rgba(55, 168, 168, 0.3), transparent);
-            width: 1px;
-            animation: line-move-v 6s linear infinite;
-        }
-
-        .circuit-line-v:nth-child(5) {
-            height: 30%;
-            top: 10%;
-            left: 25%;
-            animation-delay: -1s;
-        }
-
-        .circuit-line-v:nth-child(6) {
-            height: 40%;
-            top: 30%;
-            right: 30%;
-            animation-delay: -3s;
-            background: linear-gradient(180deg, transparent, rgba(229, 183, 58, 0.3), transparent);
-        }
-
-        .circuit-line-v:nth-child(7) {
-            height: 25%;
-            bottom: 15%;
-            left: 60%;
-            animation-delay: -5s;
-        }
-
-        @keyframes line-move-v {
-            0% { transform: translateY(-100%); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(400%); opacity: 0; }
         }
 
         /* Circuit Nodes */
@@ -154,24 +60,23 @@
 
         .circuit-node {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
             background: var(--teal);
             border-radius: 50%;
-            animation: node-pulse 2s ease-in-out infinite;
-            box-shadow: 0 0 10px var(--teal), 0 0 20px var(--teal);
+            animation: node-pulse 3s ease-in-out infinite;
         }
 
-        .circuit-node:nth-child(1) { top: 20%; left: 25%; animation-delay: 0s; }
-        .circuit-node:nth-child(2) { top: 45%; right: 30%; animation-delay: 0.5s; background: var(--gold); box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold); }
-        .circuit-node:nth-child(3) { top: 70%; left: 40%; animation-delay: 1s; }
-        .circuit-node:nth-child(4) { top: 30%; left: 70%; animation-delay: 1.5s; background: var(--gold); box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold); }
-        .circuit-node:nth-child(5) { top: 85%; right: 20%; animation-delay: 0.3s; }
-        .circuit-node:nth-child(6) { top: 55%; left: 15%; animation-delay: 0.8s; background: var(--gold); box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold); }
+        .circuit-node:nth-child(1) { top: 15%; left: 20%; }
+        .circuit-node:nth-child(2) { top: 40%; right: 25%; background: var(--gold); }
+        .circuit-node:nth-child(3) { top: 75%; left: 35%; }
+        .circuit-node:nth-child(4) { top: 25%; left: 75%; background: var(--gold); }
+        .circuit-node:nth-child(5) { top: 85%; right: 15%; }
+        .circuit-node:nth-child(6) { top: 60%; left: 10%; background: var(--gold); }
 
         @keyframes node-pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.5); opacity: 1; }
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
         }
 
         /* Data Flow Particles */
@@ -185,216 +90,76 @@
             position: absolute;
             width: 2px;
             height: 2px;
-            background: rgba(55, 168, 168, 0.8);
+            background: rgba(55, 168, 168, 0.6);
             border-radius: 50%;
-            animation: particle-float 10s linear infinite;
+            animation: particle-float 15s linear infinite;
         }
 
-        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 12s; }
-        .particle:nth-child(2) { left: 20%; animation-delay: -2s; animation-duration: 10s; background: rgba(229, 183, 58, 0.8); }
-        .particle:nth-child(3) { left: 30%; animation-delay: -4s; animation-duration: 14s; }
-        .particle:nth-child(4) { left: 40%; animation-delay: -6s; animation-duration: 11s; background: rgba(229, 183, 58, 0.8); }
-        .particle:nth-child(5) { left: 50%; animation-delay: -8s; animation-duration: 13s; }
-        .particle:nth-child(6) { left: 60%; animation-delay: -1s; animation-duration: 9s; background: rgba(229, 183, 58, 0.8); }
-        .particle:nth-child(7) { left: 70%; animation-delay: -3s; animation-duration: 15s; }
-        .particle:nth-child(8) { left: 80%; animation-delay: -5s; animation-duration: 12s; background: rgba(229, 183, 58, 0.8); }
-        .particle:nth-child(9) { left: 90%; animation-delay: -7s; animation-duration: 10s; }
+        .particle:nth-child(1) { left: 15%; animation-duration: 18s; }
+        .particle:nth-child(2) { left: 35%; animation-delay: -3s; animation-duration: 20s; background: rgba(229, 183, 58, 0.6); }
+        .particle:nth-child(3) { left: 55%; animation-delay: -6s; animation-duration: 16s; }
+        .particle:nth-child(4) { left: 75%; animation-delay: -9s; animation-duration: 22s; background: rgba(229, 183, 58, 0.6); }
+        .particle:nth-child(5) { left: 90%; animation-delay: -12s; animation-duration: 19s; }
 
         @keyframes particle-float {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            10% { opacity: 1; transform: scale(1); }
+            0% { transform: translateY(100vh); opacity: 0; }
+            10% { opacity: 1; }
             90% { opacity: 1; }
-            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+            100% { transform: translateY(-100vh); opacity: 0; }
         }
 
-        /* Animated Waves */
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 200px;
-            background: linear-gradient(180deg, transparent 0%, rgba(55, 168, 168, 0.02) 100%);
-            border-top: 1px solid rgba(55, 168, 168, 0.1);
-            animation: wave-move 15s linear infinite;
-        }
-
-        .wave::before,
-        .wave::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(55,168,168,0.05)' d='M0,60 C300,120 400,0 600,60 C800,120 900,0 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E") repeat-x;
-            background-size: 600px 100px;
-        }
-
-        .wave::before {
-            animation: wave-1 10s linear infinite;
-            opacity: 0.5;
-        }
-
-        .wave::after {
-            animation: wave-2 15s linear infinite reverse;
-            opacity: 0.3;
-        }
-
-        .wave-2 {
-            bottom: 20px;
-            height: 150px;
-            background: transparent;
-            border-top: none;
-        }
-
-        .wave-2::before,
-        .wave-2::after {
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='rgba(229,183,58,0.03)' d='M0,80 C200,40 400,100 600,60 C800,20 1000,80 1200,40 L1200,120 L0,120 Z'/%3E%3C/svg%3E") repeat-x;
-            background-size: 800px 100px;
-        }
-
-        @keyframes wave-move {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        @keyframes wave-1 {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-600px); }
-        }
-
-        @keyframes wave-2 {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-800px); }
-        }
-
-        /* Abstract Shapes */
+        /* Abstract Shapes - Static */
         .shape {
             position: absolute;
             border-radius: 50%;
             filter: blur(80px);
-            animation: float 8s ease-in-out infinite;
         }
 
         .shape-1 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(55, 168, 168, 0.12) 0%, transparent 70%);
-            top: -150px;
-            right: -100px;
-            animation-delay: 0s;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(55, 168, 168, 0.1) 0%, transparent 70%);
+            top: -100px;
+            right: -50px;
         }
 
         .shape-2 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(229, 183, 58, 0.1) 0%, transparent 70%);
-            bottom: -150px;
-            left: -100px;
-            animation-delay: -2s;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(229, 183, 58, 0.08) 0%, transparent 70%);
+            bottom: -50px;
+            left: -50px;
         }
 
         .shape-3 {
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(55, 168, 168, 0.08) 0%, transparent 70%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(55, 168, 168, 0.06) 0%, transparent 70%);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            animation-delay: -4s;
         }
 
-        .shape-4 {
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(229, 183, 58, 0.08) 0%, transparent 70%);
-            top: 20%;
-            left: 10%;
-            animation-delay: -1s;
-        }
-
-        .shape-5 {
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(circle, rgba(55, 168, 168, 0.06) 0%, transparent 70%);
-            bottom: 20%;
-            right: 15%;
-            animation-delay: -3s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(60px, -40px) scale(1.08); }
-            50% { transform: translate(-30px, 30px) scale(0.95); }
-            75% { transform: translate(50px, 40px) scale(1.05); }
-        }
-
-        /* Subtle Dots Grid */
-        .dots-grid {
-            position: absolute;
-            inset: 0;
-            background-image: radial-gradient(circle, rgba(55, 168, 168, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: dots-move 15s linear infinite;
-        }
-
-        @keyframes dots-move {
-            0% { background-position: 0 0; }
-            100% { background-position: 50px 50px; }
-        }
-
-        /* Gradient Orbs */
+        /* Gradient Orbs - Static */
         .orb {
             position: absolute;
             border-radius: 50%;
-            animation: orb-float 6s ease-in-out infinite;
         }
 
         .orb-1 {
-            width: 150px;
-            height: 150px;
-            background: linear-gradient(135deg, rgba(55, 168, 168, 0.15), rgba(79, 196, 196, 0.08));
-            top: 15%;
-            right: 20%;
-            animation-delay: -1s;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(55, 168, 168, 0.1) 0%, transparent 70%);
+            top: 20%;
+            right: 15%;
         }
 
         .orb-2 {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, rgba(229, 183, 58, 0.15), rgba(229, 183, 58, 0.08));
-            bottom: 25%;
-            left: 15%;
-            animation-delay: -3s;
-        }
-
-        .orb-3 {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, rgba(55, 168, 168, 0.1), rgba(229, 183, 58, 0.1));
-            top: 40%;
-            left: 5%;
-            animation-delay: -2s;
-        }
-
-        @keyframes orb-float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(40px, -40px) rotate(180deg); }
-        }
-
-        /* Scan Line Effect */
-        .scan-line {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(55, 168, 168, 0.2), transparent);
-            animation: scan 4s linear infinite;
-        }
-
-        @keyframes scan {
-            0% { top: -2px; opacity: 0; }
-            5% { opacity: 1; }
-            95% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
+            background: radial-gradient(circle, rgba(229, 183, 58, 0.08) 0%, transparent 70%);
+            bottom: 30%;
+            left: 10%;
         }
 
         /* Login Container */
@@ -445,16 +210,9 @@
         /* Header Gradient Bar */
         .header-gradient {
             position: relative;
-            padding: 20px 32px 16px;
-            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-light) 50%, var(--teal) 100%);
+            padding: 24px 32px 18px;
+            background: var(--teal);
             overflow: hidden;
-        }
-
-        .header-gradient::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
         }
 
         .header-gradient::after {
@@ -464,54 +222,35 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--gold), var(--teal), var(--gold));
+            background: linear-gradient(90deg, var(--gold), var(--gold-dark));
         }
 
-        /* Logo with Glow */
+        /* Logo */
         .logo-wrapper {
             position: relative;
             display: inline-block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        .logo-glow {
-            position: absolute;
-            inset: -30px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-            filter: blur(15px);
-            animation: logo-pulse 2s ease-in-out infinite;
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.1em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        @keyframes logo-pulse {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-
-        .logo-img {
-            position: relative;
-            width: 180px;
-            height: auto;
-            filter: brightness(0) invert(1);
-            transition: transform 0.4s ease;
-        }
-
-        .logo-wrapper:hover .logo-img {
-            transform: scale(1.05);
+        .logo-wrapper:hover .logo-text {
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         /* Title */
         .title {
             position: relative;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.85);
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
             letter-spacing: 0.02em;
-            margin-bottom: 0;
-            text-transform: uppercase;
-        }
-
-        .subtitle {
-            display: none;
         }
 
         /* Form */
@@ -583,13 +322,13 @@
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--teal);
-            font-size: 0.85rem;
+            color: #37a8a8;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
 
         .input-field:focus ~ .input-icon {
-            color: var(--teal-dark);
+            color: #2d8a8a;
         }
 
         /* Password Toggle */
@@ -832,15 +571,7 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(55, 168, 168, 0.2);
             border-radius: 28px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.08),
-                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-            animation: badge-float 2s ease-in-out infinite;
-        }
-
-        @keyframes badge-float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(1deg); }
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
 
         .security-dot {
@@ -879,73 +610,6 @@
             letter-spacing: 0.08em;
         }
 
-        /* Corner Decorations - Enhanced */
-        .corner-decor {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            pointer-events: none;
-            opacity: 0.8;
-        }
-
-        .corner-decor.top-left {
-            top: 0;
-            left: 0;
-        }
-
-        .corner-decor.top-left::before,
-        .corner-decor.top-left::after {
-            content: '';
-            position: absolute;
-            background: linear-gradient(135deg, var(--teal), var(--gold));
-            box-shadow: 0 0 20px rgba(55, 168, 168, 0.5);
-        }
-
-        .corner-decor.top-left::before {
-            top: 0;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            border-radius: 0 0 4px 0;
-        }
-
-        .corner-decor.top-left::after {
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 60px;
-            border-radius: 0 0 4px 0;
-        }
-
-        .corner-decor.bottom-right {
-            bottom: 0;
-            right: 0;
-        }
-
-        .corner-decor.bottom-right::before,
-        .corner-decor.bottom-right::after {
-            content: '';
-            position: absolute;
-            background: linear-gradient(135deg, var(--gold), var(--teal));
-            box-shadow: 0 0 20px rgba(229, 183, 58, 0.5);
-        }
-
-        .corner-decor.bottom-right::before {
-            bottom: 0;
-            right: 0;
-            width: 60px;
-            height: 4px;
-            border-radius: 4px 0 0 0;
-        }
-
-        .corner-decor.bottom-right::after {
-            bottom: 0;
-            right: 0;
-            width: 4px;
-            height: 60px;
-            border-radius: 4px 0 0 0;
-        }
-
         /* Feature Icons Row */
         .features-row {
             display: flex;
@@ -971,48 +635,22 @@
             font-size: 0.8rem;
         }
 
-        /* Animated Border Effect */
-        .animated-border {
-            position: absolute;
-            inset: 0;
-            border-radius: 28px;
-            padding: 2px;
-            background: linear-gradient(90deg, var(--teal), var(--gold), var(--teal), var(--gold));
-            background-size: 300% 100%;
-            animation: border-flow 4s linear infinite;
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .login-card:hover .animated-border {
-            opacity: 0.5;
-        }
-
-        @keyframes border-flow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 300% 50%; }
-        }
-
         /* Responsive */
         @media (max-width: 640px) {
             .header-gradient {
-                padding: 32px 24px 28px;
+                padding: 24px 20px 16px;
             }
 
-            .logo-img {
-                width: 120px;
+            .logo-text {
+                font-size: 1.5rem;
             }
 
             .title {
-                font-size: 1.2rem;
+                font-size: 0.9rem;
             }
 
             .form-wrapper {
-                padding: 24px 24px 32px;
+                padding: 20px 20px 24px;
             }
 
             .features-row {
@@ -1023,11 +661,6 @@
             .security-badge {
                 display: none;
             }
-
-            .corner-decor {
-                width: 60px;
-                height: 60px;
-            }
         }
     </style>
 </head>
@@ -1035,17 +668,7 @@
 <body>
     <!-- Background -->
     <div class="bg-wrapper">
-        <div class="dots-grid"></div>
         <div class="circuit-grid"></div>
-        <div class="circuit-lines">
-            <div class="circuit-line"></div>
-            <div class="circuit-line"></div>
-            <div class="circuit-line"></div>
-            <div class="circuit-line"></div>
-            <div class="circuit-line-v"></div>
-            <div class="circuit-line-v"></div>
-            <div class="circuit-line-v"></div>
-        </div>
         <div class="circuit-nodes">
             <div class="circuit-node"></div>
             <div class="circuit-node"></div>
@@ -1060,22 +683,12 @@
             <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
         </div>
         <div class="shape shape-1"></div>
         <div class="shape shape-2"></div>
         <div class="shape shape-3"></div>
-        <div class="shape shape-4"></div>
-        <div class="shape shape-5"></div>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-        <div class="scan-line"></div>
-        <div class="wave"></div>
-        <div class="wave wave-2"></div>
     </div>
 
     <!-- Security Badge -->
@@ -1087,22 +700,17 @@
     <!-- Login Container -->
     <div class="login-container">
         <div class="login-card">
-            <!-- Animated Border Effect -->
-            <div class="animated-border"></div>
-
             <!-- Card Header -->
             <div class="card-header">
                 <!-- Header Gradient Background -->
                 <div class="header-gradient">
                     <!-- Logo -->
                     <div class="logo-wrapper">
-                        <div class="logo-glow"></div>
-                        <img src="Imagenes/Version_Web.svg" alt="Solbin-X" class="logo-img">
+                        <span class="logo-text">SOLBIN-X</span>
                     </div>
                     
                     <!-- Title -->
                     <h1 class="title">Panel de Administración</h1>
-                    <p class="subtitle">Acceso restringido al sistema</p>
                 </div>
             </div>
 
