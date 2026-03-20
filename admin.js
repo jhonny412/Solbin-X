@@ -4007,14 +4007,17 @@ const PRODUCT_COLORS = [
 ];
 
 const STATUS_CONFIG = {
-    'iniciado': { label: 'Iniciados', color: 'rgba(245, 158, 11, 0.9)' },
-    'confirmado': { label: 'Confirmados', color: 'rgba(14, 165, 233, 0.9)' },
+    'iniciado': { label: 'Iniciados', color: 'rgba(59, 130, 246, 0.9)' },
+    'confirmado': { label: 'Confirmados', color: 'rgba(6, 182, 212, 0.9)' },
+    'en_proceso': { label: 'En Proceso', color: 'rgba(168, 85, 247, 0.9)' },
+    'preparando': { label: 'Preparando', color: 'rgba(251, 146, 60, 0.9)' },
     'enviado': { label: 'Enviados', color: 'rgba(139, 92, 246, 0.9)' },
-    'entregado': { label: 'Entregados', color: 'rgba(16, 185, 129, 0.9)' },
+    'entregado': { label: 'Entregados', color: 'rgba(20, 184, 166, 0.9)' },
     'completado': { label: 'Completados', color: 'rgba(34, 197, 94, 0.9)' },
+    'terminado': { label: 'Terminados', color: 'rgba(132, 204, 22, 0.9)' },
     'cancelado': { label: 'Cancelados', color: 'rgba(239, 68, 68, 0.9)' },
-    'pendiente': { label: 'Pendientes', color: 'rgba(251, 191, 36, 0.9)' },
-    'pagado': { label: 'Pagados', color: 'rgba(16, 185, 129, 0.9)' }
+    'pendiente': { label: 'Pendientes', color: 'rgba(249, 115, 22, 0.9)' },
+    'pagado': { label: 'Pagados', color: 'rgba(234, 179, 8, 0.9)' }
 };
 
 async function loadAnalytics() {
