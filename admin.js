@@ -2568,6 +2568,37 @@ document.addEventListener('visibilitychange', () => {
 async function checkAuth() {
     console.log('Verificando autenticación...');
     
+    // GENERAR ID DE INSTANCIA DEL NAVEGADOR
+    // Este ID cambia cada vez que se abre el navegador
+    const browserInstanceId = sessionStorage.getItem('browser_instance_id');
+    const currentInstanceId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    
+    if (!browserInstanceId) {
+        // Nueva instancia del navegador - generar ID
+        sessionStorage.setItem('browser_instance_id', currentInstanceId);
+        console.log('[Auth] Nueva instancia de navegador detectada');
+    }
+    
+    // REQUISITO: El usuario debe haber pasado por login.html primero
+    // y debe ser la misma instancia del navegador
+    const sessionStart = getSessionStartTime();
+    const storedBrowserId = localStorage.getItem('admin_browser_instance');
+    
+    if (!sessionStart || !storedBrowserId || storedBrowserId !== browserInstanceId) {
+        console.warn('[Auth] Sesion no valida o navegador reiniciado');
+        clearSessionData();
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    // Verificar si la sesion admin expiro
+    const now = Date.now();
+    if (now - sessionStart > SESSION_CONFIG.MAX_SESSION_MS) {
+        console.warn('[Auth] Sesión admin expirada');
+        forceLogout('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+        return;
+    }
+    
     tabId = generateTabId();
     localStorage.setItem(SESSION_CONFIG.STORAGE_KEY_TAB_ID, tabId);
     
@@ -2613,11 +2644,6 @@ async function checkAuth() {
         
         isActiveTab = true;
         
-        const existingSessionStart = getSessionStartTime();
-        if (!existingSessionStart) {
-            setSessionStartTime(Date.now());
-        }
-        
         console.log('Sesión activa:', session.user.email, '| Tab ID:', tabId);
         const userEmailEl = document.getElementById('userEmail');
         if (userEmailEl) userEmailEl.textContent = session.user.email;
@@ -2635,6 +2661,15 @@ async function checkAuth() {
 }
 
 document.addEventListener('DOMContentLoaded', checkAuth);
+
+// Limpiar sesion al cerrar el navegador/pestana
+window.addEventListener('beforeunload', function() {
+    // Limpiar sesion para que requiera re-autenticacion al reabrir
+    const sessionStart = getSessionStartTime();
+    if (sessionStart) {
+        clearSessionData();
+    }
+});
 
 // Ver detalle de producto
 window.viewProductDetail = function (product) {
