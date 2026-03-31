@@ -16,6 +16,45 @@ let catalogState = {
     }
 };
 
+// --- SKELETON LOADER ---
+function showSkeletonLoader(grid, count = 8) {
+    let skeletonHTML = '';
+    for (let i = 0; i < count; i++) {
+        skeletonHTML += `
+            <div class="producto-card group relative bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 animate-pulse">
+                <div class="h-56 bg-gradient-to-b from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800"></div>
+                <div class="p-5 space-y-3">
+                    <div class="h-4 bg-gray-100 dark:bg-gray-700 rounded w-1/3"></div>
+                    <div class="h-6 bg-gray-100 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div class="h-4 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div>
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="h-8 bg-gray-100 dark:bg-gray-700 rounded w-1/3"></div>
+                        <div class="h-10 bg-gray-100 dark:bg-gray-700 rounded-full w-1/3"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    grid.innerHTML = skeletonHTML;
+}
+
+function showSkeletonLoaderRow(grid, count = 4) {
+    let skeletonHTML = '';
+    for (let i = 0; i < count; i++) {
+        skeletonHTML += `
+            <div class="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                <div class="w-16 h-16 bg-gradient-to-b from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-lg"></div>
+                <div class="flex-1 space-y-2">
+                    <div class="h-4 bg-gray-100 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div>
+                </div>
+                <div class="h-8 bg-gray-100 dark:bg-gray-700 rounded w-20"></div>
+            </div>
+        `;
+    }
+    grid.innerHTML = skeletonHTML;
+}
+
 // --- CORE LOADER ---
 
 // Cargar productos al inicio
@@ -23,8 +62,8 @@ async function loadAndRenderProducts() {
     const grid = document.getElementById('productos-grid');
     if (!grid) return;
 
-    // Loader inicial
-    grid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-4 text-center py-20"><i class="fas fa-circle-notch fa-spin text-4xl text-sky-600"></i><p class="mt-4 text-gray-500 dark:text-gray-400">Cargando catálogo...</p></div>';
+    // Skeleton loader inicial
+    showSkeletonLoader(grid, 8);
 
     try {
         const client = window.supabaseClient || window.supabase;
@@ -207,7 +246,7 @@ function renderCurrentPage() {
 
         card.innerHTML = `
             <!-- Imagen Container -->
-            <div class="relative h-56 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 cursor-pointer" onclick='window.location.href="producto.html?id=${p.id}"'>
+            <div class="relative h-48 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 cursor-pointer flex items-center justify-center" onclick='window.location.href="producto.html?id=${p.id}"'>
                 <img src="${mainImage}" alt="${p.name.replace(/"/g, '&quot;')}" class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110" loading="lazy">
                 
                 ${badges}
@@ -232,53 +271,58 @@ function renderCurrentPage() {
                 <i class="fas fa-heart"></i>
             </button>
 
-            <!-- Contenido -->
-            <div class="p-5">
-                <!-- Categoría y Rating -->
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-bold tracking-wider text-${color}-600 dark:text-${color}-400 uppercase bg-${color}-50 dark:bg-${color}-900/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <!-- Contenido - Flex column para uniformidad -->
+            <div class="p-4 flex flex-col flex-grow">
+                <!-- Categoría -->
+                <div class="mb-2">
+                    <span class="text-[10px] font-bold tracking-wider text-${color}-600 dark:text-${color}-400 uppercase bg-${color}-50 dark:bg-${color}-900/30 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
                         <i class="fas ${categoryIcon}"></i> ${p.category}
                     </span>
-                    <div class="flex items-center text-yellow-400 text-xs">
-                        <i class="fas fa-star"></i>
-                        <span class="ml-1 text-gray-500 dark:text-gray-400">4.9</span>
-                    </div>
                 </div>
                 
-                <!-- Nombre del producto -->
-                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-sky-600 transition leading-snug line-clamp-2 min-h-[2.5rem]" onclick='window.location.href="producto.html?id=${p.id}"'>
+                <!-- Nombre del producto - altura fija -->
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-[#0D9488] transition leading-snug h-10 overflow-hidden" onclick='window.location.href="producto.html?id=${p.id}"'>
                     ${p.name}
                 </h3>
                 
-                <!-- Specs preview -->
-                <div class="flex flex-wrap gap-1 mb-3">
+                <!-- Specs preview - altura fija -->
+                <div class="flex flex-wrap gap-1 mb-2 h-6 overflow-hidden">
                     ${specsPreview}
                 </div>
                 
-                <!-- Stock indicator -->
+                <!-- Rating -->
                 <div class="flex items-center gap-1 mb-3">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-xs text-green-600 dark:text-green-400 font-medium">En stock</span>
+                    <div class="flex items-center text-yellow-400 text-xs">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <span class="text-xs text-gray-400">4.9</span>
                 </div>
+
+                <!-- Spacer -->
+                <div class="flex-grow"></div>
 
                 <!-- Separador -->
                 <div class="border-t border-gray-100 dark:border-gray-700 my-3"></div>
 
-                <!-- Precio y Acción -->
+                <!-- Precio y Acción - alineados al fondo -->
                 <div class="flex justify-between items-end">
                     <div class="flex flex-col">
                         ${p.old_price && parseFloat(p.old_price) > parseFloat(p.price) ?
                 `<span class="text-xs text-gray-400 line-through">S/. ${parseFloat(p.old_price).toLocaleString()}</span>` : ''}
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
                     </div>
                     <button type="button" 
-                        class="add-to-cart-btn flex items-center gap-2 bg-[#0D9488] text-white px-4 py-2.5 rounded-xl hover:bg-[#0F766E] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium text-sm"
+                        class="add-to-cart-btn flex items-center justify-center gap-2 bg-[#0D9488] text-white px-3 py-2 rounded-lg hover:bg-[#0F766E] transition-all duration-300 shadow-md hover:shadow-lg font-medium text-xs min-w-[90px]"
                         data-name="${safeName}" 
                         data-price="${p.price}"
                         data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'
                         title="Agregar al carrito">
                         <i class="fas fa-cart-plus"></i>
-                        <span class="hidden sm:inline">Agregar</span>
+                        <span>Agregar</span>
                     </button>
                 </div>
             </div>

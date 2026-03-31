@@ -578,8 +578,8 @@ document.addEventListener('DOMContentLoaded', function () {
             warning: 'bg-amber-500'
         };
         const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-times-circle',
+            success: 'success',
+            error: 'error',
             info: 'fa-info-circle',
             warning: 'fa-exclamation-circle'
         };
@@ -683,7 +683,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 success: {
                     gradient: 'alert-gradient-success',
-                    icon: 'fa-check-circle',
+                    icon: 'success',
                     iconBg: 'bg-white/20',
                     iconColor: 'text-white',
                     textColor: 'text-white',
@@ -699,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 error: {
                     gradient: 'alert-gradient-error',
-                    icon: 'fa-times-circle',
+                    icon: 'error',
                     iconBg: 'bg-white/20',
                     iconColor: 'text-white',
                     textColor: 'text-white',

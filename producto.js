@@ -48,14 +48,15 @@ async function initProductPage() {
         area.classList.add('opacity-100', 'translate-y-0');
 
     } catch (err) {
-        console.error(err);
+        console.error('Error loading product:', err);
         const loading = document.getElementById('product-loading');
         loading.innerHTML = `
             <div class="text-center py-20">
                 <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
                 <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-3">Producto No Encontrado</h2>
-                <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">El producto que buscas no existe o ha sido movido del catálogo.</p>
-                <a href="index.html#catalogo" class="inline-flex items-center gap-2 bg-sky-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-sky-700 transition-all transform hover:-translate-y-1">
+                <p class="text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">El producto que buscas no existe o ha sido movido del catálogo.</p>
+                <p class="text-gray-400 dark:text-gray-500 mb-8 text-sm">ID: ${productId}</p>
+                <a href="index.html#catalogo" class="inline-flex items-center gap-2 bg-[#0D9488] hover:bg-[#0F766E] text-white px-8 py-3 rounded-xl font-semibold transition-all hover:-translate-y-0.5">
                     <i class="fas fa-arrow-left"></i> Volver al Catálogo
                 </a>
             </div>
@@ -66,34 +67,26 @@ async function initProductPage() {
 function initQuantitySelector() {
     const minusBtn = document.getElementById('qty-minus');
     const plusBtn = document.getElementById('qty-plus');
-    const qtyInput = document.getElementById('product-quantity');
+    const qtyDisplay = document.getElementById('product-quantity');
     
-    if (!minusBtn || !plusBtn || !qtyInput) return;
+    if (!minusBtn || !plusBtn || !qtyDisplay) return;
     
     let quantity = 1;
     
+    function updateQuantity(newQty) {
+        const maxStock = currentProduct?.stock || 99;
+        if (newQty < 1) newQty = 1;
+        if (newQty > maxStock) newQty = maxStock;
+        quantity = newQty;
+        qtyDisplay.textContent = quantity;
+    }
+    
     minusBtn.addEventListener('click', () => {
-        if (quantity > 1) {
-            quantity--;
-            qtyInput.value = quantity;
-        }
+        updateQuantity(quantity - 1);
     });
     
     plusBtn.addEventListener('click', () => {
-        const maxStock = currentProduct?.stock || 99;
-        if (quantity < maxStock) {
-            quantity++;
-            qtyInput.value = quantity;
-        }
-    });
-    
-    qtyInput.addEventListener('change', () => {
-        let val = parseInt(qtyInput.value);
-        const maxStock = currentProduct?.stock || 99;
-        if (val < 1) val = 1;
-        if (val > maxStock) val = maxStock;
-        quantity = val;
-        qtyInput.value = quantity;
+        updateQuantity(quantity + 1);
     });
 }
 
@@ -355,14 +348,19 @@ function renderProductData(product) {
     let hasSpecs = false;
 
     if (product.specifications && Object.keys(product.specifications).length > 0) {
+        specsHtml += '<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden">';
+        let isEven = false;
         Object.entries(product.specifications).forEach(([key, val]) => {
+            const rowClass = isEven ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50';
             specsHtml += `
-            <div class="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 px-4 rounded-lg transition-colors">
-                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">${key}</span>
-                <span class="text-base font-medium text-gray-900 dark:text-white ml-4 text-right break-words max-w-[60%]">${val}</span>
+            <div class="flex items-center justify-between px-4 py-3 ${rowClass} transition-colors hover:bg-[#0D9488]/5 dark:hover:bg-[#0D9488]/10">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">${key}</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-white text-right ml-4">${val}</span>
             </div>`;
+            isEven = !isEven;
             hasSpecs = true;
         });
+        specsHtml += '</div>';
     }
 
     if (hasSpecs) {
@@ -375,17 +373,19 @@ function renderProductData(product) {
 
     const btnCart = document.getElementById('add-to-cart-big-btn');
     btnCart.onclick = () => {
-        const qtyInput = document.getElementById('product-quantity');
-        const quantity = parseInt(qtyInput?.value || 1);
+        const qtyDisplay = document.getElementById('product-quantity');
+        const quantity = parseInt(qtyDisplay?.textContent) || 1;
         
         if (window.cartManager) {
             window.cartManager.addToCart(product.name, parseFloat(product.price), quantity, product);
-            btnCart.innerHTML = `<i class="fas fa-check-circle text-2xl"></i> ¡Agregado!`;
-            btnCart.classList.add('bg-emerald-600', 'hover:bg-emerald-600');
+            btnCart.innerHTML = `<i class="fas fa-check-circle text-xl"></i> ¡Agregado al Carrito!`;
+            btnCart.classList.add('bg-green-600', 'hover:bg-green-600');
+            btnCart.disabled = true;
             
             setTimeout(() => {
-                btnCart.innerHTML = `<i class="fas fa-cart-plus text-2xl"></i> Añadir al Carrito`;
-                btnCart.classList.remove('bg-emerald-600', 'hover:bg-emerald-600');
+                btnCart.innerHTML = `<i class="fas fa-shopping-cart text-lg"></i> <span class="text-lg">Añadir al Carrito</span>`;
+                btnCart.classList.remove('bg-green-600', 'hover:bg-green-600');
+                btnCart.disabled = false;
             }, 2000);
             
             if (window.updateCartBadge) window.updateCartBadge();

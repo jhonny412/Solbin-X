@@ -33,7 +33,6 @@
     <meta name="rating" content="general">
 
     <!-- SEO Avanzado -->
-    <meta name="theme-color" content="#0D9488">
     <meta name="msapplication-TileColor" content="#0D9488">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -79,9 +78,9 @@
     <meta name="geo.placename" content="Lima, Perú">
 
     <!-- Theme Color -->
-    <meta name="theme-color" content="#0284c7">
-    <meta name="msapplication-navbutton-color" content="#0284c7">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#0284c7">
+    <meta name="theme-color" content="#0D9488">
+    <meta name="msapplication-navbutton-color" content="#0D9488">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0D9488">
 
     <!-- Structured Data / Schema.org - Store -->
     <script type="application/ld+json">
@@ -271,11 +270,18 @@
     <link rel="preload" href="dist/styles.css" as="style">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-    <!-- Font Awesome (external) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Tailwind CSS (local, optimized) -->
     <link rel="stylesheet" href="dist/styles.css">
+    
+    <!-- Theme CSS (shared variables and components) -->
+    <link rel="stylesheet" href="dist/theme.css">
+    
+    <!-- Custom UI Styles -->
+    <link rel="stylesheet" href="dist/custom-ui.css">
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -289,207 +295,16 @@
         }
     </script>
 
-    <!-- Custom Styles (minimal - extras not in Tailwind) -->
+    <!-- Custom Styles (page-specific only - theme variables are in dist/theme.css) -->
     <style>
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f3f4f6;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-            --card-bg: #ffffff;
-            --nav-bg: #ffffff;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #111827;
-            --bg-secondary: #1f2937;
-            --text-primary: #f3f4f6;
-            --text-secondary: #d1d5db;
-            --border-color: #374151;
-            --card-bg: #1f2937;
-            --nav-bg: #111827;
-        }
+        /* Page-specific styles - carousel, modal, and custom interactions */
 
         .smooth-scroll {
             scroll-behavior: smooth;
         }
 
         .gradient-bg {
-            background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
-        }
-
-        .card-hover {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .fade-in {
-            animation: fadeIn 1s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .whatsapp-float {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            bottom: 40px;
-            right: 40px;
-            background-color: #25d366;
-            color: #FFF;
-            border-radius: 50px;
-            text-align: center;
-            font-size: 30px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            transition: all 0.3s ease;
-            animation: whatsapp-pulse 2s infinite, whatsapp-glow 2s ease-in-out infinite;
-        }
-
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.4);
-            animation: none;
-        }
-
-        @keyframes whatsapp-pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
-            }
-
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
-            }
-
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
-            }
-        }
-
-        @keyframes whatsapp-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 25px rgba(37, 211, 102, 0.8), 0 0 50px rgba(37, 211, 102, 0.4);
-            }
-        }
-
-        /* Chatbot Danna Animation */
-        #solbin-chatbot-open {
-            animation: danna-bounce 2s ease-in-out infinite;
-        }
-
-        #solbin-chatbot-open:hover {
-            animation: none;
-            transform: scale(1.05);
-        }
-
-        @keyframes danna-bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            10% {
-                transform: translateY(-5px);
-            }
-
-            30% {
-                transform: translateY(-8px);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-
-            70% {
-                transform: translateY(-3px);
-            }
-        }
-
-        #solbin-chatbot-open::before {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 30px;
-            border: 2px solid #0D9488;
-            animation: danna-ring 2s ease-in-out infinite;
-            opacity: 0.6;
-        }
-
-        @keyframes danna-ring {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.6;
-            }
-
-            50% {
-                transform: scale(1.05);
-                opacity: 0.2;
-            }
-        }
-
-        .danna-icon {
-            position: relative;
-            animation: danna-spin 3s linear infinite;
-        }
-
-        @keyframes danna-spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .nav-link {
-            position: relative;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: #0ea5e9;
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
         }
 
         /* Carousel Styles */
@@ -534,28 +349,18 @@
             border-radius: 6px;
         }
 
-        /* Carousel Dots Container - Asegurar visibilidad */
-        #carousel-dots-container {
-            z-index: 100 !important;
-        }
-
-        /* Fix para imágenes del carrusel */
         .carousel-slide img {
             display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Llenar todo el ancho del carrusel */
             object-position: center;
-            /* Centrar la imagen */
             position: absolute;
             top: 0;
             left: 0;
             will-change: transform;
-            /* Optimizar para animaciones */
         }
 
-        /* Skeleton loader para carrusel */
         .carousel-skeleton {
             position: absolute;
             top: 0;
@@ -565,21 +370,6 @@
             z-index: 5;
         }
 
-        @keyframes shimmer {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        .animate-shimmer {
-            animation: shimmer 2s infinite linear;
-        }
-
-        /* Transición suave para imágenes del carrusel */
         .carousel-slide img {
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
@@ -594,10 +384,9 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0f172a;
+            background-color: var(--bg-secondary);
         }
 
-        /* Carousel Arrows - Asegurar visibilidad máxima */
         #carousel-prev-btn,
         #carousel-next-btn {
             z-index: 200 !important;
@@ -616,25 +405,20 @@
 
         #carousel-prev-btn i,
         #carousel-next-btn i {
-            color: #0D9488 !important;
+            color: var(--primary) !important;
         }
 
         #carousel-prev-btn:hover,
         #carousel-next-btn:hover {
             opacity: 1 !important;
             transform: translateY(-50%) scale(1.15);
-            background-color: rgba(13, 148, 136, 1) !important;
+            background-color: var(--primary) !important;
             box-shadow: 0 6px 16px rgba(13, 148, 136, 0.5);
         }
 
         #carousel-prev-btn:hover i,
         #carousel-next-btn:hover i {
             color: white !important;
-        }
-
-        /* Debug: Mostrar borde rojo si hay error */
-        .carousel-slide img[src=""] {
-            border: 2px solid red;
         }
 
         /* Image Modal Styles */
@@ -667,7 +451,7 @@
             max-width: 100%;
             max-height: 90vh;
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
         }
 
         .modal-close {
@@ -682,7 +466,7 @@
         }
 
         .modal-close:hover {
-            color: #667eea;
+            color: var(--primary-light);
         }
 
         .modal-caption {
@@ -698,14 +482,13 @@
                 transform: scale(0.8);
                 opacity: 0;
             }
-
             to {
                 transform: scale(1);
                 opacity: 1;
             }
         }
 
-        /* Custom Range Slider Styles */
+        /* Custom Range Slider */
         .slider {
             -webkit-appearance: none;
             appearance: none;
@@ -717,13 +500,13 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #667eea;
+            background: var(--primary);
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .slider::-webkit-slider-thumb:hover {
-            background: #764ba2;
+            background: var(--primary-dark);
             transform: scale(1.2);
         }
 
@@ -731,71 +514,53 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #667eea;
+            background: var(--primary);
             cursor: pointer;
             border: none;
             transition: all 0.3s ease;
         }
 
         .slider::-moz-range-thumb:hover {
-            background: #764ba2;
+            background: var(--primary-dark);
             transform: scale(1.2);
         }
 
-        .slider::-webkit-slider-runnable-track {
-            background: linear-gradient(to right, #667eea 0%, #667eea var(--value), #e5e7eb var(--value), #e5e7eb 100%);
-            height: 8px;
-            border-radius: 4px;
+        /* Autocomplete */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            box-shadow: var(--shadow-lg);
         }
 
-        /* Skeleton Screens para carga */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-            border-radius: 4px;
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        @keyframes skeleton-loading {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
+        .autocomplete-items div:hover {
+            background-color: var(--bg-secondary);
         }
 
-        .skeleton-text {
-            height: 1em;
-            margin-bottom: 0.5em;
+        .autocomplete-active {
+            background-color: var(--primary) !important;
+            color: var(--text-inverse);
         }
 
-        .skeleton-image {
-            height: 200px;
-            width: 100%;
-        }
-
-        /* Mejoras de accesibilidad - Focus visible */
-        *:focus-visible {
-            outline: 3px solid #0D9488;
-            outline-offset: 2px;
-        }
-
-        button:focus-visible,
-        a:focus-visible,
-        input:focus-visible {
-            outline: 3px solid #0D9488;
-            outline-offset: 2px;
-            border-radius: 4px;
-        }
-
-        /* Skip to main content para accesibilidad */
+        /* Skip to main content */
         .skip-link {
             position: absolute;
             top: -40px;
             left: 0;
-            background: #0D9488;
+            background: var(--primary);
             color: white;
             padding: 8px;
             text-decoration: none;
@@ -806,204 +571,107 @@
             top: 0;
         }
 
-        /* Breadcrumbs */
-        .breadcrumb {
-            padding: 0.75rem 1rem;
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-        }
-
-        .breadcrumb-item+.breadcrumb-item::before {
-            content: ">";
-            padding: 0 0.5rem;
-            color: #6c757d;
-        }
-
-        /* Autocomplete/Búsqueda predictiva */
-        .autocomplete-items {
-            position: absolute;
-            border: 1px solid #d4d4d4;
-            border-bottom: none;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .autocomplete-items div {
-            padding: 10px;
-            cursor: pointer;
-            background-color: #fff;
-            border-bottom: 1px solid #d4d4d4;
-        }
-
-        .autocomplete-items div:hover {
-            background-color: #e9ecef;
-        }
-
-        .autocomplete-active {
-            background-color: #0D9488 !important;
-            color: #ffffff;
-        }
-
-        /* Notificaciones toast */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: #0D9488;
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 9999;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* Scroll suave mejorado */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Toast container */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* Reducir movimiento para accesibilidad */
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* Custom Cursor Effect */
+        /* Custom Cursor Effect - Neon Style */
         .custom-cursor {
             position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #0D9488;
+            width: 36px;
+            height: 36px;
+            border: 2px solid #0ff;
             border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
-            transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
-            mix-blend-mode: difference;
+            transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow:
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 40px #0ff,
+                0 0 80px #0ff;
+            mix-blend-mode: screen;
         }
 
         .custom-cursor.hover {
-            width: 50px;
-            height: 50px;
-            background-color: rgba(13, 148, 136, 0.2);
-            border-color: #0D9488;
+            width: 60px;
+            height: 60px;
+            border-color: #f0f;
+            box-shadow:
+                0 0 10px #f0f,
+                0 0 25px #f0f,
+                0 0 50px #f0f,
+                0 0 100px #f0f;
         }
 
         .custom-cursor-dot {
             position: fixed;
-            width: 6px;
-            height: 6px;
-            background-color: #0D9488;
+            width: 8px;
+            height: 8px;
+            background-color: #fff;
             border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
-            transition: transform 0.05s ease;
+            box-shadow:
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px #0ff,
+                0 0 40px #0ff;
+            mix-blend-mode: screen;
+        }
+
+        #cursorCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         @media (pointer: coarse) {
-
             .custom-cursor,
-            .custom-cursor-dot {
+            .custom-cursor-dot,
+            #cursorCanvas {
                 display: none;
             }
         }
 
-        /* Smooth Transitions for Elements */
-        .transition-smooth {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .transition-smooth-fast {
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hover-lift {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .hover-scale {
-            transition: transform 0.3s ease;
-        }
-
-        .hover-scale:hover {
-            transform: scale(1.05);
-        }
-
-        .hover-glow {
-            transition: box-shadow 0.3s ease;
-        }
-
-        .hover-glow:hover {
-            box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
-        }
-
-        .btn-transition {
+        /* Nav link underline animation */
+        .nav-link {
             position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
         }
 
-        .btn-transition::before {
+        .nav-link::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
         }
 
-        .btn-transition:hover::before {
-            left: 100%;
-        }
-
+        /* Card transitions */
         .card-transition {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card-transition:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-card-hover);
         }
 
+        /* Image zoom */
         .img-zoom {
             overflow: hidden;
         }
@@ -1016,34 +684,15 @@
             transform: scale(1.1);
         }
 
-        .nav-animate {
-            position: relative;
-        }
-
-        .nav-animate::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #0D9488;
-            transition: width 0.3s ease;
-        }
-
-        .nav-animate:hover::after {
-            width: 100%;
-        }
-
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .fade-in-up.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* Reducir movimiento para accesibilidad */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
@@ -1055,6 +704,7 @@
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <!-- Custom Cursor Elements -->
+    <canvas id="cursorCanvas"></canvas>
     <div class="custom-cursor" id="customCursor"></div>
     <div class="custom-cursor-dot" id="customCursorDot"></div>
 
@@ -1063,15 +713,15 @@
 
     <!-- Top Bar - Envío Gratis y Promociones -->
     <div
-        class="bg-gradient-to-r from-[#0D9488] to-teal-600 text-white text-xs sm:text-sm py-2 px-4 text-center relative z-50">
+        class="bg-gradient-to-r from-[#0D9488] to-teal-600 text-white text-xs sm:text-sm py-2 px-4 text-center relative z-10">
         <div class="max-w-7xl mx-auto flex justify-center items-center gap-4">
             <span class="flex items-center gap-2">
-                <i class="fas fa-truck-fast"></i>
+                <i class="fas fa-truck text-4xl"></i>
                 <strong>Envíos</strong> a todo el territorio nacional
             </span>
             <span class="hidden sm:inline">|</span>
             <span class="hidden sm:flex items-center gap-2">
-                <i class="fas fa-shield-alt"></i>
+                <i class="fas fa-shield-check"></i>
                 Garantía de 1 año en todos los productos
             </span>
         </div>
@@ -1118,7 +768,7 @@
                     <!-- Close Button -->
                     <button onclick="closeWebAlert()"
                         class="relative group w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-90">
-                        <i class="fas fa-times text-lg group-hover:scale-125 transition-transform"></i>
+                        <i class="fas fa-xmark text-lg group-hover:scale-125 transition-transform"></i>
                     </button>
                 </div>
             </div>
@@ -1214,7 +864,7 @@
     </style>
 
     <!-- Navegación Principal - Estilo E-commerce -->
-    <nav class="bg-white dark:bg-gray-900 shadow-lg fixed w-full top-8 z-40 transition-colors duration-300">
+    <nav class="bg-white dark:bg-gray-900 shadow-lg fixed w-full top-[42px] z-40 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <!-- Logo más compacto -->
@@ -1295,7 +945,7 @@
                 <div class="flex items-center space-x-8 overflow-x-auto">
                     <a href="#catalogo" id="btn-todas-categorias" data-filter="all"
                         class="nav-link flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap cursor-pointer">
-                        <i class="fas fa-th-large text-[#0D9488]"></i>
+                        <i class="fas fa-th text-[#0D9488]"></i>
                         <span>Todas las Categorías</span>
                     </a>
                     <a href="#catalogo" onclick="filterCategory('laptops', this)" data-filter="laptops"
@@ -1357,7 +1007,7 @@
                 <p class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Categorías</p>
                 <a href="#catalogo" id="btn-todos-productos" data-filter="all"
                     class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-th-large w-6 text-[#0D9488]"></i> Todos los Productos
+                    <i class="fas fa-th w-6 text-[#0D9488]"></i> Todos los Productos
                 </a>
                 <a href="#catalogo" onclick="filterCategory('laptops', this)" data-filter="laptops"
                     class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
@@ -1387,7 +1037,7 @@
                 </a>
                 <a href="#testimonios"
                     class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-comments w-6 text-[#0D9488]"></i> Testimonios
+                    <i class="fas fa-comment-dots w-6 text-[#0D9488]"></i> Testimonios
                 </a>
                 <a href="#contacto"
                     class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
@@ -1453,7 +1103,7 @@
     <main id="main-content">
 
         <!-- Landing Page / Hero Section - Banner Style -->
-        <section id="inicio" class="relative pt-20 overflow-hidden">
+        <section id="inicio" class="relative pt-[122px] overflow-hidden">
             <h1 class="sr-only">Solbin-X: Venta de Laptops, Componentes y Accesorios Tecnológicos en Perú</h1>
             <!-- Carousel Container - Adapts to image proportions -->
             <div class="carousel-container w-full relative" style="aspect-ratio: 1200/370;"
@@ -1462,7 +1112,7 @@
                     <!-- Las imágenes se cargarán dinámicamente desde Supabase -->
                     <div class="flex items-center justify-center h-full text-white text-center">
                         <div>
-                            <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                            <i class="fas fa-circle-notch fa-spin text-4xl mb-4"></i>
                             <p>Cargando carrusel...</p>
                         </div>
                     </div>
@@ -1499,7 +1149,7 @@
                             </div>
                         </div>
                         <div class="flex items-center justify-center space-x-4 text-white">
-                            <i class="fas fa-shield-alt text-4xl"></i>
+                            <i class="fas fa-shield-check text-4xl"></i>
                             <div class="text-left">
                                 <h3 class="font-bold text-lg">Garantía Total</h3>
                                 <p class="text-sm opacity-90">1 año en todos los productos</p>
@@ -1567,7 +1217,7 @@
                         <a href="#catalogo"
                             onclick="filterCategory('all', document.querySelector('.filter-btn[data-filter=\'all\']')); filterPriceRange(0, 5000);"
                             class="bg-white text-red-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-lg transform hover:-translate-y-1 whitespace-nowrap inline-flex items-center gap-2">
-                            <i class="fas fa-fire"></i>
+                            <i class="fas fa-fire text-xl"></i>
                             Ver Ofertas
                         </a>
                     </div>
@@ -1631,7 +1281,7 @@
                                 </h3>
                                 <button onclick="resetCatalogFilters()"
                                     class="text-sm text-gray-500 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] transition">
-                                    <i class="fas fa-redo mr-1"></i>
+                                    <i class="fas fa-rotate-left mr-1"></i>
                                     Limpiar
                                 </button>
                             </div>
@@ -1655,7 +1305,7 @@
                             <div class="mb-6">
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-th-large text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-th text-[#0D9488] mr-2 text-xs"></i>
                                     Categorías
                                 </h4>
                                 <div class="space-y-2">
@@ -1820,7 +1470,7 @@
                                 <!-- Filtro por Ordenamiento -->
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-sort text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-arrows-alt-v text-[#0D9488] mr-2 text-xs"></i>
                                     Ordenar Por
                                 </h4>
                                 <select id="sortSelect" onchange="filterSort(this.value)"
@@ -2060,7 +1710,7 @@
                             <div class="mb-6">
                                 <div
                                     class="inline-block p-4 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900 dark:to-amber-800 rounded-xl">
-                                    <i class="fas fa-shield-alt text-4xl text-amber-600 dark:text-amber-300"></i>
+                                    <i class="fas fa-shield-check text-4xl text-amber-600 dark:text-amber-300"></i>
                                 </div>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Garantía Completa</h3>
@@ -2166,7 +1816,7 @@
                             <!-- Contenedor del ícono principal -->
                             <div class="relative bg-white rounded-3xl shadow-2xl p-12 text-center">
                                 <div class="text-green-600 mb-4">
-                                    <i class="fas fa-truck-fast text-8xl"></i>
+                                    <i class="fas fa-truck text-4xl text-8xl"></i>
                                 </div>
                                 <h3 class="text-2xl font-bold text-gray-800 mb-2">Envíos Express</h3>
                                 <p class="text-gray-600 font-semibold mb-6">A Todo el País</p>
@@ -2174,7 +1824,7 @@
                                 <!-- Badges de garantía -->
                                 <div class="flex justify-center gap-3 mb-4">
                                     <div class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-                                        <i class="fas fa-shield-alt mr-1"></i>Seguro
+                                        <i class="fas fa-shield-check mr-1"></i>Seguro
                                     </div>
                                     <div class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
                                         <i class="fas fa-leaf mr-1"></i>Eco
@@ -2545,7 +2195,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 bg-[#0D9488]/20 rounded-full flex items-center justify-center">
-                                <i class="fas fa-shield-alt text-[#0D9488] text-xl"></i>
+                                <i class="fas fa-shield-check text-[#0D9488] text-xl"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-sm">Compra Segura</p>
@@ -2563,7 +2213,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 bg-amber-600/20 rounded-full flex items-center justify-center">
-                                <i class="fas fa-undo text-amber-500 text-xl"></i>
+                                <i class="fas fa-rotate-left text-amber-500 text-xl"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-sm">Garantía 1 Año</p>
@@ -2589,7 +2239,7 @@
                     <!-- Logo y Descripción -->
                     <div class="lg:col-span-2">
                         <a href="#inicio" class="inline-block mb-4">
-                            <img src="Imagenes/Version_Web.svg" alt="Solbin-X"
+                            <img src="Imagenes/Version_Web.svg" alt="Solbin-X" loading="lazy"
                                 class="h-[106px] w-auto brightness-0 invert transition-all duration-300 hover:opacity-80">
                         </a>
                         <p class="text-gray-400 dark:text-gray-500 text-sm mb-4 leading-relaxed">
@@ -2601,11 +2251,11 @@
                             <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Métodos de Pago</p>
                             <div class="flex flex-wrap gap-2">
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
-                                        class="fab fa-cc-visa text-lg"></i> Visa</span>
+                                        class="fas fa-credit-card text-lg"></i> Visa</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
-                                        class="fab fa-cc-mastercard text-lg"></i> Mastercard</span>
+                                        class="fas fa-credit-card text-lg"></i> Mastercard</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
-                                        class="fas fa-money-bill-wave text-lg"></i> Yape</span>
+                                        class="fas fa-dollar-sign text-lg"></i> Yape</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
                                         class="fas fa-mobile-alt text-lg"></i> Plin</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
@@ -2785,7 +2435,7 @@
                     <button id="solbin-chatbot-close" type="button"
                         class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition"
                         aria-label="Cerrar chat">
-                        <i class="fas fa-times"></i>
+                        <i class="fas fa-xmark"></i>
                     </button>
                 </div>
 
@@ -2821,7 +2471,7 @@
                     <!-- Close Button -->
                     <button onclick="closeProductModal()"
                         class="absolute top-4 right-4 z-10 p-2 rounded-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-red-500 transition shadow-md">
-                        <i class="fas fa-times text-xl"></i>
+                        <i class="fas fa-xmark text-xl"></i>
                     </button>
 
                     <div class="flex flex-col md:flex-row">
@@ -2848,7 +2498,7 @@
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
+                                        <i class="fas fa-star-half"></i>
                                     </span>
                                     <span class="text-sm text-gray-500 dark:text-gray-400">(4.8/5.0)</span>
                                 </div>
@@ -2886,7 +2536,7 @@
                                 </button>
                                 <p
                                     class="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
-                                    <i class="fas fa-shield-alt"></i> Compra protegida y garantía de 12 meses
+                                    <i class="fas fa-shield-check"></i> Compra protegida y garantía de 12 meses
                                 </p>
                             </div>
                         </div>
@@ -3071,7 +2721,7 @@
 
                 if (loading) {
                     button.dataset.originalText = button.innerHTML;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Cargando...';
+                    button.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Cargando...';
                     button.disabled = true;
                     button.classList.add('opacity-75', 'cursor-not-allowed');
                 } else {
@@ -3166,29 +2816,138 @@
             }
         </script>
 
-        <!-- Custom Cursor Script -->
+        <!-- Custom Cursor Script - Neon Effect -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const cursor = document.getElementById('customCursor');
                 const cursorDot = document.getElementById('customCursorDot');
+                const canvas = document.getElementById('cursorCanvas');
+                const ctx = canvas ? canvas.getContext('2d') : null;
 
-                if (window.matchMedia('(pointer: fine)').matches) {
+                if (window.matchMedia('(pointer: fine)').matches && canvas && ctx) {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+
+                    window.addEventListener('resize', () => {
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                    });
+
                     let mouseX = 0, mouseY = 0;
                     let cursorX = 0, cursorY = 0;
+                    let hue = 180;
+                    let particles = [];
+
+                    const neonColors = [
+                        [0, 255, 255],
+                        [255, 0, 255],
+                        [0, 255, 128],
+                        [128, 0, 255],
+                        [255, 128, 0]
+                    ];
+                    let colorIndex = 0;
+                    let colorProgress = 0;
+
+                    class NeonParticle {
+                        constructor(x, y, color) {
+                            this.x = x;
+                            this.y = y;
+                            this.size = Math.random() * 4 + 2;
+                            this.life = 1;
+                            this.decay = Math.random() * 0.03 + 0.02;
+                            this.vx = (Math.random() - 0.5) * 3;
+                            this.vy = (Math.random() - 0.5) * 3;
+                            this.color = color;
+                        }
+                        update() {
+                            this.x += this.vx;
+                            this.y += this.vy;
+                            this.life -= this.decay;
+                            this.size *= 0.96;
+                        }
+                        draw() {
+                            if (this.life <= 0) return;
+                            const [r, g, b] = this.color;
+                            ctx.save();
+                            ctx.globalAlpha = this.life;
+                            ctx.beginPath();
+                            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgb(${r},${g},${b})`;
+                            ctx.shadowColor = `rgb(${r},${g},${b})`;
+                            ctx.shadowBlur = 15;
+                            ctx.fill();
+                            ctx.restore();
+                        }
+                    }
+
+                    let trail = [];
 
                     document.addEventListener('mousemove', function (e) {
                         mouseX = e.clientX;
                         mouseY = e.clientY;
+
+                        colorProgress += 0.02;
+                        if (colorProgress >= 1) {
+                            colorProgress = 0;
+                            colorIndex = (colorIndex + 1) % neonColors.length;
+                        }
+
+                        const c1 = neonColors[colorIndex];
+                        const c2 = neonColors[(colorIndex + 1) % neonColors.length];
+                        const currentColor = c1.map((v, i) => Math.round(v + (c2[i] - v) * colorProgress));
+
+                        for (let i = 0; i < 2; i++) {
+                            particles.push(new NeonParticle(mouseX, mouseY, currentColor));
+                        }
+
+                        trail.push({ x: mouseX, y: mouseY, life: 1, color: [...currentColor] });
+                        if (trail.length > 30) trail.shift();
+
+                        const [r, g, b] = currentColor;
+                        cursorDot.style.boxShadow = `
+                            0 0 5px rgb(${r},${g},${b}),
+                            0 0 10px rgb(${r},${g},${b}),
+                            0 0 20px rgb(${r},${g},${b}),
+                            0 0 40px rgb(${r},${g},${b})`;
+                        cursorDot.style.backgroundColor = `rgb(${r},${g},${b})`;
                     });
 
                     function animateCursor() {
-                        cursorX += (mouseX - cursorX) * 0.15;
-                        cursorY += (mouseY - cursorY) * 0.15;
+                        cursorX += (mouseX - cursorX) * 0.12;
+                        cursorY += (mouseY - cursorY) * 0.12;
 
                         cursor.style.left = cursorX + 'px';
                         cursor.style.top = cursorY + 'px';
                         cursorDot.style.left = mouseX + 'px';
                         cursorDot.style.top = mouseY + 'px';
+
+                        hue = (hue + 0.5) % 360;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        for (let i = trail.length - 1; i >= 0; i--) {
+                            trail[i].life -= 0.03;
+                            if (trail[i].life <= 0) {
+                                trail.splice(i, 1);
+                                continue;
+                            }
+                            const t = trail[i];
+                            const [r, g, b] = t.color;
+                            ctx.beginPath();
+                            ctx.arc(t.x, t.y, 4 * t.life, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(${r},${g},${b},${t.life * 0.6})`;
+                            ctx.shadowColor = `rgb(${r},${g},${b})`;
+                            ctx.shadowBlur = 20;
+                            ctx.fill();
+                        }
+
+                        for (let i = particles.length - 1; i >= 0; i--) {
+                            particles[i].update();
+                            particles[i].draw();
+                            if (particles[i].life <= 0) {
+                                particles.splice(i, 1);
+                            }
+                        }
 
                         requestAnimationFrame(animateCursor);
                     }
@@ -3198,6 +2957,17 @@
                     interactiveElements.forEach(el => {
                         el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
                         el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                    });
+
+                    document.addEventListener('click', function (e) {
+                        const clickColor = neonColors[Math.floor(Math.random() * neonColors.length)];
+                        for (let i = 0; i < 15; i++) {
+                            const p = new NeonParticle(e.clientX, e.clientY, clickColor);
+                            p.vx = (Math.random() - 0.5) * 8;
+                            p.vy = (Math.random() - 0.5) * 8;
+                            p.size = Math.random() * 6 + 3;
+                            particles.push(p);
+                        }
                     });
                 }
             });

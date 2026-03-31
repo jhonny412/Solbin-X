@@ -196,47 +196,52 @@ class CartManager {
 
     // Mostrar notificación
     showNotification(productName, quantity = 1) {
-        // Crear notificación
+        // Crear notificación toast
         const notification = document.createElement('div');
-        notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 opacity-0 transition-opacity duration-300';
+        notification.className = 'toast toast-success';
+        notification.style.cssText = 'position: fixed; top: 100px; right: 20px; padding: 16px 24px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); z-index: 9999; transform: translateX(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 4px solid var(--success);';
 
         const iconElement = document.createElement('i');
-        iconElement.className = 'fas fa-check-circle text-2xl mr-3';
+        iconElement.className = 'fas fa-check-circle';
+        iconElement.style.cssText = 'font-size: 24px; color: var(--success); margin-right: 12px;';
 
         const textContainer = document.createElement('div');
 
         const productNameElement = document.createElement('p');
-        productNameElement.className = 'font-bold';
+        productNameElement.style.cssText = 'font-weight: 600; color: var(--text-primary); margin-bottom: 4px;';
         productNameElement.textContent = this.sanitizeHTML(productName);
 
         const messageElement = document.createElement('p');
-        messageElement.className = 'text-sm';
-        messageElement.textContent = quantity > 1 ? `${quantity} unidades agregadas` : 'Agregado al carrito';
+        messageElement.style.cssText = 'font-size: 14px; color: var(--text-secondary);';
+        messageElement.textContent = quantity > 1 ? `${quantity} unidades agregadas al carrito` : 'Agregado al carrito';
 
         textContainer.appendChild(productNameElement);
         textContainer.appendChild(messageElement);
 
         const container = document.createElement('div');
-        container.className = 'flex items-center';
+        container.className = 'toast-message';
+        container.style.cssText = 'display: flex; align-items: center;';
         container.appendChild(iconElement);
         container.appendChild(textContainer);
 
         notification.appendChild(container);
         document.body.appendChild(notification);
 
-        // Mostrar notificación
-        setTimeout(() => {
+        // Mostrar notificación con animación
+        requestAnimationFrame(() => {
+            notification.style.transform = 'translateX(0)';
             notification.style.opacity = '1';
-        }, 100);
+        });
 
         // Ocultar notificación
         setTimeout(() => {
+            notification.style.transform = 'translateX(120%)';
             notification.style.opacity = '0';
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.remove();
                 }
-            }, 300);
+            }, 400);
         }, 3000);
     }
 }

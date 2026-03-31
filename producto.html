@@ -15,6 +15,10 @@
 
     <!-- Local optimized CSS -->
     <link rel="stylesheet" href="dist/styles.css">
+    <link rel="stylesheet" href="dist/theme.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="dist/custom-ui.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
 
@@ -69,66 +73,9 @@
     <meta name="twitter:url" content="https://solbin-x.com/">
     <meta name="twitter:title" content="Solbin-X | Equipos Tecnológicos de Calidad en Perú">
 
-    <!-- Preload Critical Assets -->
-    <link rel="preload" href="Imagenes/Version_Web.svg" as="image" type="image/svg+xml">
-
-    <!-- SEO Meta Tags -->
-    <title>Detalles de Producto - Solbin-X, Componentes y Accesorios Tecnológicos en Perú</title>
-    <meta name="description"
-        content="Compra Laptops, Componentes y Accesorios en Solbin-X. Los mejores precios en Gaming y Tecnología en Perú. Envíos Rápidos a todo el país y Garantía Total.">
-    <meta name="keywords"
-        content="venta de laptops, comprar pc gamer, laptops peru, computadoras, tarjetas graficas, componentes pc, gaming peru, laptops lenovo, laptops asus, accesorios tecnologicos, tienda tecnologia lima, equipos informaticos, solbin-x">
-    <meta name="author" content="Solbin-X">
-    <meta name="robots" content="index, follow">
-    <meta name="language" content="Spanish">
-    <meta name="revisit-after" content="7 days">
-    <meta name="distribution" content="global">
-    <meta name="rating" content="general">
-
-    <!-- SEO Avanzado -->
-    <meta name="theme-color" content="#0D9488">
-    <meta name="msapplication-TileColor" content="#0D9488">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Solbin-X">
-
-    <!-- Geo Tags para SEO Local -->
-    <meta name="geo.region" content="PE-LIM">
-    <meta name="geo.placename" content="Lima">
-    <meta name="geo.position" content="-12.0464;-77.0428">
-    <meta name="ICBM" content="-12.0464, -77.0428">
-
-    <!-- Verification (agregar cuando tengas) -->
-    <!-- <meta name="google-site-verification" content="tu-codigo"> -->
-    <!-- <meta name="facebook-domain-verification" content="tu-codigo"> -->
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://solbin-x.com/">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://solbin-x.com/">
-    <meta property="og:title" content="Solbin-X | Equipos Tecnológicos de Calidad en Perú">
-    <meta property="og:description"
-        content="Tu tienda de confianza para laptops, componentes gaming y accesorios tecnológicos. Envíos a todo el Perú. Garantía incluida.">
-    <meta property="og:image" content="https://solbin-x.com/Imagenes/Version_Web.png">
-    <meta property="og:locale" content="es_PE">
-    <meta property="og:site_name" content="Solbin-X">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://solbin-x.com/">
-    <meta name="twitter:title" content="Solbin-X | Equipos Tecnológicos de Calidad en Perú">
-    <meta name="twitter:description"
-        content="Tu tienda de confianza para laptops, componentes gaming y accesorios tecnológicos. Envíos a todo el Perú.">
-    <meta name="twitter:image" content="https://solbin-x.com/Imagenes/Version_Web.svg">
-
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg">
     <link rel="apple-touch-icon" href="Imagenes/FavIcon.svg">
-    <!-- Geo Tags -->
-    <meta name="geo.region" content="PE">
-    <meta name="geo.placename" content="Lima, Perú">
 
     <!-- Structured Data / Schema.org - Store -->
     <script type="application/ld+json">
@@ -154,84 +101,33 @@
     <script type="application/ld+json" id="product-ld"></script>
     <!-- Custom Styles (minimal - extras not in Tailwind) -->
     <style>
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f3f4f6;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-            --card-bg: #ffffff;
-            --nav-bg: #ffffff;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #111827;
-            --bg-secondary: #1f2937;
-            --text-primary: #f3f4f6;
-            --text-secondary: #d1d5db;
-            --border-color: #374151;
-            --card-bg: #1f2937;
-            --nav-bg: #111827;
-        }
+        /* Theme variables are now in dist/theme.css */
 
         .smooth-scroll {
             scroll-behavior: smooth;
         }
 
-        /* Premium Buttons Styles (Missing Tailwind Custom Values) */
+        /* Premium Buttons - using theme variables */
         .btn-cart-premium {
-            background: linear-gradient(to right, #0d9488, #0f766e) !important;
+            background: linear-gradient(to right, var(--primary) 0%, var(--primary-dark) 100%) !important;
             box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.4), 0 8px 10px -6px rgba(13, 148, 136, 0.1) !important;
             color: white !important;
         }
         .btn-cart-premium:hover {
-            background: linear-gradient(to right, #0f766e, #115e59) !important;
+            background: linear-gradient(to right, var(--primary-dark) 0%, var(--primary-700) 100%) !important;
         }
         
         .btn-whatsapp-premium {
-            color: #25D366 !important;
-            border-color: #25D366 !important;
+            color: var(--whatsapp) !important;
+            border-color: var(--whatsapp) !important;
             box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.15) !important;
         }
         .btn-whatsapp-premium i {
-            color: #25D366 !important;
+            color: var(--whatsapp) !important;
         }
         [data-theme="dark"] .btn-whatsapp-premium {
             background-color: transparent !important;
-            border-color: #25D366 !important;
-        }
-
-        /* WhatsApp Float Styles */
-        @keyframes pulse-whatsapp {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
-        }
-
-        .whatsapp-float {
-            position: fixed;
-            width: 65px;
-            height: 65px;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-            color: #FFF;
-            border-radius: 50px;
-            text-align: center;
-            font-size: 32px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: pulse-whatsapp 2s infinite;
-        }
-
-        .whatsapp-float:hover {
-            transform: scale(1.15) rotate(5deg);
-            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5);
-            animation: none;
+            border-color: var(--whatsapp) !important;
         }
 
         .whatsapp-tooltip {
@@ -278,12 +174,6 @@
             background: rgba(17, 24, 39, 1) !important;
             animation-play-state: paused;
         }
-
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #0D9488; color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; }
-        .toast.show { transform: translateY(0); opacity: 1; }
-        
-        .skip-link { position: absolute; top: -100px; left: 0; background: #0D9488; color: white; padding: 10px 20px; z-index: 9999; transition: top 0.3s; }
-        .skip-link:focus { top: 0; }
     </style>
 </head>
 
@@ -295,42 +185,16 @@
     <div class="bg-gradient-to-r from-[#0D9488] to-teal-600 text-white text-xs sm:text-sm py-2 px-4 text-center relative z-50">
         <div class="max-w-7xl mx-auto flex justify-center items-center gap-4">
             <span class="flex items-center gap-2">
-                <i class="fas fa-truck-fast"></i>
+                <i class="fas fa-truck text-4xl"></i>
                 <strong>Envíos</strong> a todo el territorio nacional
             </span>
             <span class="hidden sm:inline">|</span>
             <span class="hidden sm:flex items-center gap-2">
-                <i class="fas fa-shield-alt"></i>
+                <i class="fas fa-shield-check"></i>
                 Garantía de 1 año en todos los productos
             </span>
         </div>
     </div>
-
-    <!-- Content Security Policy - Optimizada para producción local -->
-    <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' https: data:; font-src 'self' https://cdnjs.cloudflare.com; frame-src https://www.google.com; connect-src 'self' https:; media-src 'self' https://assets.mixkit.co;">
-
-    <!-- Preload Critical CSS -->
-    <link rel="preload" href="dist/styles.css" as="style">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
-    <!-- Font Awesome (external) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Tailwind CSS (local, optimized) -->
-    <link rel="stylesheet" href="dist/styles.css">
-
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Tailwind config for dark mode (only if Tailwind CDN is loaded) -->
-    <script>
-        if (typeof tailwind !== 'undefined') {
-            tailwind.config = {
-                darkMode: 'class'
-            }
-        }
-    </script>
 
     <div id="web-alert-banner" class="hidden fixed w-full top-8 z-50 animate-slide-down">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
@@ -372,7 +236,7 @@
                     <!-- Close Button -->
                     <button onclick="closeWebAlert()"
                         class="relative group w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-90">
-                        <i class="fas fa-times text-lg group-hover:scale-125 transition-transform"></i>
+                        <i class="fas fa-xmark text-lg group-hover:scale-125 transition-transform"></i>
                     </button>
                 </div>
             </div>
@@ -596,7 +460,7 @@
                 <div class="flex items-center space-x-8 overflow-x-auto">
                     <a href="#catalogo" id="btn-todas-categorias" data-filter="all"
                         class="nav-link flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap cursor-pointer">
-                        <i class="fas fa-th-large text-[#0D9488]"></i>
+                        <i class="fas fa-th text-[#0D9488]"></i>
                         <span>Todas las Categorías</span>
                     </a>
                     <a href="index.html#catalogo" data-filter="laptops"
@@ -658,7 +522,7 @@
                 <p class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Categorías</p>
                 <a href="index.html#catalogo" id="btn-todos-productos" data-filter="all"
                     class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-th-large w-6 text-[#0D9488]"></i> Todos los Productos
+                    <i class="fas fa-th w-6 text-[#0D9488]"></i> Todos los Productos
                 </a>
                 <a href="index.html#catalogo" data-filter="laptops"
                     class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
@@ -686,7 +550,7 @@
                 </a>
                 <a href="#testimonios"
                     class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-comments w-6 text-[#0D9488]"></i> Testimonios
+                    <i class="fas fa-comment-dots w-6 text-[#0D9488]"></i> Testimonios
                 </a>
                 <a href="#contacto"
                     class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
@@ -708,203 +572,275 @@
     <main id="product-container" class="pt-32 pb-20 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
         <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
             <div id="product-loading" class="text-center py-20 flex flex-col items-center justify-center">
-                <i class="fas fa-circle-notch fa-spin text-5xl text-sky-600 mb-6 drop-shadow-md"></i>
+                <i class="fas fa-circle-notch text-5xl text-sky-600 mb-6 drop-shadow-md fa-spin"></i>
                 <p class="text-gray-500 dark:text-gray-400 font-medium text-lg tracking-wide uppercase">Cargando detalles del producto...</p>
             </div>
             
             <div id="product-detail-area" class="hidden opacity-0 transition-all duration-700 ease-in-out transform translate-y-4">
-                <!-- Breadcrumbs -->
-                <nav class="flex mb-8 text-sm text-gray-500 dark:text-gray-400 items-center overflow-x-auto whitespace-nowrap custom-scrollbar pb-2">
-                    <a href="index.html" class="hover:text-sky-600 dark:hover:text-sky-400 transition-colors flex items-center gap-2"><i class="fas fa-home"></i> Inicio</a>
-                    <i class="fas fa-chevron-right text-xs mx-3 text-gray-300 dark:text-gray-600"></i>
-                    <a href="index.html#catalogo" class="hover:text-sky-600 dark:hover:text-sky-400 transition-colors" id="bread-category">Catálogo</a>
-                    <i class="fas fa-chevron-right text-xs mx-3 text-gray-300 dark:text-gray-600"></i>
-                    <span class="text-gray-800 dark:text-gray-200 font-bold truncate max-w-xs" id="bread-name">...</span>
+                <!-- Breadcrumbs Mejorados -->
+                <nav class="breadcrumbs mb-8">
+                    <a href="index.html"><i class="fas fa-home"></i></a>
+                    <span class="separator"><i class="fas fa-chevron-right"></i></span>
+                    <a href="index.html#catalogo" id="bread-category">Catálogo</a>
+                    <span class="separator"><i class="fas fa-chevron-right"></i></span>
+                    <span class="current" id="bread-name">...</span>
                 </nav>
 
-                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl p-6 lg:p-12 mb-12 border border-white/20 dark:border-gray-700/50 backdrop-blur-xl relative overflow-hidden group/main">
-                    <!-- Deco elements -->
-                    <div class="absolute -top-40 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-1000 group-hover/main:bg-sky-500/20"></div>
-                    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-1000 group-hover/main:bg-blue-500/20"></div>
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden mb-12 relative">
+                    <!-- Deco elements corporativos -->
+                    <div class="absolute -top-60 -right-60 w-[500px] h-[500px] bg-gradient-to-br from-[#0D9488]/5 to-[#0D9488]/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-60 -left-60 w-[500px] h-[500px] bg-gradient-to-tr from-[#0D9488]/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-                    <div class="flex flex-col xl:flex-row gap-12 relative z-10">
+                    <div class="flex flex-col lg:flex-row relative z-10">
                         <!-- Galería de Imágenes -->
-                        <div class="xl:w-1/2 flex flex-col">
-                            <div id="main-image-container" class="relative bg-white dark:bg-gray-800 rounded-[2.5rem] p-12 mb-6 h-[400px] sm:h-[500px] lg:h-[650px] flex items-center justify-center overflow-hidden border border-gray-100 dark:border-gray-700 shadow-xl cursor-zoom-in transition-shadow duration-500 hover:shadow-2xl">
-                                <!-- Badges y Etiquetas -->
-                                <div id="product-badges" class="absolute top-6 left-6 z-20 flex flex-col gap-2"></div>
-                                <button onclick="toggleWishlistBtn(this)" class="absolute top-6 right-6 z-20 w-14 h-14 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:scale-110 active:scale-95 transition-all duration-300 border border-gray-100 dark:border-gray-700">
-                                    <i class="fas fa-heart text-2xl"></i>
+                        <div class="lg:w-3/5 p-6 lg:p-8">
+                            <!-- Imagen Principal -->
+                            <div id="main-image-container" class="relative bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden aspect-square flex items-center justify-center mb-4 group">
+                                <!-- Badges -->
+                                <div id="product-badges" class="absolute top-4 left-4 z-20 flex flex-col gap-2"></div>
+                                
+                                <!-- Wishlist Button -->
+                                <button onclick="toggleWishlistBtn(this)" class="absolute top-4 right-4 z-20 w-11 h-11 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:scale-110 active:scale-95 transition-all duration-300">
+                                    <i class="fas fa-heart text-lg"></i>
                                 </button>
-                                <img id="main-product-image" src="" alt="Producto" class="max-w-full max-h-full object-contain pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-10">
+                                
+                                <!-- Main Image -->
+                                <img id="main-product-image" src="" alt="Producto" class="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105">
+                                
+                                <!-- Zoom hint -->
+                                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fas fa-search-plus mr-1"></i> Clic para zoom
+                                </div>
                             </div>
                             
                             <!-- Miniaturas -->
-                            <div class="flex items-center justify-between">
-                                <div id="thumbnail-gallery" class="flex gap-3 overflow-x-auto pb-2 flex-1 custom-scrollbar">
+                            <div class="flex items-center gap-3">
+                                <div id="thumbnail-gallery" class="flex gap-2 overflow-x-auto pb-2 flex-1 custom-scrollbar">
                                     <!-- Rellenado dinámicamente -->
                                 </div>
-                                <span id="image-count" class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-3"></span>
+                                <span id="image-count" class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap"></span>
                             </div>
                         </div>
 
                         <!-- Detalles del Producto -->
-                        <div class="xl:w-1/2 flex flex-col justify-center">
-                            <div class="mb-4">
-                                <span id="product-brand-badge" class="inline-block bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-widest mb-4 border border-sky-200 dark:border-sky-800 shadow-sm">Marca</span>
-                                <h1 id="product-title" class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-4 tracking-tight">Cargando Título...</h1>
+                        <div class="lg:w-2/5 p-6 lg:p-8 lg:border-l lg:border-gray-100 dark:lg:border-gray-700 flex flex-col">
+                            <!-- Brand Badge -->
+                            <div class="mb-3">
+                                <span id="product-brand-badge" class="inline-flex items-center gap-2 bg-[#0D9488]/10 dark:bg-[#0D9488]/20 text-[#0D9488] dark:text-[#14B8A6] px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider">
+                                    <i class="fas fa-tag"></i> <span>Marca</span>
+                                </span>
                             </div>
+                            
+                            <!-- Title -->
+                            <h1 id="product-title" class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-4">Cargando Título...</h1>
 
-                            <!-- Rating & Stock Line -->
-                            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-100 dark:border-gray-700">
-                                <div class="flex items-center text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-full border border-yellow-100 dark:border-yellow-800/50">
-                                    <i class="fas fa-star mr-1"></i>
-                                    <span class="text-gray-700 dark:text-gray-300 font-bold ml-1">4.9 <span class="text-xs text-gray-500 font-normal ml-1">(150)</span></span>
+                            <!-- Rating & Stock -->
+                            <div class="flex flex-wrap items-center gap-4 text-sm mb-6 pb-6 border-b border-gray-100 dark:border-gray-700">
+                                <!-- Rating Stars -->
+                                <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-0.5 text-yellow-400">
+                                        <i class="fas fa-star text-sm"></i>
+                                        <i class="fas fa-star text-sm"></i>
+                                        <i class="fas fa-star text-sm"></i>
+                                        <i class="fas fa-star text-sm"></i>
+                                        <i class="fas fa-star-half text-sm"></i>
+                                    </div>
+                                    <span class="text-gray-700 dark:text-gray-300 font-semibold">4.9</span>
+                                    <span class="text-gray-400">(150 reseñas)</span>
                                 </div>
-                                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
-                                <div class="flex items-center text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800/50">
-                                    <i class="fas fa-check-circle mr-2"></i> Stock Disponible
+                                
+                                <!-- Divider -->
+                                <div class="hidden sm:block w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
+                                
+                                <!-- Stock -->
+                                <div class="flex items-center gap-2">
+                                    <span class="relative flex h-2.5 w-2.5">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                                    </span>
+                                    <span class="text-green-600 dark:text-green-400 font-medium">En Stock</span>
                                 </div>
                             </div>
                             
-                            <!-- Precio Box -->
-                            <div class="bg-gray-50/50 dark:bg-gray-800/50 rounded-3xl p-8 mb-8 border border-gray-100 dark:border-gray-700 relative overflow-hidden">
-                                <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-2">
-                                    <span class="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest">Oferta Exclusiva Online</span>
+                            <!-- Price Box -->
+                            <div class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl p-5 mb-6 border border-gray-100 dark:border-gray-700">
+                                <div class="flex items-baseline gap-3 mb-2">
+                                    <span class="text-xs font-semibold text-[#0D9488] uppercase tracking-wider">Precio Especial</span>
                                 </div>
-                                <div class="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 mb-3 relative z-10">
-                                    <p id="product-price" class="text-6xl font-black text-gray-900 dark:text-white tracking-tighter">S/. 0.00</p>
-                                    <div class="flex items-center gap-3">
-                                        <p id="product-old-price" class="text-2xl text-gray-400 line-through font-medium hidden">S/. 0.00</p>
-                                        <span id="product-discount-badge" class="hidden bg-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/20">-%</span>
+                                <div class="flex flex-wrap items-end gap-4 mb-3">
+                                    <p id="product-price" class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white">S/. 0.00</p>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <p id="product-old-price" class="text-lg text-gray-400 line-through hidden">S/. 0.00</p>
+                                        <span id="product-discount-badge" class="hidden bg-[#0D9488] text-white px-3 py-1 rounded-full text-sm font-bold shadow-md">-%</span>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                    <i class="fas fa-certificate text-sky-500"></i>
-                                    <span>Garantía oficial y comprobante legal (Boleta o Factura)</span>
+                                <!-- Trust Badge -->
+                                <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <i class="fas fa-shield-check text-[#0D9488]"></i>
+                                    <span>Incluye garantía oficial de 1 año + comprobante fiscal</span>
                                 </div>
                             </div>
 
                             <!-- Quantity Selector -->
-                            <div class="flex items-center gap-4 mb-8">
-                                <span class="text-gray-700 dark:text-gray-300 font-semibold">Cantidad:</span>
-                                <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                                    <button id="qty-minus" class="w-12 h-12 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-l-xl transition-colors">
-                                        <i class="fas fa-minus"></i>
+                            <div class="flex items-center gap-4 mb-5">
+                                <span class="text-gray-700 dark:text-gray-300 font-medium">Cantidad:</span>
+                                <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                                    <button id="qty-minus" type="button" class="w-14 h-12 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-[#0D9488] hover:text-white transition-all duration-200 rounded-l-xl text-xl font-bold">
+                                        −
                                     </button>
-                                    <input type="number" id="product-quantity" value="1" min="1" class="w-16 h-12 text-center bg-transparent border-x border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white focus:outline-none">
-                                    <button id="qty-plus" class="w-12 h-12 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-r-xl transition-colors">
-                                        <i class="fas fa-plus"></i>
+                                    <span id="product-quantity" class="w-16 h-12 flex items-center justify-center bg-white dark:bg-gray-800 font-bold text-gray-900 dark:text-white text-lg border-x border-gray-200 dark:border-gray-700">1</span>
+                                    <button id="qty-plus" type="button" class="w-14 h-12 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-[#0D9488] hover:text-white transition-all duration-200 rounded-r-xl text-xl font-bold">
+                                        +
                                     </button>
                                 </div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Stock: <span class="font-semibold text-emerald-600 dark:text-emerald-400">Disponible</span></span>
                             </div>
 
-                            <!-- Features Grid -->
-                            <div class="grid grid-cols-2 gap-4 mb-8">
-                                <div class="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50">
-                                    <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                        <i class="fas fa-shipping-fast"></i>
+                            <!-- Features -->
+                            <div class="grid grid-cols-2 gap-3 mb-6">
+                                <div class="flex items-center gap-3 bg-[#0D9488]/5 dark:bg-[#0D9488]/10 p-3 rounded-xl border border-[#0D9488]/10 dark:border-[#0D9488]/20">
+                                    <div class="w-9 h-9 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488]">
+                                        <i class="fas fa-truck text-sm"></i>
                                     </div>
                                     <div>
-                                        <span class="text-gray-800 dark:text-white font-bold text-sm block">Envío Rápido</span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">2-5 días hábiles</span>
+                                        <span class="text-gray-800 dark:text-white font-semibold text-xs block">Envío Rápido</span>
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs">2-5 días</span>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/50">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                        <i class="fas fa-shield-alt"></i>
+                                <div class="flex items-center gap-3 bg-[#0D9488]/5 dark:bg-[#0D9488]/10 p-3 rounded-xl border border-[#0D9488]/10 dark:border-[#0D9488]/20">
+                                    <div class="w-9 h-9 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488]">
+                                        <i class="fas fa-rotate-left text-sm"></i>
                                     </div>
                                     <div>
-                                        <span class="text-gray-800 dark:text-white font-bold text-sm block">Garantía</span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">1 año coverage</span>
+                                        <span class="text-gray-800 dark:text-white font-semibold text-xs block">Devolución</span>
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs">7 días</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-                                <button id="add-to-cart-big-btn" class="flex-[1.5] btn-cart-premium py-5 px-8 sm:py-6 sm:px-10 rounded-2xl font-bold text-base sm:text-lg transition-all duration-500 flex items-center justify-center gap-3 transform hover:-translate-y-2 active:scale-95 border border-transparent group relative overflow-hidden">
-                                    <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                                    <i class="fas fa-cart-shopping text-xl sm:text-2xl group-hover:rotate-12 transition-transform relative z-10"></i> 
-                                    <span class="relative z-10 uppercase tracking-wide">Añadir al Carrito</span>
+                            <div class="flex flex-col gap-3 mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">
+                                <button id="add-to-cart-big-btn" class="w-full bg-[#0D9488] hover:bg-[#0F766E] text-white py-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-3 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98]">
+                                    <i class="fas fa-shopping-cart text-lg"></i> 
+                                    <span class="text-lg">Añadir al Carrito</span>
                                 </button>
-                                <a id="buy-whatsapp-btn" href="#" target="_blank" class="flex-1 btn-whatsapp-premium bg-white py-6 px-8 rounded-2xl font-bold text-lg hover:bg-green-50 dark:hover:bg-gray-800 transition-all duration-300 border-2 flex items-center justify-center gap-3 transform hover:-translate-y-2 active:scale-95 group">
-                                    <i class="fab fa-whatsapp text-3xl group-hover:scale-110 transition-transform"></i>
-                                    <div class="flex flex-col leading-tight text-left">
-                                        <span class="text-[10px] uppercase font-black opacity-80">Asesoría Directa</span>
-                                        <span class="whitespace-nowrap">Comprar via WhatsApp</span>
-                                    </div>
+                                <a id="buy-whatsapp-btn" href="#" target="_blank" class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-3 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98]">
+                                    <i class="fab fa-whatsapp text-2xl"></i>
+                                    <span class="text-lg">Comprar por WhatsApp</span>
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                <!-- Tabs Section: Descripción, Especificaciones, Envío -->
-                <div class="mt-16">
-                    <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <!-- Tabs Section -->
+                <div class="mt-12">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
                         <!-- Tabs Header -->
-                        <div class="flex border-b border-gray-100 dark:border-gray-700 overflow-x-auto bg-gray-50/50 dark:bg-gray-900/50">
-                            <button onclick="switchTab('description')" data-tab="description" class="tab-btn active-tab flex-1 min-w-[150px] py-6 px-8 text-center font-bold text-sky-600 bg-white dark:bg-gray-800 transition-all border-r border-gray-100 dark:border-gray-700">
+                        <div class="flex border-b border-gray-100 dark:border-gray-700 overflow-x-auto">
+                            <button onclick="switchTab('description')" data-tab="description" class="tab-btn active-tab flex-1 min-w-[120px] py-4 px-5 text-center font-semibold text-[#0D9488] bg-white dark:bg-gray-800 transition-all border-r border-gray-100 dark:border-gray-700 relative">
                                 <i class="fas fa-align-left mr-2"></i> Descripción
                             </button>
-                            <button onclick="switchTab('specs')" data-tab="specs" class="tab-btn flex-1 min-w-[150px] py-6 px-8 text-center font-bold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all border-r border-gray-100 dark:border-gray-700">
-                                <i class="fas fa-list-ul mr-2"></i> Especificaciones
+                            <button onclick="switchTab('specs')" data-tab="specs" class="tab-btn flex-1 min-w-[120px] py-4 px-5 text-center font-semibold text-gray-500 hover:text-[#0D9488] dark:hover:text-[#0D9488] transition-all border-r border-gray-100 dark:border-gray-700">
+                                <i class="fas fa-microchip mr-2"></i> Especificaciones
                             </button>
-                            <button onclick="switchTab('shipping')" data-tab="shipping" class="tab-btn flex-1 min-w-[150px] py-6 px-8 text-center font-bold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all">
+                            <button onclick="switchTab('shipping')" data-tab="shipping" class="tab-btn flex-1 min-w-[120px] py-4 px-5 text-center font-semibold text-gray-500 hover:text-[#0D9488] dark:hover:text-[#0D9488] transition-all">
                                 <i class="fas fa-truck mr-2"></i> Envío
                             </button>
                         </div>
                         
                         <!-- Tab Content -->
-                        <div class="p-8">
+                        <div class="p-6 lg:p-8">
                             <!-- Description Tab -->
                             <div id="tab-description" class="product-tab">
-                                <div class="prose max-w-none">
-                                    <p id="product-description" class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">Cargando descripción...</p>
+                                <div class="prose dark:prose-invert max-w-none">
+                                    <p id="product-description" class="text-gray-600 dark:text-gray-300 leading-relaxed text-base">Cargando descripción...</p>
                                 </div>
                             </div>
                             
                             <!-- Specs Tab -->
                             <div id="tab-specs" class="product-tab hidden">
                                 <div id="product-specs-container">
-                                    <div id="product-specs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div id="product-specs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <!-- Cargado dinámicamente -->
                                     </div>
                                 </div>
-                                <p id="no-specs-message" class="hidden text-gray-500 dark:text-gray-400 text-center py-8">
-                                    <i class="fas fa-info-circle text-3xl mb-3"></i><br>
-                                    Este producto no tiene especificaciones técnicas registradas.
+                                <p id="no-specs-message" class="hidden text-gray-500 dark:text-gray-400 text-center py-12">
+                                    <i class="fas fa-box text-5xl mb-4 text-[#0D9488]/50"></i>
+                                    <br>
+                                    <span class="text-lg font-medium">Sin especificaciones registradas</span>
+                                    <br>
+                                    <span class="text-sm">Este producto no tiene detalles técnicos disponibles.</span>
                                 </p>
                             </div>
                             
                             <!-- Shipping Tab -->
                             <div id="tab-shipping" class="product-tab hidden">
-                                <div class="grid md:grid-cols-2 gap-8">
-                                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20 p-6 rounded-2xl border border-emerald-200 dark:border-emerald-800">
-                                        <div class="flex items-center gap-3 mb-4">
-                                            <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white">
-                                                <i class="fas fa-truck"></i>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="bg-gradient-to-br from-[#0D9488]/5 to-transparent dark:from-[#0D9488]/10 p-6 rounded-2xl border border-[#0D9488]/10 dark:border-[#0D9488]/20">
+                                        <div class="flex items-center gap-4 mb-4">
+                                            <div class="w-12 h-12 bg-[#0D9488] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#0D9488]/30">
+                                                <i class="fas fa-truck text-xl"></i>
                                             </div>
-                                            <h4 class="text-lg font-bold text-emerald-800 dark:text-emerald-300">Métodos de Envío</h4>
+                                            <div>
+                                                <h4 class="font-bold text-gray-900 dark:text-white text-lg">Métodos de Envío</h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">Opciones flexibles para tu comodidad</p>
+                                            </div>
                                         </div>
-                                        <ul class="space-y-3 text-emerald-700 dark:text-emerald-300">
-                                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500"></i> Delivery Express (2-5 días hábiles)</li>
-                                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500"></i> Envío programado disponible</li>
-                                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500"></i> Recojo en tienda (Lima)</li>
+                                        <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                                            <li class="flex items-start gap-3">
+                                                <i class="fas fa-check-circle text-[#0D9488] mt-1"></i>
+                                                <div>
+                                                    <span class="font-medium">Delivery Express</span>
+                                                    <p class="text-sm text-gray-500">2-5 días hábiles a todo el Perú</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex items-start gap-3">
+                                                <i class="fas fa-check-circle text-[#0D9488] mt-1"></i>
+                                                <div>
+                                                    <span class="font-medium">Envío Programado</span>
+                                                    <p class="text-sm text-gray-500">Elige la fecha que prefieras</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex items-start gap-3">
+                                                <i class="fas fa-check-circle text-[#0D9488] mt-1"></i>
+                                                <div>
+                                                    <span class="font-medium">Recojo en Tienda</span>
+                                                    <p class="text-sm text-gray-500">Av. Lima 123, Lima Centro</p>
+                                                </div>
+                                            </li>
                                         </ul>
                                     </div>
-                                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
-                                        <div class="flex items-center gap-3 mb-4">
-                                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                                                <i class="fas fa-shield-alt"></i>
+                                    <div class="bg-gradient-to-br from-[#0D9488]/5 to-transparent dark:from-[#0D9488]/10 p-6 rounded-2xl border border-[#0D9488]/10 dark:border-[#0D9488]/20">
+                                        <div class="flex items-center gap-4 mb-4">
+                                            <div class="w-12 h-12 bg-[#0D9488] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#0D9488]/30">
+                                                <i class="fas fa-shield-check text-xl"></i>
                                             </div>
-                                            <h4 class="text-lg font-bold text-blue-800 dark:text-blue-300">Garantía</h4>
+                                            <div>
+                                                <h4 class="font-bold text-gray-900 dark:text-white text-lg">Garantía y Soporte</h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">Tu compra protegida</p>
+                                            </div>
                                         </div>
-                                        <ul class="space-y-3 text-blue-700 dark:text-blue-300">
-                                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-500"></i> 1 año de garantía total</li>
-                                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-500"></i> Devolución en 7 días</li>
-                                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-500"></i> Soporte técnico especializado</li>
+                                        <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                                            <li class="flex items-start gap-3">
+                                                <i class="fas fa-check-circle text-[#0D9488] mt-1"></i>
+                                                <div>
+                                                    <span class="font-medium">1 Año de Garantía</span>
+                                                    <p class="text-sm text-gray-500">Cubre defectos de fabricación</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex items-start gap-3">
+                                                <i class="fas fa-check-circle text-[#0D9488] mt-1"></i>
+                                                <div>
+                                                    <span class="font-medium">Devolución en 7 Días</span>
+                                                    <p class="text-sm text-gray-500">Si no estás satisfecho</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex items-start gap-3">
+                                                <i class="fas fa-check-circle text-[#0D9488] mt-1"></i>
+                                                <div>
+                                                    <span class="font-medium">Soporte Técnico</span>
+                                                    <p class="text-sm text-gray-500">Ayuda experta disponible</p>
+                                                </div>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -914,18 +850,18 @@
                 </div>
 
                 <!-- Productos Relacionados -->
-                <div id="related-products-section" class="mt-24 reveal hidden">
-                    <div class="flex items-center justify-between mb-10 border-b border-gray-100 dark:border-gray-800 pb-6">
+                <div id="related-products-section" class="mt-16 reveal hidden">
+                    <div class="flex items-center justify-between mb-8">
                         <div>
-                            <span class="text-[#0D9488] font-bold tracking-widest uppercase text-xs">También te puede gustar</span>
-                            <h2 class="text-3xl font-black text-gray-900 dark:text-white mt-1">Productos Relacionados</h2>
+                            <span class="text-[#0D9488] font-bold tracking-wider uppercase text-xs">Explora más</span>
+                            <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mt-1">Productos Relacionados</h2>
                         </div>
-                        <a href="index.html#catalogo" class="text-sky-500 hover:text-sky-600 font-bold text-sm flex items-center gap-2 group">
-                            Ver todo <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                        <a href="index.html#catalogo" class="hidden sm:flex items-center gap-2 text-[#0D9488] hover:text-[#0F766E] font-medium transition-colors group">
+                            Ver todos <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
                         </a>
                     </div>
                     
-                    <div id="related-products-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    <div id="related-products-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                         <!-- Cargado dinámicamente -->
                     </div>
                 </div>
@@ -939,7 +875,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 bg-[#0D9488]/20 rounded-full flex items-center justify-center">
-                                <i class="fas fa-shield-alt text-[#0D9488] text-xl"></i>
+                                <i class="fas fa-shield-check text-[#0D9488] text-xl"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-sm">Compra Segura</p>
@@ -957,7 +893,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 bg-amber-600/20 rounded-full flex items-center justify-center">
-                                <i class="fas fa-undo text-amber-500 text-xl"></i>
+                                <i class="fas fa-rotate-left text-amber-500 text-xl"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-sm">Garantía 1 Año</p>
@@ -983,7 +919,7 @@
                     <!-- Logo y Descripción -->
                     <div class="lg:col-span-2">
                         <a href="#inicio" class="inline-block mb-4">
-                            <img src="Imagenes/Version_Web.svg" alt="Solbin-X"
+                            <img src="Imagenes/Version_Web.svg" alt="Solbin-X" loading="lazy"
                                 class="h-[106px] w-auto brightness-0 invert transition-all duration-300 hover:opacity-80">
                         </a>
                         <p class="text-gray-400 dark:text-gray-500 text-sm mb-4 leading-relaxed">
@@ -999,7 +935,7 @@
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
                                         class="fab fa-cc-mastercard text-lg"></i> Mastercard</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
-                                        class="fas fa-money-bill-wave text-lg"></i> Yape</span>
+                                        class="fas fa-dollar-sign text-lg"></i> Yape</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
                                         class="fas fa-mobile-alt text-lg"></i> Plin</span>
                                 <span class="bg-white/10 px-3 py-1 rounded text-xs flex items-center gap-1"><i
@@ -1025,22 +961,22 @@
                         <ul class="space-y-2 text-sm">
                             <li><a href="#inicio"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
-                                        class="fas fa-chevron-right text-xs"></i> Inicio</a></li>
+                                        class="fas fa-chevron-right text-xs"</i> Inicio</a></li>
                             <li><a href="#nosotros"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
-                                        class="fas fa-chevron-right text-xs"></i> Nosotros</a></li>
+                                        class="fas fa-chevron-right text-xs"</i> Nosotros</a></li>
                             <li><a href="#catalogo"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
-                                        class="fas fa-chevron-right text-xs"></i> Catálogo</a></li>
+                                        class="fas fa-chevron-right text-xs"</i> Catálogo</a></li>
                             <li><a href="#testimonios"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
-                                        class="fas fa-chevron-right text-xs"></i> Testimonios</a></li>
+                                        class="fas fa-chevron-right text-xs"</i> Testimonios</a></li>
                             <li><a href="#contacto"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
-                                        class="fas fa-chevron-right text-xs"></i> Contacto</a></li>
+                                        class="fas fa-chevron-right text-xs"</i> Contacto</a></li>
                             <li><a href="carrito.html"
                                     class="text-gray-400 hover:text-sky-400 transition flex items-center gap-2"><i
-                                        class="fas fa-chevron-right text-xs"></i> Mi Carrito</a></li>
+                                        class="fas fa-chevron-right text-xs"</i> Mi Carrito</a></li>
                         </ul>
                     </div>
 
@@ -1171,7 +1107,7 @@
                     <button id="solbin-chatbot-close" type="button"
                         class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-100 transition"
                         aria-label="Cerrar chat">
-                        <i class="fas fa-times"></i>
+                        <i class="fas fa-xmark"></i>
                     </button>
                 </div>
 
@@ -1207,7 +1143,7 @@
                     <!-- Close Button -->
                     <button onclick="closeProductModal()"
                         class="absolute top-4 right-4 z-10 p-2 rounded-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-red-500 transition shadow-md">
-                        <i class="fas fa-times text-xl"></i>
+                        <i class="fas fa-xmark text-xl"></i>
                     </button>
 
                     <div class="flex flex-col md:flex-row">
@@ -1234,7 +1170,7 @@
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
+                                        <i class="fas fa-star-half"></i>
                                     </span>
                                     <span class="text-sm text-gray-500 dark:text-gray-400">(4.8/5.0)</span>
                                 </div>
@@ -1272,7 +1208,7 @@
                                 </button>
                                 <p
                                     class="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
-                                    <i class="fas fa-shield-alt"></i> Compra protegida y garantía de 12 meses
+                                    <i class="fas fa-shield-check"></i> Compra protegida y garantía de 12 meses
                                 </p>
                             </div>
                         </div>
@@ -1458,7 +1394,7 @@
 
                 if (loading) {
                     button.dataset.originalText = button.innerHTML;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Cargando...';
+                    button.innerHTML = '<i class="fas fa-spinner mr-2 fa-spin"></i> Cargando...';
                     button.disabled = true;
                     button.classList.add('opacity-75', 'cursor-not-allowed');
                 } else {
