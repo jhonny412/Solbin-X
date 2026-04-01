@@ -571,72 +571,24 @@
             top: 0;
         }
 
-        /* Custom Cursor Effect - Neon Style */
-        .custom-cursor {
-            position: fixed;
-            width: 36px;
-            height: 36px;
-            border: 2px solid #0ff;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow:
-                0 0 10px #0ff,
-                0 0 20px #0ff,
-                0 0 40px #0ff,
-                0 0 80px #0ff;
-            mix-blend-mode: screen;
-        }
-
-        .custom-cursor.hover {
-            width: 60px;
-            height: 60px;
-            border-color: #f0f;
-            box-shadow:
-                0 0 10px #f0f,
-                0 0 25px #f0f,
-                0 0 50px #f0f,
-                0 0 100px #f0f;
-        }
-
+        /* Click Explosion Canvas */
+        .custom-cursor,
         .custom-cursor-dot {
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            background-color: #fff;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            box-shadow:
-                0 0 5px #fff,
-                0 0 10px #fff,
-                0 0 20px #0ff,
-                0 0 40px #0ff;
-            mix-blend-mode: screen;
+            display: none;
         }
 
-        #cursorCanvas {
+        #explosionCanvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 9998;
-        }
-
-        @keyframes neonPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            z-index: 9999;
         }
 
         @media (pointer: coarse) {
-            .custom-cursor,
-            .custom-cursor-dot,
-            #cursorCanvas {
+            #explosionCanvas {
                 display: none;
             }
         }
@@ -703,10 +655,8 @@
     <!-- Skip to main content para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-    <!-- Custom Cursor Elements -->
-    <canvas id="cursorCanvas"></canvas>
-    <div class="custom-cursor" id="customCursor"></div>
-    <div class="custom-cursor-dot" id="customCursorDot"></div>
+    <!-- Click Explosion Canvas -->
+    <canvas id="explosionCanvas"></canvas>
 
     <!-- Toast Container para notificaciones -->
     <div id="toast-container" class="toast-container"></div>
@@ -2816,160 +2766,80 @@
             }
         </script>
 
-        <!-- Custom Cursor Script - Neon Effect -->
+        <!-- Click Explosion Script -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const cursor = document.getElementById('customCursor');
-                const cursorDot = document.getElementById('customCursorDot');
-                const canvas = document.getElementById('cursorCanvas');
-                const ctx = canvas ? canvas.getContext('2d') : null;
+                const canvas = document.getElementById('explosionCanvas');
+                const ctx = canvas.getContext('2d');
 
-                if (window.matchMedia('(pointer: fine)').matches && canvas && ctx) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                window.addEventListener('resize', () => {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
+                });
 
-                    window.addEventListener('resize', () => {
-                        canvas.width = window.innerWidth;
-                        canvas.height = window.innerHeight;
-                    });
+                let particles = [];
 
-                    let mouseX = 0, mouseY = 0;
-                    let cursorX = 0, cursorY = 0;
-                    let hue = 180;
-                    let particles = [];
+                const colors = ['#0ff', '#f0f', '#ff0', '#0f0', '#f60', '#fff'];
 
-                    const neonColors = [
-                        [0, 255, 255],
-                        [255, 0, 255],
-                        [0, 255, 128],
-                        [128, 0, 255],
-                        [255, 128, 0]
-                    ];
-                    let colorIndex = 0;
-                    let colorProgress = 0;
-
-                    class NeonParticle {
-                        constructor(x, y, color) {
-                            this.x = x;
-                            this.y = y;
-                            this.size = Math.random() * 4 + 2;
-                            this.life = 1;
-                            this.decay = Math.random() * 0.03 + 0.02;
-                            this.vx = (Math.random() - 0.5) * 3;
-                            this.vy = (Math.random() - 0.5) * 3;
-                            this.color = color;
-                        }
-                        update() {
-                            this.x += this.vx;
-                            this.y += this.vy;
-                            this.life -= this.decay;
-                            this.size *= 0.96;
-                        }
-                        draw() {
-                            if (this.life <= 0) return;
-                            const [r, g, b] = this.color;
-                            ctx.save();
-                            ctx.globalAlpha = this.life;
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgb(${r},${g},${b})`;
-                            ctx.shadowColor = `rgb(${r},${g},${b})`;
-                            ctx.shadowBlur = 15;
-                            ctx.fill();
-                            ctx.restore();
-                        }
+                class Particle {
+                    constructor(x, y) {
+                        this.x = x;
+                        this.y = y;
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = Math.random() * 8 + 3;
+                        this.vx = Math.cos(angle) * speed;
+                        this.vy = Math.sin(angle) * speed;
+                        this.size = Math.random() * 5 + 2;
+                        this.life = 1;
+                        this.decay = Math.random() * 0.02 + 0.015;
+                        this.color = colors[Math.floor(Math.random() * colors.length)];
+                        this.gravity = 0.1;
                     }
-
-                    let trail = [];
-
-                    document.addEventListener('mousemove', function (e) {
-                        mouseX = e.clientX;
-                        mouseY = e.clientY;
-
-                        colorProgress += 0.02;
-                        if (colorProgress >= 1) {
-                            colorProgress = 0;
-                            colorIndex = (colorIndex + 1) % neonColors.length;
-                        }
-
-                        const c1 = neonColors[colorIndex];
-                        const c2 = neonColors[(colorIndex + 1) % neonColors.length];
-                        const currentColor = c1.map((v, i) => Math.round(v + (c2[i] - v) * colorProgress));
-
-                        for (let i = 0; i < 2; i++) {
-                            particles.push(new NeonParticle(mouseX, mouseY, currentColor));
-                        }
-
-                        trail.push({ x: mouseX, y: mouseY, life: 1, color: [...currentColor] });
-                        if (trail.length > 30) trail.shift();
-
-                        const [r, g, b] = currentColor;
-                        cursorDot.style.boxShadow = `
-                            0 0 5px rgb(${r},${g},${b}),
-                            0 0 10px rgb(${r},${g},${b}),
-                            0 0 20px rgb(${r},${g},${b}),
-                            0 0 40px rgb(${r},${g},${b})`;
-                        cursorDot.style.backgroundColor = `rgb(${r},${g},${b})`;
-                    });
-
-                    function animateCursor() {
-                        cursorX += (mouseX - cursorX) * 0.12;
-                        cursorY += (mouseY - cursorY) * 0.12;
-
-                        cursor.style.left = cursorX + 'px';
-                        cursor.style.top = cursorY + 'px';
-                        cursorDot.style.left = mouseX + 'px';
-                        cursorDot.style.top = mouseY + 'px';
-
-                        hue = (hue + 0.5) % 360;
-
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                        for (let i = trail.length - 1; i >= 0; i--) {
-                            trail[i].life -= 0.03;
-                            if (trail[i].life <= 0) {
-                                trail.splice(i, 1);
-                                continue;
-                            }
-                            const t = trail[i];
-                            const [r, g, b] = t.color;
-                            ctx.beginPath();
-                            ctx.arc(t.x, t.y, 4 * t.life, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(${r},${g},${b},${t.life * 0.6})`;
-                            ctx.shadowColor = `rgb(${r},${g},${b})`;
-                            ctx.shadowBlur = 20;
-                            ctx.fill();
-                        }
-
-                        for (let i = particles.length - 1; i >= 0; i--) {
-                            particles[i].update();
-                            particles[i].draw();
-                            if (particles[i].life <= 0) {
-                                particles.splice(i, 1);
-                            }
-                        }
-
-                        requestAnimationFrame(animateCursor);
+                    update() {
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        this.vy += this.gravity;
+                        this.vx *= 0.98;
+                        this.life -= this.decay;
+                        this.size *= 0.97;
                     }
-                    animateCursor();
-
-                    const interactiveElements = document.querySelectorAll('a, button, input, .filter-btn, .card-hover, .hover-lift, .hover-scale, .hover-glow');
-                    interactiveElements.forEach(el => {
-                        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-                        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-                    });
-
-                    document.addEventListener('click', function (e) {
-                        const clickColor = neonColors[Math.floor(Math.random() * neonColors.length)];
-                        for (let i = 0; i < 15; i++) {
-                            const p = new NeonParticle(e.clientX, e.clientY, clickColor);
-                            p.vx = (Math.random() - 0.5) * 8;
-                            p.vy = (Math.random() - 0.5) * 8;
-                            p.size = Math.random() * 6 + 3;
-                            particles.push(p);
-                        }
-                    });
+                    draw() {
+                        if (this.life <= 0) return;
+                        ctx.save();
+                        ctx.globalAlpha = this.life;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 12;
+                        ctx.fill();
+                        ctx.restore();
+                    }
                 }
+
+                document.addEventListener('click', function (e) {
+                    for (let i = 0; i < 30; i++) {
+                        particles.push(new Particle(e.clientX, e.clientY));
+                    }
+                });
+
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    for (let i = particles.length - 1; i >= 0; i--) {
+                        particles[i].update();
+                        particles[i].draw();
+                        if (particles[i].life <= 0) {
+                            particles.splice(i, 1);
+                        }
+                    }
+
+                    requestAnimationFrame(animate);
+                }
+                animate();
             });
 
             // Fade in up animation on scroll
