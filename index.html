@@ -14,7 +14,7 @@
     <link rel="dns-prefetch" href="https://afhjtkifntysqnlquuyk.supabase.co">
 
     <!-- Local optimized CSS -->
-    <link rel="stylesheet" href="dist/styles.css">
+    <link rel="stylesheet" href="dist/styles.css?v=4">
 
     <!-- Preload Critical Assets -->
     <link rel="preload" href="Imagenes/Version_Web.svg" as="image" type="image/svg+xml">
@@ -33,7 +33,7 @@
     <meta name="rating" content="general">
 
     <!-- SEO Avanzado -->
-    <meta name="msapplication-TileColor" content="#0D9488">
+    <meta name="msapplication-TileColor" content="#116975">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Solbin-X">
@@ -70,17 +70,17 @@
     <meta name="twitter:image" content="https://solbin-x.com/Imagenes/Version_Web.svg">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg">
-    <link rel="apple-touch-icon" href="Imagenes/FavIcon.svg">
+    <link rel="icon" type="image/svg+xml" href="Imagenes/FavIcon.svg?v=7">
+    <link rel="apple-touch-icon" sizes="180x180" href="Imagenes/FavIcon.png?v=7">
 
     <!-- Geo Tags -->
     <meta name="geo.region" content="PE">
     <meta name="geo.placename" content="Lima, Perú">
 
     <!-- Theme Color -->
-    <meta name="theme-color" content="#0D9488">
-    <meta name="msapplication-navbutton-color" content="#0D9488">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#0D9488">
+    <meta name="theme-color" content="#116975">
+    <meta name="msapplication-navbutton-color" content="#116975">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#116975">
 
     <!-- Structured Data / Schema.org - Store -->
     <script type="application/ld+json">
@@ -267,7 +267,7 @@
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' https: data:; font-src 'self' https://cdnjs.cloudflare.com; frame-src https://www.google.com; connect-src 'self' https:; media-src 'self' https://assets.mixkit.co;">
 
     <!-- Preload Critical CSS -->
-    <link rel="preload" href="dist/styles.css" as="style">
+    <link rel="preload" href="dist/styles.css?v=4" as="style">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
 
@@ -275,13 +275,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Tailwind CSS (local, optimized) -->
-    <link rel="stylesheet" href="dist/styles.css">
+    <link rel="stylesheet" href="dist/styles.css?v=4">
     
     <!-- Theme CSS (shared variables and components) -->
-    <link rel="stylesheet" href="dist/theme.css">
+    <link rel="stylesheet" href="dist/theme.css?v=4">
     
     <!-- Custom UI Styles -->
-    <link rel="stylesheet" href="dist/custom-ui.css">
+    <link rel="stylesheet" href="dist/custom-ui.css?v=4">
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -290,7 +290,16 @@
     <script>
         if (typeof tailwind !== 'undefined') {
             tailwind.config = {
-                darkMode: 'class'
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        colors: {
+                            teal: {
+                                600: '#116975'
+                            }
+                        }
+                    }
+                }
             }
         }
     </script>
@@ -413,7 +422,7 @@
             opacity: 1 !important;
             transform: translateY(-50%) scale(1.15);
             background-color: var(--primary) !important;
-            box-shadow: 0 6px 16px rgba(13, 148, 136, 0.5);
+            box-shadow: 0 6px 16px rgba(17, 105, 117, 0.5);
         }
 
         #carousel-prev-btn:hover i,
@@ -663,7 +672,7 @@
 
     <!-- Top Bar - Envío Gratis y Promociones -->
     <div
-        class="bg-gradient-to-r from-[#0D9488] to-teal-600 text-white text-xs sm:text-sm py-2 px-4 text-center relative z-10">
+        class="bg-gradient-to-r from-[#116975] to-[#0d5459] text-white text-xs sm:text-sm py-2 px-4 text-center relative z-10">
         <div class="max-w-7xl mx-auto flex justify-center items-center gap-4">
             <span class="flex items-center gap-2">
                 <i class="fas fa-truck text-4xl"></i>
@@ -821,8 +830,8 @@
                 <div class="flex items-center flex-shrink-0">
                     <a href="#inicio" class="flex items-center" aria-label="Solbin-X - Inicio">
                         <img src="Imagenes/Version_Web.svg" alt="Solbin-X Logo - Tienda de Tecnología en Perú"
-                            width="300" height="90" loading="eager" fetchpriority="high"
-                            class="h-[90px] w-auto dark:brightness-0 dark:invert transition-all duration-300 hover:scale-105">
+                            width="151" height="56" loading="eager" fetchpriority="high"
+                            class="h-12 sm:h-14 w-auto max-w-[170px] object-contain dark:brightness-0 dark:invert transition-all duration-300 hover:scale-105">
                     </a>
                 </div>
 
@@ -835,7 +844,7 @@
                         <i
                             class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
                         <button
-                            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0D9488] text-white px-4 py-1.5 rounded-full hover:bg-[#0F766E] transition text-sm font-medium">
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#116975] text-white px-4 py-1.5 rounded-full hover:bg-[#0F766E] transition text-sm font-medium">
                             Buscar
                         </button>
                     </div>
@@ -845,7 +854,7 @@
                 <div class="flex items-center space-x-3 sm:space-x-6">
                     <!-- Soporte -->
                     <a href="https://wa.me/51945297289" target="_blank" rel="noopener noreferrer"
-                        class="hidden md:flex flex-col items-center text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] transition">
+                        class="hidden md:flex flex-col items-center text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] transition">
                         <i class="fas fa-headset text-xl mb-0.5"></i>
                         <span class="text-xs">Soporte</span>
                     </a>
@@ -861,17 +870,17 @@
 
                     <!-- Carrito mejorado -->
                     <a href="carrito.html"
-                        class="flex items-center gap-2 bg-sky-50 dark:bg-[#0D9488]/20 dark:bg-opacity-20 px-4 py-2 rounded-full hover:bg-[#0D9488]/10 dark:hover:bg-[#0D9488]/20 dark:hover:bg-opacity-30 transition group">
+                        class="flex items-center gap-2 bg-sky-50 dark:bg-[#116975]/20 dark:bg-opacity-20 px-4 py-2 rounded-full hover:bg-[#116975]/10 dark:hover:bg-[#116975]/20 dark:hover:bg-opacity-30 transition group">
                         <div class="relative">
                             <i
-                                class="fas fa-shopping-cart text-xl text-[#0D9488] dark:text-[#0D9488] group-hover:scale-110 transition"></i>
+                                class="fas fa-shopping-cart text-xl text-[#116975] dark:text-[#116975] group-hover:scale-110 transition"></i>
                             <span id="cart-badge"
                                 class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center transform scale-0 transition-transform duration-300">0</span>
                         </div>
                         <div class="hidden sm:block">
                             <span class="text-xs text-gray-600 dark:text-gray-400 block">Tu Carrito</span>
                             <span id="cart-total-header"
-                                class="text-sm font-bold text-[#0D9488] dark:text-[#0D9488]">S/. 0.00</span>
+                                class="text-sm font-bold text-[#116975] dark:text-[#116975]">S/. 0.00</span>
                         </div>
                     </a>
 
@@ -894,37 +903,37 @@
             <div class="hidden lg:flex border-t border-gray-100 dark:border-gray-800 py-2">
                 <div class="flex items-center space-x-8 overflow-x-auto">
                     <a href="#catalogo" id="btn-todas-categorias" data-filter="all"
-                        class="nav-link flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap cursor-pointer">
-                        <i class="fas fa-th text-[#0D9488]"></i>
+                        class="nav-link flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap cursor-pointer">
+                        <i class="fas fa-th text-[#116975]"></i>
                         <span>Todas las Categorías</span>
                     </a>
                     <a href="#catalogo" onclick="filterCategory('laptops', this)" data-filter="laptops"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-laptop mr-1"></i> Laptops
                     </a>
                     <a href="#catalogo" onclick="filterCategory('smartphones', this)" data-filter="smartphones"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-mobile-alt mr-1"></i> Smartphones
                     </a>
                     <a href="#catalogo" onclick="filterCategory('tablets', this)" data-filter="tablets"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-tablet-alt mr-1"></i> Tablets
                     </a>
                     <a href="#catalogo" onclick="filterCategory('accesorios', this)" data-filter="accesorios"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-headphones mr-1"></i> Accesorios
                     </a>
                     <a href="#catalogo" onclick="filterCategory('gaming', this)" data-filter="gaming"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         <i class="fas fa-gamepad mr-1"></i> Gaming
                     </a>
                     <span class="text-gray-300">|</span>
                     <a href="#nosotros"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         Nosotros
                     </a>
                     <a href="#contacto"
-                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] text-sm font-medium transition whitespace-nowrap">
+                        class="nav-link text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] text-sm font-medium transition whitespace-nowrap">
                         Contacto
                     </a>
                     <button type="button" id="theme-toggle"
@@ -933,7 +942,7 @@
                         <i class="fas fa-moon dark:hidden"></i>
                         <i class="fas fa-sun hidden dark:inline"></i>
                     </button>
-                    <a href="login.html" class="text-gray-500 hover:text-[#0D9488] transition text-sm"
+                    <a href="login.html" class="text-gray-500 hover:text-[#116975] transition text-sm"
                         title="Admin Login">
                         <i class="fas fa-user-lock"></i>
                     </a>
@@ -956,46 +965,46 @@
             <div class="px-2 pt-2 pb-3 space-y-1">
                 <p class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Categorías</p>
                 <a href="#catalogo" id="btn-todos-productos" data-filter="all"
-                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-th w-6 text-[#0D9488]"></i> Todos los Productos
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-th w-6 text-[#116975]"></i> Todos los Productos
                 </a>
                 <a href="#catalogo" onclick="filterCategory('laptops', this)" data-filter="laptops"
-                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-laptop w-6 text-[#0D9488]"></i> Laptops
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-laptop w-6 text-[#116975]"></i> Laptops
                 </a>
                 <a href="#catalogo" onclick="filterCategory('smartphones', this)" data-filter="smartphones"
-                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-mobile-alt w-6 text-[#0D9488]"></i> Smartphones
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-mobile-alt w-6 text-[#116975]"></i> Smartphones
                 </a>
                 <a href="#catalogo" onclick="filterCategory('tablets', this)" data-filter="tablets"
-                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-tablet-alt w-6 text-[#0D9488]"></i> Tablets
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-tablet-alt w-6 text-[#116975]"></i> Tablets
                 </a>
                 <a href="#catalogo" onclick="filterCategory('accesorios', this)" data-filter="accesorios"
-                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-headphones w-6 text-[#0D9488]"></i> Accesorios
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-headphones w-6 text-[#116975]"></i> Accesorios
                 </a>
                 <a href="#catalogo" onclick="filterCategory('gaming', this)" data-filter="gaming"
-                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-gamepad w-6 text-[#0D9488]"></i> Gaming
+                    class="nav-link block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-gamepad w-6 text-[#116975]"></i> Gaming
                 </a>
                 <div class="border-t dark:border-gray-800 my-2"></div>
                 <p class="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Información</p>
                 <a href="#nosotros"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-info-circle w-6 text-[#0D9488]"></i> Nosotros
+                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-info-circle w-6 text-[#116975]"></i> Nosotros
                 </a>
                 <a href="#testimonios"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-comment-dots w-6 text-[#0D9488]"></i> Testimonios
+                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-comment-dots w-6 text-[#116975]"></i> Testimonios
                 </a>
                 <a href="#contacto"
-                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
-                    <i class="fas fa-envelope w-6 text-[#0D9488]"></i> Contacto
+                    class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center">
+                    <i class="fas fa-envelope w-6 text-[#116975]"></i> Contacto
                 </a>
                 <div class="border-t dark:border-gray-800 my-2"></div>
                 <a href="carrito.html"
-                    class="block px-3 py-2 text-[#0D9488] dark:text-[#0D9488] hover:bg-[#0D9488]/10 dark:hover:bg-gray-800 rounded-md flex items-center font-medium">
+                    class="block px-3 py-2 text-[#116975] dark:text-[#116975] hover:bg-[#116975]/10 dark:hover:bg-gray-800 rounded-md flex items-center font-medium">
                     <i class="fas fa-shopping-cart w-6"></i> Ver Carrito
                 </a>
                 <button onclick="showWishlist()"
@@ -1012,7 +1021,7 @@
         <ol class="flex items-center space-x-2 text-sm" itemscope itemtype="https://schema.org/BreadcrumbList">
             <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                 <a href="index.html" itemprop="item"
-                    class="text-gray-500 hover:text-[#0D9488] transition-colors flex items-center gap-1">
+                    class="text-gray-500 hover:text-[#116975] transition-colors flex items-center gap-1">
                     <i class="fas fa-home text-xs"></i>
                     <span itemprop="name">Inicio</span>
                 </a>
@@ -1123,7 +1132,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-end mb-10">
                     <div>
-                        <span class="text-[#0D9488] font-semibold text-sm uppercase tracking-wider">Selección
+                        <span class="text-[#116975] font-semibold text-sm uppercase tracking-wider">Selección
                             Especial</span>
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">Productos
                             Destacados
@@ -1131,7 +1140,7 @@
                         <p class="text-gray-600 dark:text-gray-400 mt-2">Los más populares de esta semana</p>
                     </div>
                     <a href="#catalogo"
-                        class="mt-4 md:mt-0 inline-flex items-center text-[#0D9488] hover:text-[#0F766E] font-medium transition-smooth group">
+                        class="mt-4 md:mt-0 inline-flex items-center text-[#116975] hover:text-[#0F766E] font-medium transition-smooth group">
                         Ver todo el catálogo
                         <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-smooth"></i>
                     </a>
@@ -1209,10 +1218,10 @@
         <section id="catalogo" class="py-20 bg-white dark:bg-gray-900 transition-colors duration-300 fade-in-up">
             <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="text-[#0D9488] font-semibold text-sm uppercase tracking-wider">Explora</span>
+                    <span class="text-[#116975] font-semibold text-sm uppercase tracking-wider">Explora</span>
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4 mt-2">Nuestro Catálogo
                     </h2>
-                    <div class="w-24 h-1 bg-[#0D9488] mx-auto mb-4"></div>
+                    <div class="w-24 h-1 bg-[#116975] mx-auto mb-4"></div>
                     <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">Encuentra los mejores
                         productos
                         tecnológicos de última generación al mejor precio</p>
@@ -1226,11 +1235,11 @@
                             class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sticky top-24 transition-colors duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <h3 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
-                                    <i class="fas fa-filter text-[#0D9488] mr-2"></i>
+                                    <i class="fas fa-filter text-[#116975] mr-2"></i>
                                     Filtros
                                 </h3>
                                 <button onclick="resetCatalogFilters()"
-                                    class="text-sm text-gray-500 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488] transition">
+                                    class="text-sm text-gray-500 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975] transition">
                                     <i class="fas fa-rotate-left mr-1"></i>
                                     Limpiar
                                 </button>
@@ -1240,7 +1249,7 @@
                             <div class="mb-6">
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-search text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-search text-[#116975] mr-2 text-xs"></i>
                                     Buscador
                                 </h4>
                                 <div class="relative">
@@ -1255,32 +1264,32 @@
                             <div class="mb-6">
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-th text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-th text-[#116975] mr-2 text-xs"></i>
                                     Categorías
                                 </h4>
                                 <div class="space-y-2">
                                     <button
-                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-[#0D9488] text-white font-semibold hover:bg-[#0F766E] transition"
+                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-[#116975] text-white font-semibold hover:bg-[#0F766E] transition"
                                         data-filter="all" onclick="filterCategory('all', this)">
                                         <i class="fas fa-check-circle mr-2"></i>Todos los Productos
                                     </button>
                                     <button
-                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:text-[#0D9488] transition"
+                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:text-[#116975] transition"
                                         data-filter="laptops" onclick="filterCategory('laptops', this)">
                                         <i class="fas fa-laptop mr-2"></i>Laptops
                                     </button>
                                     <button
-                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:text-[#0D9488] transition"
+                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:text-[#116975] transition"
                                         data-filter="smartphones" onclick="filterCategory('smartphones', this)">
                                         <i class="fas fa-mobile-alt mr-2"></i>Smartphones
                                     </button>
                                     <button
-                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:text-[#0D9488] transition"
+                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:text-[#116975] transition"
                                         data-filter="tablets" onclick="filterCategory('tablets', this)">
                                         <i class="fas fa-tablet-alt mr-2"></i>Tablets
                                     </button>
                                     <button
-                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:text-[#0D9488] transition"
+                                        class="filter-btn w-full text-left px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:text-[#116975] transition"
                                         data-filter="accesorios" onclick="filterCategory('accesorios', this)">
                                         <i class="fas fa-headphones mr-2"></i>Accesorios
                                     </button>
@@ -1291,84 +1300,84 @@
                             <div class="mb-6 border-t dark:border-gray-700 border-gray-200 pt-6">
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-tag text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-tag text-[#116975] mr-2 text-xs"></i>
                                     Marcas
                                 </h4>
                                 <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2" id="brandFilters">
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Lenovo">
                                         <span>Lenovo</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Dell">
                                         <span>Dell</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Asus">
                                         <span>Asus</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Acer">
                                         <span>Acer</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Msi">
                                         <span>MSI</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Hp">
                                         <span>HP</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Apple">
                                         <span>Apple</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Huawei">
                                         <span>Huawei</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Razer">
                                         <span>Razer</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Dynabook">
                                         <span>Dynabook</span>
                                     </label>
                                     <label
-                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#0D9488] dark:hover:text-[#0D9488]">
+                                        class="flex items-center space-x-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-[#116975] dark:hover:text-[#116975]">
                                         <input type="checkbox"
-                                            class="brand-checkbox form-checkbox text-[#0D9488] rounded"
+                                            class="brand-checkbox form-checkbox text-[#116975] rounded"
                                             onchange="filterBrand(this)" value="Chuwi">
                                         <span>Chuwi</span>
                                     </label>
@@ -1379,13 +1388,13 @@
                                 <!-- Filtro por Precio -->
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-dollar-sign text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-dollar-sign text-[#116975] mr-2 text-xs"></i>
                                     Rango de Precio
                                 </h4>
                                 <div class="space-y-4">
                                     <div class="text-center mb-3">
                                         <span id="priceValue"
-                                            class="text-2xl font-bold text-[#0D9488] dark:text-[#0D9488]">S/.
+                                            class="text-2xl font-bold text-[#116975] dark:text-[#116975]">S/.
                                             10,000</span>
                                     </div>
                                     <input type="range" id="priceRange" min="0" max="10000" value="10000" step="100"
@@ -1397,19 +1406,19 @@
                                     </div>
                                     <div class="space-y-2 mt-4">
                                         <button onclick="filterPriceRange(0, 1000)"
-                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:border-[#0D9488] hover:text-[#0D9488] transition text-left">
+                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:border-[#116975] hover:text-[#116975] transition text-left">
                                             Hasta S/. 1,000
                                         </button>
                                         <button onclick="filterPriceRange(1000, 3000)"
-                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:border-[#0D9488] hover:text-[#0D9488] transition text-left">
+                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:border-[#116975] hover:text-[#116975] transition text-left">
                                             S/. 1,000 - 3,000
                                         </button>
                                         <button onclick="filterPriceRange(3000, 5000)"
-                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:border-[#0D9488] hover:text-[#0D9488] transition text-left">
+                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:border-[#116975] hover:text-[#116975] transition text-left">
                                             S/. 3,000 - 5,000
                                         </button>
                                         <button onclick="filterPriceRange(5000, 10000)"
-                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#0D9488]/10 dark:hover:bg-gray-600 hover:border-[#0D9488] hover:text-[#0D9488] transition text-left">
+                                            class="w-full text-sm bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 hover:bg-[#116975]/10 dark:hover:bg-gray-600 hover:border-[#116975] hover:text-[#116975] transition text-left">
                                             Más de S/. 5,000
                                         </button>
                                     </div>
@@ -1420,7 +1429,7 @@
                                 <!-- Filtro por Ordenamiento -->
                                 <h4
                                     class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center">
-                                    <i class="fas fa-arrows-alt-v text-[#0D9488] mr-2 text-xs"></i>
+                                    <i class="fas fa-arrows-alt-v text-[#116975] mr-2 text-xs"></i>
                                     Ordenar Por
                                 </h4>
                                 <select id="sortSelect" onchange="filterSort(this.value)"
@@ -1438,11 +1447,11 @@
                                 class="mt-6 bg-gradient-to-r from-sky-50 dark:from-sky-900 dark:from-opacity-30 to-blue-50 dark:to-blue-900 dark:to-opacity-30 p-4 rounded-lg border border-sky-200 dark:border-sky-700">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
-                                        <i class="fas fa-box text-[#0D9488] text-xl mr-3"></i>
+                                        <i class="fas fa-box text-[#116975] text-xl mr-3"></i>
                                         <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Productos
                                             encontrados</span>
                                     </div>
-                                    <span id="productCount" class="text-2xl font-bold text-[#0D9488]">20</span>
+                                    <span id="productCount" class="text-2xl font-bold text-[#116975]">20</span>
                                 </div>
                             </div>
                         </div>
@@ -1464,7 +1473,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">Sobre Nosotros</h2>
-                    <div class="w-24 h-1 bg-[#0D9488] mx-auto"></div>
+                    <div class="w-24 h-1 bg-[#116975] mx-auto"></div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-12 items-center">
                     <div>
@@ -1484,11 +1493,11 @@
                         </p>
                         <div class="grid grid-cols-2 gap-6 mt-8">
                             <div class="text-center">
-                                <p class="text-4xl font-bold text-[#0D9488]">10,000+</p>
+                                <p class="text-4xl font-bold text-[#116975]">10,000+</p>
                                 <p class="text-gray-600 dark:text-gray-400">Clientes Satisfechos</p>
                             </div>
                             <div class="text-center">
-                                <p class="text-4xl font-bold text-[#0D9488]">500+</p>
+                                <p class="text-4xl font-bold text-[#116975]">500+</p>
                                 <p class="text-gray-600 dark:text-gray-400">Productos Disponibles</p>
                             </div>
                         </div>
@@ -1498,7 +1507,7 @@
                             class="rounded-2xl shadow-2xl w-full object-cover cursor-pointer" style="max-height: 500px;"
                             onclick="toggleVideo(this)">
                         </video>
-                        <div class="absolute -bottom-6 -left-6 bg-[#0D9488] text-white p-6 rounded-xl shadow-xl">
+                        <div class="absolute -bottom-6 -left-6 bg-[#116975] text-white p-6 rounded-xl shadow-xl">
                             <p class="text-3xl font-bold">8+</p>
                             <p class="text-sm">Años de Experiencia</p>
                         </div>
@@ -1559,7 +1568,7 @@
                             <div class="mb-6">
                                 <div
                                     class="inline-block p-4 bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-900 dark:to-sky-800 rounded-xl">
-                                    <i class="fas fa-crown text-4xl text-[#0D9488] dark:text-[#0D9488]"></i>
+                                    <i class="fas fa-crown text-4xl text-[#116975] dark:text-[#116975]"></i>
                                 </div>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Calidad Premium</h3>
@@ -1567,15 +1576,15 @@
                                 marcas líderes del mercado mundial</p>
                             <div class="space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-check-circle text-[#0D9488] mr-2"></i>
+                                    <i class="fas fa-check-circle text-[#116975] mr-2"></i>
                                     Productos certificados
                                 </div>
                                 <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-check-circle text-[#0D9488] mr-2"></i>
+                                    <i class="fas fa-check-circle text-[#116975] mr-2"></i>
                                     Garantía oficial
                                 </div>
                                 <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-check-circle text-[#0D9488] mr-2"></i>
+                                    <i class="fas fa-check-circle text-[#116975] mr-2"></i>
                                     Control de calidad
                                 </div>
                             </div>
@@ -1688,7 +1697,7 @@
                 <div
                     class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-20 border-t border-gray-200 dark:border-gray-700">
                     <div class="text-center">
-                        <div class="text-4xl md:text-5xl font-bold text-[#0D9488] dark:text-[#0D9488] mb-2">10K+</div>
+                        <div class="text-4xl md:text-5xl font-bold text-[#116975] dark:text-[#116975] mb-2">10K+</div>
                         <p class="text-gray-600 dark:text-gray-400">Clientes Satisfechos</p>
                     </div>
                     <div class="text-center">
@@ -1810,7 +1819,7 @@
                                 <p class="text-xs text-gray-600 mt-1">Envíos</p>
                             </div>
                             <div>
-                                <p class="text-3xl font-bold text-[#0D9488]">99%</p>
+                                <p class="text-3xl font-bold text-[#116975]">99%</p>
                                 <p class="text-xs text-gray-600 mt-1">Satisfacción</p>
                             </div>
                         </div>
@@ -1827,7 +1836,7 @@
                 <div class="text-center mb-16">
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">Lo Que Dicen Nuestros
                         Clientes</h2>
-                    <div class="w-24 h-1 bg-[#0D9488] mx-auto mb-4"></div>
+                    <div class="w-24 h-1 bg-[#116975] mx-auto mb-4"></div>
                     <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">Miles de clientes satisfechos
                         confían en nosotros</p>
                 </div>
@@ -1968,7 +1977,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">Contáctanos</h2>
-                    <div class="w-24 h-1 bg-[#0D9488] mx-auto mb-4"></div>
+                    <div class="w-24 h-1 bg-[#116975] mx-auto mb-4"></div>
                     <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">Estamos aquí para ayudarte.
                         Envíanos tu consulta y te responderemos lo antes posible.</p>
                 </div>
@@ -2019,7 +2028,7 @@
                             <input type="hidden" name="_next" value="https://solbin-x.com/gracias.html">
 
                             <button type="submit" id="contact-submit-btn"
-                                class="w-full bg-[#0D9488] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#0F766E] transition duration-300 shadow-lg flex items-center justify-center gap-2">
+                                class="w-full bg-[#116975] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#0F766E] transition duration-300 shadow-lg flex items-center justify-center gap-2">
                                 <span>Enviar Mensaje</span>
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -2035,14 +2044,14 @@
                             </h3>
                             <div class="space-y-4">
                                 <div class="flex items-start">
-                                    <i class="fas fa-map-marker-alt text-[#0D9488] text-2xl mt-1"></i>
+                                    <i class="fas fa-map-marker-alt text-[#116975] text-2xl mt-1"></i>
                                     <div class="ml-4">
                                         <h4 class="font-bold text-gray-800 dark:text-white">Dirección</h4>
                                         <p class="text-gray-600 dark:text-gray-400">Calle 100 #15-20</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start">
-                                    <i class="fas fa-phone text-[#0D9488] text-2xl mt-1"></i>
+                                    <i class="fas fa-phone text-[#116975] text-2xl mt-1"></i>
                                     <div class="ml-4">
                                         <h4 class="font-bold text-gray-800 dark:text-white">Teléfono</h4>
                                         <p class="text-gray-600 dark:text-gray-400">+51 (1) 234-5678</p>
@@ -2050,7 +2059,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-start">
-                                    <i class="fas fa-envelope text-[#0D9488] text-2xl mt-1"></i>
+                                    <i class="fas fa-envelope text-[#116975] text-2xl mt-1"></i>
                                     <div class="ml-4">
                                         <h4 class="font-bold text-gray-800 dark:text-white">Email</h4>
                                         <p class="text-gray-600 dark:text-gray-400">info@solbin-x.com</p>
@@ -2058,7 +2067,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-start">
-                                    <i class="fas fa-clock text-[#0D9488] text-2xl mt-1"></i>
+                                    <i class="fas fa-clock text-[#116975] text-2xl mt-1"></i>
                                     <div class="ml-4">
                                         <h4 class="font-bold text-gray-800 dark:text-white">Horario</h4>
                                         <p class="text-gray-600 dark:text-gray-400">Lunes a Viernes: 9:00 AM - 7:00 PM
@@ -2092,7 +2101,7 @@
                         class="relative bg-white dark:bg-gray-800 rounded-[2rem] p-8 md:p-16 border border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden">
                         <!-- Detalle visual sutil -->
                         <div class="absolute top-0 right-0 p-8 opacity-5 dark:opacity-10 pointer-events-none">
-                            <i class="fas fa-paper-plane text-8xl -rotate-12 text-[#0D9488]"></i>
+                            <i class="fas fa-paper-plane text-8xl -rotate-12 text-[#116975]"></i>
                         </div>
 
                         <div class="relative grid lg:grid-cols-2 gap-12 items-center">
@@ -2144,8 +2153,8 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-[#0D9488]/20 rounded-full flex items-center justify-center">
-                                <i class="fas fa-shield-check text-[#0D9488] text-xl"></i>
+                            <div class="w-12 h-12 bg-[#116975]/20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shield-check text-[#116975] text-xl"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-sm">Compra Segura</p>
@@ -2190,7 +2199,8 @@
                     <div class="lg:col-span-2">
                         <a href="#inicio" class="inline-block mb-4">
                             <img src="Imagenes/Version_Web.svg" alt="Solbin-X" loading="lazy"
-                                class="h-[106px] w-auto brightness-0 invert transition-all duration-300 hover:opacity-80">
+                                width="130" height="48"
+                                class="h-10 sm:h-12 w-auto max-w-[150px] object-contain brightness-0 invert transition-all duration-300 hover:opacity-80">
                         </a>
                         <p class="text-gray-400 dark:text-gray-500 text-sm mb-4 leading-relaxed">
                             Tu tienda de confianza para equipos tecnológicos de última generación. Laptops, smartphones,
@@ -2215,7 +2225,7 @@
                         <!-- Certificaciones -->
                         <div class="flex gap-3">
                             <div class="bg-white/5 px-3 py-2 rounded-lg text-center">
-                                <i class="fas fa-certificate text-[#0D9488] text-lg"></i>
+                                <i class="fas fa-certificate text-[#116975] text-lg"></i>
                                 <p class="text-[10px] text-gray-400 mt-1">SSL Seguro</p>
                             </div>
                             <div class="bg-white/5 px-3 py-2 rounded-lg text-center">
@@ -2282,15 +2292,15 @@
                         <h4 class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-300">Contacto</h4>
                         <ul class="space-y-3 text-sm">
                             <li class="flex items-start gap-2 text-gray-400">
-                                <i class="fas fa-phone text-[#0D9488] mt-1"></i>
+                                <i class="fas fa-phone text-[#116975] mt-1"></i>
                                 <span>+51 945 297 289</span>
                             </li>
                             <li class="flex items-start gap-2 text-gray-400">
-                                <i class="fas fa-envelope text-[#0D9488] mt-1"></i>
+                                <i class="fas fa-envelope text-[#116975] mt-1"></i>
                                 <span>ventas@solbin-x.com</span>
                             </li>
                             <li class="flex items-start gap-2 text-gray-400">
-                                <i class="fas fa-map-marker-alt text-[#0D9488] mt-1"></i>
+                                <i class="fas fa-map-marker-alt text-[#116975] mt-1"></i>
                                 <span>Lima, Perú</span>
                             </li>
                         </ul>
@@ -2298,7 +2308,7 @@
                         <h4 class="text-sm font-bold uppercase tracking-wider mb-3 mt-6 text-gray-300">Síguenos</h4>
                         <div class="flex gap-3">
                             <a href="#"
-                                class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#0D9488] hover:text-white transition">
+                                class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#116975] hover:text-white transition">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
                             <a href="#"
@@ -2359,7 +2369,7 @@
             <!-- Botón flotante -->
             <button id="solbin-chatbot-open" type="button"
                 class="flex items-center gap-3 bg-gray-900 dark:bg-black text-white px-4 py-3 rounded-full shadow-lg hover:opacity-90 transition">
-                <span class="w-9 h-9 rounded-full bg-[#0D9488] flex items-center justify-center font-bold">
+                <span class="w-9 h-9 rounded-full bg-[#116975] flex items-center justify-center font-bold">
                     <i class="fas fa-robot text-white text-lg danna-icon"></i>
                 </span>
                 <span class="font-semibold">Danna</span>
@@ -2373,7 +2383,7 @@
                     class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-9 h-9 rounded-full bg-[#0D9488] flex items-center justify-center font-bold text-white">
+                            class="w-9 h-9 rounded-full bg-[#116975] flex items-center justify-center font-bold text-white">
                             <i class="fas fa-robot text-white text-lg"></i>
                         </div>
                         <div>
@@ -2397,7 +2407,7 @@
                             class="flex-1 px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-sm outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Escribe tu mensaje..." autocomplete="off" />
                         <button id="solbin-chatbot-send" type="button"
-                            class="px-4 py-2 rounded-xl bg-[#0D9488] text-white font-semibold hover:bg-[#0F766E] transition">
+                            class="px-4 py-2 rounded-xl bg-[#116975] text-white font-semibold hover:bg-[#0F766E] transition">
                             Enviar
                         </button>
                     </div>
@@ -2435,7 +2445,7 @@
                         <div class="md:w-1/2 p-8 flex flex-col justify-center">
                             <div class="mb-4">
                                 <span id="modalProdCategory"
-                                    class="inline-block px-3 py-1 bg-[#0D9488]/10 dark:bg-[#0D9488]/20 text-[#0D9488] dark:text-[#0D9488] rounded-full text-xs font-bold uppercase tracking-wide mb-2">
+                                    class="inline-block px-3 py-1 bg-[#116975]/10 dark:bg-[#116975]/20 text-[#116975] dark:text-[#116975] rounded-full text-xs font-bold uppercase tracking-wide mb-2">
                                     Categoría
                                 </span>
                                 <h2 id="modalProdTitle"
@@ -2480,7 +2490,7 @@
                                 </div>
 
                                 <button id="modalAddToCartBtn" type="button"
-                                    class="w-full bg-[#0D9488] text-white font-bold py-4 px-6 rounded-xl hover:bg-[#0F766E] shadow-lg transform transition hover:-translate-y-1 flex items-center justify-center gap-2">
+                                    class="w-full bg-[#116975] text-white font-bold py-4 px-6 rounded-xl hover:bg-[#0F766E] shadow-lg transform transition hover:-translate-y-1 flex items-center justify-center gap-2">
                                     <i class="fas fa-shopping-cart"></i>
                                     Agregar al Carrito
                                 </button>
@@ -2540,7 +2550,7 @@
                 toast.className = `toast toast-${type}`;
 
                 const colors = {
-                    success: '#0D9488',
+                    success: '#116975',
                     error: '#EF4444',
                     warning: '#F59E0B',
                     info: '#3B82F6'
@@ -2629,7 +2639,7 @@
                     <img src="${product.image_url || ''}" alt="${product.name}" class="w-10 h-10 object-contain" onerror="this.style.display='none'">
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-800">${product.name}</p>
-                        <p class="text-xs text-[#0D9488] font-bold">S/. ${parseFloat(product.price).toLocaleString()}</p>
+                        <p class="text-xs text-[#116975] font-bold">S/. ${parseFloat(product.price).toLocaleString()}</p>
                     </div>
                 `;
                     div.addEventListener('click', () => {

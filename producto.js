@@ -56,7 +56,7 @@ async function initProductPage() {
                 <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-3">Producto No Encontrado</h2>
                 <p class="text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">El producto que buscas no existe o ha sido movido del catálogo.</p>
                 <p class="text-gray-400 dark:text-gray-500 mb-8 text-sm">ID: ${productId}</p>
-                <a href="index.html#catalogo" class="inline-flex items-center gap-2 bg-[#0D9488] hover:bg-[#0F766E] text-white px-8 py-3 rounded-xl font-semibold transition-all hover:-translate-y-0.5">
+                <a href="index.html#catalogo" class="inline-flex items-center gap-2 bg-[#116975] hover:bg-[#0F766E] text-white px-8 py-3 rounded-xl font-semibold transition-all hover:-translate-y-0.5">
                     <i class="fas fa-arrow-left"></i> Volver al Catálogo
                 </a>
             </div>
@@ -196,7 +196,7 @@ async function loadRelatedProducts(product) {
                     ${badgeHtml}
                     <img src="${img}" alt="${p.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 ease-out" loading="lazy">
                 </div>
-                <h3 class="text-sm font-bold text-gray-800 dark:text-white line-clamp-2 mb-2 flex-grow group-hover:text-[#0D9488] transition-colors">
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white line-clamp-2 mb-2 flex-grow group-hover:text-[#116975] transition-colors">
                     ${p.name}
                 </h3>
                 <div class="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700">
@@ -207,7 +207,7 @@ async function loadRelatedProducts(product) {
                         </div>
                     </div>
                     <button
-                        class="related-add-cart-btn w-full flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-[#0F766E] text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
+                        class="related-add-cart-btn w-full flex items-center justify-center gap-2 bg-[#116975] hover:bg-[#0F766E] text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 active:scale-95"
                         data-product-id="${p.id}"
                         data-product-name="${p.name}"
                         data-product-price="${p.price}"
@@ -228,11 +228,11 @@ async function loadRelatedProducts(product) {
                         window.cartManager.addToCart(p.name, parseFloat(p.price), 1, p);
                         addBtn.innerHTML = `<i class="fas fa-check-circle text-sm"></i><span>¡Agregado!</span>`;
                         addBtn.classList.add('bg-emerald-500');
-                        addBtn.classList.remove('bg-[#0D9488]');
+                        addBtn.classList.remove('bg-[#116975]');
                         setTimeout(() => {
                             addBtn.innerHTML = `<i class="fas fa-cart-plus text-sm"></i><span>Agregar al Carrito</span>`;
                             addBtn.classList.remove('bg-emerald-500');
-                            addBtn.classList.add('bg-[#0D9488]');
+                            addBtn.classList.add('bg-[#116975]');
                         }, 2000);
                         if (window.updateCartBadge) window.updateCartBadge();
                     } else {
@@ -353,7 +353,7 @@ function renderProductData(product) {
         Object.entries(product.specifications).forEach(([key, val]) => {
             const rowClass = isEven ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50';
             specsHtml += `
-            <div class="flex items-center justify-between px-4 py-3 ${rowClass} transition-colors hover:bg-[#0D9488]/5 dark:hover:bg-[#0D9488]/10">
+            <div class="flex items-center justify-between px-4 py-3 ${rowClass} transition-colors hover:bg-[#116975]/5 dark:hover:bg-[#116975]/10">
                 <span class="text-sm font-medium text-gray-500 dark:text-gray-400">${key}</span>
                 <span class="text-sm font-semibold text-gray-900 dark:text-white text-right ml-4">${val}</span>
             </div>`;

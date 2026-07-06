@@ -410,14 +410,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const originalHTML = button.innerHTML;
             button.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Agregado</span>';
             button.classList.add('bg-green-600');
-            button.classList.remove('bg-[#0D9488]', 'bg-green-600', 'bg-pink-600', 'bg-indigo-600', 'bg-purple-600');
+            button.classList.remove('bg-[#116975]', 'bg-green-600', 'bg-pink-600', 'bg-indigo-600', 'bg-purple-600');
 
             setTimeout(() => {
                 button.innerHTML = originalHTML;
                 button.classList.remove('bg-green-600');
                 // Restaurar color original basado en la clase del botón
                 if (button.classList.contains('add-to-cart-btn')) {
-                    button.classList.add('bg-[#0D9488]');
+                    button.classList.add('bg-[#116975]');
                 }
             }, 1500);
         } else {

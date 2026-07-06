@@ -211,21 +211,21 @@
     right: 40px;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+    background: linear-gradient(135deg, #116975 0%, #0F766E 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 99;
-    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+    box-shadow: 0 4px 15px rgba(17, 105, 117, 0.4);
     transition: all 0.3s ease;
     animation: danna-bounce 2s infinite;
 }
 
 .danna-avatar:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+    box-shadow: 0 6px 20px rgba(17, 105, 117, 0.5);
 }
 
 @keyframes danna-bounce {

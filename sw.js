@@ -1,5 +1,5 @@
 // Service Worker para Solbin-X - PWA
-const CACHE_NAME = 'solbin-v3';
+const CACHE_NAME = 'solbin-v7';
 const CAROUSEL_CACHE_NAME = 'solbin-carousel-v2';
 const STATIC_ASSETS = [
     '/',
@@ -18,7 +18,8 @@ const STATIC_ASSETS = [
     '/chatbot-solbin.js',
     '/newsletter.js',
     '/Imagenes/Version_Web.svg',
-    '/Imagenes/FavIcon.svg'
+    '/Imagenes/FavIcon.svg',
+    '/Imagenes/FavIcon.png'
 ];
 
 // Función para verificar si una URL es una imagen del carrusel
@@ -72,7 +73,14 @@ self.addEventListener('activate', event => {
 const NETWORK_FIRST_URLS = [
     '/admin.html',
     '/admin.js',
-    '/admin-export.js'
+    '/admin-export.js',
+    '/dist/styles.css',
+    '/dist/theme.css',
+    '/dist/custom-ui.css',
+    '/loader.js',
+    '/script.js',
+    '/producto.js',
+    '/carrito-script.js'
 ];
 
 function shouldUseNetworkFirst(url) {

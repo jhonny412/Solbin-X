@@ -281,7 +281,7 @@ function renderCurrentPage() {
                 </div>
                 
                 <!-- Nombre del producto - altura fija -->
-                <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-[#0D9488] transition leading-snug h-10 overflow-hidden" onclick='window.location.href="producto.html?id=${p.id}"'>
+                <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-2 cursor-pointer hover:text-[#116975] transition leading-snug h-10 overflow-hidden" onclick='window.location.href="producto.html?id=${p.id}"'>
                     ${p.name}
                 </h3>
                 
@@ -316,7 +316,7 @@ function renderCurrentPage() {
                         <span class="text-lg font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
                     </div>
                     <button type="button" 
-                        class="add-to-cart-btn flex items-center justify-center gap-2 bg-[#0D9488] text-white px-3 py-2 rounded-lg hover:bg-[#0F766E] transition-all duration-300 shadow-md hover:shadow-lg font-medium text-xs min-w-[90px]"
+                        class="add-to-cart-btn flex items-center justify-center gap-2 bg-[#116975] text-white px-3 py-2 rounded-lg hover:bg-[#0F766E] transition-all duration-300 shadow-md hover:shadow-lg font-medium text-xs min-w-[90px]"
                         data-name="${safeName}" 
                         data-price="${p.price}"
                         data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'
@@ -376,7 +376,7 @@ function renderPaginator() {
     const createBtn = (html, isDisabled, onClick) => {
         const btn = document.createElement('button');
         btn.innerHTML = html;
-        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition ${isDisabled ? 'text-gray-300 border-gray-200 cursor-not-allowed' : 'text-[#0D9488] border-[#0D9488] hover:bg-[#0D9488] hover:text-white'}`;
+        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition ${isDisabled ? 'text-gray-300 border-gray-200 cursor-not-allowed' : 'text-[#116975] border-[#116975] hover:bg-[#116975] hover:text-white'}`;
         btn.disabled = isDisabled;
         btn.onclick = onClick;
         return btn;
@@ -394,7 +394,7 @@ function renderPaginator() {
 
         const btn = document.createElement('button');
         btn.textContent = i;
-        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition font-medium ${i === currentPage ? 'bg-[#0D9488] text-white border-[#0D9488] shadow-md' : 'text-gray-600 border-gray-300 hover:border-[#0D9488] hover:text-[#0D9488]'}`;
+        btn.className = `w-10 h-10 rounded-full flex items-center justify-center border transition font-medium ${i === currentPage ? 'bg-[#116975] text-white border-[#116975] shadow-md' : 'text-gray-600 border-gray-300 hover:border-[#116975] hover:text-[#116975]'}`;
         btn.onclick = () => {
             catalogState.currentPage = i;
             renderCurrentPage();
@@ -425,25 +425,25 @@ function filterCategory(cat, btnElement) {
         if (filterVal === cat) {
             if (el.classList.contains('filter-btn')) {
                 // Estilo para botones del sidebar
-                el.classList.add('bg-[#0D9488]', 'text-white');
+                el.classList.add('bg-[#116975]', 'text-white');
                 el.classList.remove('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
                 const checkIcon = el.querySelector('.fa-check-circle');
                 if (checkIcon) checkIcon.classList.remove('hidden');
             } else {
                 // Estilo para links del navbar/footer
-                el.classList.add('text-[#0D9488]', 'font-bold');
+                el.classList.add('text-[#116975]', 'font-bold');
                 el.classList.remove('text-gray-700', 'text-gray-600', 'dark:text-gray-300', 'dark:text-gray-400');
             }
         } else {
             if (el.classList.contains('filter-btn')) {
                 // Reset sidebar buttons
-                el.classList.remove('bg-[#0D9488]', 'text-white');
+                el.classList.remove('bg-[#116975]', 'text-white');
                 el.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300');
                 const checkIcon = el.querySelector('.fa-check-circle');
                 if (checkIcon) checkIcon.classList.add('hidden');
             } else {
                 // Reset navbar/footer links
-                el.classList.remove('text-[#0D9488]', 'font-bold');
+                el.classList.remove('text-[#116975]', 'font-bold');
                 if (el.closest('.lg\\:flex')) {
                     el.classList.add('text-gray-700', 'dark:text-gray-300');
                 } else {
@@ -621,7 +621,7 @@ function renderFeaturedProducts() {
                         <span class="text-lg font-bold text-gray-900 dark:text-white">S/. ${parseFloat(p.price).toLocaleString()}</span>
                     </div>
                     <button type="button" 
-                        class="add-to-cart-btn w-8 h-8 bg-[#0D9488] text-white rounded-lg hover:bg-[#0F766E] transition flex items-center justify-center"
+                        class="add-to-cart-btn w-8 h-8 bg-[#116975] text-white rounded-lg hover:bg-[#0F766E] transition flex items-center justify-center"
                         data-name="${safeName}" 
                         data-price="${p.price}"
                         data-product='${JSON.stringify(p).replace(/'/g, "\\'")}'

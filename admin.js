@@ -1607,7 +1607,7 @@ window.printOrder = function () {
                             border-bottom: 2px solid #f1f5f9;
                             padding-bottom: 15px;
                 }
-                            .logo-img {height: 100px; width: auto; }
+                            .logo-img {height: 64px; width: auto; max-width: 174px; object-fit: contain; }
                             .order-title-section {
                                 text-align: center;
                                 margin-bottom: 25px;
@@ -2933,7 +2933,7 @@ window.printProductDetail = function () {
                         border-bottom: 2px solid #3b82f6; 
                     }
                     .logo-container { margin-bottom: 0; }
-                    .logo-container img { height: 55px; width: auto; }
+                    .logo-container img { height: 48px; width: auto; max-width: 130px; object-fit: contain; }
                     .company-name { display: none; }
                     
                     /* Product Header - Ultra compacto */
@@ -3620,6 +3620,20 @@ window.viewOrderById = function (id) {
 
 window.loadOfferSettings = async function () {
     console.log("Cargando configuración de ofertas...");
+
+    const dateInput = document.getElementById('offerEndDate');
+    const toggle = document.getElementById('offerActiveToggle');
+    const statusText = document.getElementById('offerStatusText');
+
+    // Set default: fecha/hora actual en el input, y evitar fechas pasadas
+    if (dateInput) {
+        const now = new Date();
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        const localStr = local.toISOString().slice(0, 16);
+        dateInput.value = localStr;
+        dateInput.setAttribute('min', localStr);
+    }
+
     try {
         const client = window.supabaseClient || window.supabase;
         const { data, error } = await client
@@ -3637,9 +3651,6 @@ window.loadOfferSettings = async function () {
             const config = data.value;
 
             // Set Toggle
-            const toggle = document.getElementById('offerActiveToggle');
-            const statusText = document.getElementById('offerStatusText');
-
             if (toggle) {
                 toggle.checked = config.isActive;
                 if (statusText) statusText.textContent = config.isActive ? 'Activado' : 'Desactivado';
@@ -3650,13 +3661,15 @@ window.loadOfferSettings = async function () {
                 };
             }
 
-            // Set Date
-            const dateInput = document.getElementById('offerEndDate');
+            // Set Date (sobreescribe el default si hay fecha guardada)
             if (dateInput && config.endDate) {
-                // Determine format
-                // datetime-local expects YYYY-MM-DDThh:mm
-                // config.endDate might be ISO string "2026-02-14T23:59:59"
-                dateInput.value = config.endDate.slice(0, 16); // Cut off seconds/timezone if needed for input
+                const d = new Date(config.endDate);
+                if (!isNaN(d.getTime())) {
+                    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+                    dateInput.value = local.toISOString().slice(0, 16);
+                } else {
+                    dateInput.value = config.endDate.slice(0, 16);
+                }
             }
         }
     } catch (err) {
@@ -3669,15 +3682,32 @@ window.saveOfferSettings = async function () {
     const dateInput = document.getElementById('offerEndDate');
 
     try {
-        const newConfig = {
-            isActive: toggle ? toggle.checked : false,
-            endDate: dateInput ? dateInput.value : null
-        };
-
-        if (!newConfig.endDate) {
+        if (!dateInput || !dateInput.value) {
             Swal.fire('Error', 'Debes seleccionar una fecha de finalización.', 'error');
             return;
         }
+
+        const parts = dateInput.value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+        if (!parts) {
+            Swal.fire('Error', 'El formato de fecha no es válido.', 'error');
+            return;
+        }
+
+        const localDate = new Date(+parts[1], +parts[2] - 1, +parts[3], +parts[4], +parts[5]);
+        if (isNaN(localDate.getTime())) {
+            Swal.fire('Error', 'La fecha seleccionada no es válida.', 'error');
+            return;
+        }
+
+        if (localDate <= new Date()) {
+            Swal.fire('Error', 'La fecha de finalización debe ser en el futuro.', 'error');
+            return;
+        }
+
+        const newConfig = {
+            isActive: toggle ? toggle.checked : false,
+            endDate: localDate.toISOString()
+        };
 
         const client = window.supabaseClient || window.supabase;
 
